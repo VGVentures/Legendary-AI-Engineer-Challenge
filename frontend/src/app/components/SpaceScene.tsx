@@ -6,266 +6,119 @@ import { Stars, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import Planet from './Planet';
 
-// Enhanced mystical aurora strips with better 3D depth
-function AuroraStrips() {
-  const groupRef = useRef<THREE.Group>(null);
+// Realistic Aurora Borealis component
+function AuroraBorealis() {
+  const auroraRef = useRef<THREE.Group>(null);
+  const curtainRefs = useRef<(THREE.Mesh | null)[]>([]);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.z += 0.0012;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.25) * 3;
+    const time = state.clock.elapsedTime;
+    
+    if (auroraRef.current) {
+      auroraRef.current.rotation.y = Math.sin(time * 0.1) * 0.1;
     }
-  });
 
-  const strips = [];
-  for (let i = 0; i < 8; i++) {
-    const x = (i - 4) * 18;
-    const height = 60 + Math.random() * 40;
-    const width = 12 + Math.random() * 8;
-    
-    strips.push(
-      <mesh
-        key={i}
-        position={[x, 0, -50]}
-      >
-        <planeGeometry args={[width, height, 1, 8]} />
-        <meshBasicMaterial
-          color={i % 4 === 0 ? '#00ff88' : i % 4 === 1 ? '#0088ff' : i % 4 === 2 ? '#8800ff' : '#ff0088'}
-          transparent
-          opacity={0.7}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-    );
-  }
-
-  return (
-    <group ref={groupRef}>
-      {strips}
-    </group>
-  );
-}
-
-// Enhanced realistic stars with twinkling effects
-function RealisticStars() {
-  const starsRef = useRef<THREE.Points>(null);
-  const starCount = 3000;
-  
-  const positions = new Float32Array(starCount * 3);
-  const colors = new Float32Array(starCount * 3);
-  const sizes = new Float32Array(starCount);
-  const twinkleSpeeds = new Float32Array(starCount);
-  
-  for (let i = 0; i < starCount; i++) {
-    // Position stars in a sphere
-    const radius = 100 + Math.random() * 100;
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(Math.random() * 2 - 1);
-    
-    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-    positions[i * 3 + 2] = radius * Math.cos(phi);
-    
-    // Vary star colors - mostly white/blue with some yellow/orange
-    const colorChoice = Math.random();
-    if (colorChoice < 0.7) {
-      // White/blue stars (most common)
-      const blueTint = 0.8 + Math.random() * 0.2;
-      colors[i * 3] = 0.9 + Math.random() * 0.1;     // R
-      colors[i * 3 + 1] = 0.9 + Math.random() * 0.1; // G
-      colors[i * 3 + 2] = blueTint;                   // B
-    } else if (colorChoice < 0.85) {
-      // Yellow stars
-      colors[i * 3] = 1.0;     // R
-      colors[i * 3 + 1] = 0.9 + Math.random() * 0.1; // G
-      colors[i * 3 + 2] = 0.6 + Math.random() * 0.2; // B
-    } else if (colorChoice < 0.95) {
-      // Orange stars
-      colors[i * 3] = 1.0;     // R
-      colors[i * 3 + 1] = 0.7 + Math.random() * 0.2; // G
-      colors[i * 3 + 2] = 0.4 + Math.random() * 0.2; // B
-    } else {
-      // Red stars (rare)
-      colors[i * 3] = 1.0;     // R
-      colors[i * 3 + 1] = 0.4 + Math.random() * 0.3; // G
-      colors[i * 3 + 2] = 0.2 + Math.random() * 0.2; // B
-    }
-    
-    // Vary star sizes
-    sizes[i] = 0.5 + Math.random() * 2.5;
-    
-    // Vary twinkle speeds
-    twinkleSpeeds[i] = 0.5 + Math.random() * 2;
-  }
-
-  useFrame((state) => {
-    if (starsRef.current) {
-      const material = starsRef.current.material as THREE.PointsMaterial;
-      const positions = starsRef.current.geometry.attributes.position.array as Float32Array;
-      
-      // Update star brightness for twinkling effect
-      for (let i = 0; i < starCount; i++) {
-        const time = state.clock.elapsedTime * twinkleSpeeds[i];
-        const twinkle = 0.3 + 0.7 * Math.sin(time) * Math.sin(time * 1.5);
+    // Animate individual aurora curtains
+    curtainRefs.current.forEach((curtain, index) => {
+      if (curtain) {
+        const speed = 0.5 + index * 0.2;
+        const amplitude = 0.3 + index * 0.1;
         
-        // Apply twinkling to opacity
-        if (material.opacity !== undefined) {
-          material.opacity = twinkle;
+        // Wave-like movement
+        curtain.position.y = Math.sin(time * speed) * amplitude;
+        curtain.rotation.z = Math.sin(time * speed * 0.5) * 0.1;
+        
+        // Color shift
+        const material = curtain.material as THREE.MeshBasicMaterial;
+        if (material) {
+          const hue = (0.4 + Math.sin(time * 0.3 + index) * 0.1) % 1;
+          material.color.setHSL(hue, 0.8, 0.6);
         }
       }
-      
-      // Gentle rotation
-      starsRef.current.rotation.y += 0.0001;
-    }
+    });
   });
 
   return (
-    <points ref={starsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={starCount}
-          array={positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={starCount}
-          array={colors}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-size"
-          count={starCount}
-          array={sizes}
-          itemSize={1}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={1}
-        vertexColors
-        transparent
-        opacity={1}
-        blending={THREE.AdditiveBlending}
-        sizeAttenuation={true}
-        depthWrite={false}
-      />
-    </points>
-  );
-}
+    <group ref={auroraRef} position={[0, 0, -30]}>
+      {/* Multiple aurora curtains for depth and realism */}
+      {Array.from({ length: 8 }, (_, i) => (
+        <mesh
+          key={i}
+          ref={(el) => (curtainRefs.current[i] = el)}
+          position={[
+            (i - 4) * 15,
+            Math.sin(i * 0.5) * 10,
+            -i * 2
+          ]}
+          rotation={[0, 0, Math.PI / 2]}
+        >
+          <planeGeometry args={[8, 40, 8, 16]} />
+          <meshBasicMaterial
+            color={`hsl(${140 + i * 10}, 70%, 60%)`}
+            transparent
+            opacity={0.3 - i * 0.02}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
 
-// Bright nearby stars with lens flare effect
-function BrightStars() {
-  const brightStarsRef = useRef<THREE.Group>(null);
-  const brightStarCount = 50;
-  
-  const brightStars = [];
-  for (let i = 0; i < brightStarCount; i++) {
-    const radius = 80 + Math.random() * 60;
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(Math.random() * 2 - 1);
-    
-    const x = radius * Math.sin(phi) * Math.cos(theta);
-    const y = radius * Math.sin(phi) * Math.sin(theta);
-    const z = radius * Math.cos(phi);
-    
-    const size = 2 + Math.random() * 4;
-    const twinkleSpeed = 1 + Math.random() * 3;
-    
-    brightStars.push(
-      <mesh key={i} position={[x, y, z]}>
-        <sphereGeometry args={[size, 8, 8]} />
+      {/* Additional flowing aurora strips */}
+      {Array.from({ length: 6 }, (_, i) => (
+        <mesh
+          key={`strip-${i}`}
+          position={[
+            (i - 3) * 20 + Math.sin(i) * 5,
+            Math.cos(i * 0.8) * 15,
+            -10 - i * 3
+          ]}
+          rotation={[0, 0, Math.PI / 2 + Math.sin(i) * 0.2]}
+        >
+          <planeGeometry args={[4, 30, 4, 12]} />
+          <meshBasicMaterial
+            color={`hsl(${160 + i * 15}, 80%, 70%)`}
+            transparent
+            opacity={0.4}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+
+      {/* Vertical aurora pillars */}
+      {Array.from({ length: 5 }, (_, i) => (
+        <mesh
+          key={`pillar-${i}`}
+          position={[
+            (i - 2) * 25,
+            Math.sin(i * 1.2) * 8,
+            -15
+          ]}
+          rotation={[0, 0, Math.PI / 2]}
+        >
+          <planeGeometry args={[6, 35, 6, 14]} />
+          <meshBasicMaterial
+            color={`hsl(${150 + i * 8}, 75%, 65%)`}
+            transparent
+            opacity={0.35}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+
+      {/* Ambient aurora glow */}
+      <mesh position={[0, 0, -20]}>
+        <sphereGeometry args={[50, 16, 16]} />
         <meshBasicMaterial
-          color="#ffffff"
+          color="#00ff88"
           transparent
-          opacity={0.8}
+          opacity={0.05}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
-    );
-  }
-
-  useFrame((state) => {
-    if (brightStarsRef.current) {
-      brightStarsRef.current.children.forEach((star, index) => {
-        const material = star.material as THREE.MeshBasicMaterial;
-        const time = state.clock.elapsedTime * (1 + index * 0.1);
-        const twinkle = 0.4 + 0.6 * Math.sin(time) * Math.sin(time * 1.3);
-        material.opacity = twinkle;
-      });
-    }
-  });
-
-  return (
-    <group ref={brightStarsRef}>
-      {brightStars}
     </group>
-  );
-}
-
-// Enhanced floating particles with better 3D distribution
-function FloatingParticles() {
-  const particlesRef = useRef<THREE.Points>(null);
-  const particleCount = 200;
-  
-  const positions = new Float32Array(particleCount * 3);
-  const colors = new Float32Array(particleCount * 3);
-  
-  for (let i = 0; i < particleCount; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 300;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 300;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 300;
-    
-    const colorChoice = Math.random();
-    if (colorChoice < 0.25) {
-      colors[i * 3] = 0.0;     // Emerald green
-      colors[i * 3 + 1] = 1.0;
-      colors[i * 3 + 2] = 0.5;
-    } else if (colorChoice < 0.5) {
-      colors[i * 3] = 0.2;     // Ocean blue
-      colors[i * 3 + 1] = 0.8;
-      colors[i * 3 + 2] = 1.0;
-    } else if (colorChoice < 0.75) {
-      colors[i * 3] = 0.8;     // Mystical purple
-      colors[i * 3 + 1] = 0.2;
-      colors[i * 3 + 2] = 1.0;
-    } else {
-      colors[i * 3] = 1.0;     // Cosmic pink
-      colors[i * 3 + 1] = 0.0;
-      colors[i * 3 + 2] = 0.8;
-    }
-  }
-
-  useFrame(() => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y += 0.0006;
-      particlesRef.current.rotation.x += 0.0003;
-    }
-  });
-
-  return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={particleCount}
-          array={colors}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={2.5}
-        vertexColors
-        transparent
-        opacity={0.9}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
   );
 }
 
@@ -305,37 +158,8 @@ function SpaceSceneContent() {
         color="#446688"
       />
 
-      {/* Mystical aurora effect in background */}
-      <mesh position={[0, 0, -50]} rotation={[0, 0, 0]}>
-        <planeGeometry args={[200, 100]} />
-        <meshBasicMaterial
-          color="#00ff88"
-          transparent
-          opacity={0.1}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      {/* Additional aurora layers for depth */}
-      <mesh position={[0, 0, -45]} rotation={[0, 0, Math.PI / 8]}>
-        <planeGeometry args={[180, 80]} />
-        <meshBasicMaterial
-          color="#0088ff"
-          transparent
-          opacity={0.08}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      <mesh position={[0, 0, -40]} rotation={[0, 0, -Math.PI / 6]}>
-        <planeGeometry args={[160, 60]} />
-        <meshBasicMaterial
-          color="#8800ff"
-          transparent
-          opacity={0.06}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      {/* Realistic Aurora Borealis */}
+      <AuroraBorealis />
 
       {/* Enhanced starfield with more stars */}
       <Stars 
