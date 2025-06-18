@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -16,6 +16,33 @@ export default function Planet({ position, size, color, type = 'terrestrial' }: 
   const glowRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const coreRef = useRef<THREE.Mesh>(null);
+  const sparklesRef = useRef<THREE.Group>(null);
+
+  // Create sparkle particles for the rings
+  const sparkles = useMemo(() => {
+    const particles = [];
+    const particleCount = 50;
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount;
+      const radius = size * (1.8 + Math.random() * 0.8); // Between 1.8x and 2.6x planet size
+      const height = (Math.random() - 0.5) * size * 0.3; // Slight height variation
+      
+      particles.push({
+        position: [
+          Math.cos(angle) * radius,
+          height,
+          Math.sin(angle) * radius
+        ],
+        size: Math.random() * 0.3 + 0.1,
+        speed: Math.random() * 0.02 + 0.01,
+        angle: angle,
+        radius: radius,
+        twinkle: Math.random() * Math.PI * 2
+      });
+    }
+    return particles;
+  }, [size]);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -29,6 +56,24 @@ export default function Planet({ position, size, color, type = 'terrestrial' }: 
     }
     if (coreRef.current) {
       coreRef.current.rotation.y += 0.005;
+    }
+    
+    // Animate sparkles
+    if (sparklesRef.current) {
+      sparklesRef.current.children.forEach((sparkle, index) => {
+        const particle = sparkles[index];
+        particle.angle += particle.speed;
+        particle.twinkle += 0.1;
+        
+        sparkle.position.x = Math.cos(particle.angle) * particle.radius;
+        sparkle.position.z = Math.sin(particle.angle) * particle.radius;
+        
+        // Twinkling effect
+        const twinkleIntensity = 0.5 + 0.5 * Math.sin(particle.twinkle);
+        if (sparkle.material) {
+          sparkle.material.opacity = twinkleIntensity * 0.8;
+        }
+      });
     }
   });
 
@@ -179,6 +224,43 @@ export default function Planet({ position, size, color, type = 'terrestrial' }: 
           blending={THREE.AdditiveBlending}
         />
       </mesh>
+
+      {/* Sparkle particles around the rings */}
+      <group ref={sparklesRef}>
+        {sparkles.map((particle, index) => (
+          <mesh key={index} position={particle.position as [number, number, number]}>
+            <sphereGeometry args={[particle.size, 8, 8]} />
+            <meshBasicMaterial
+              color={color}
+              transparent
+              opacity={0.8}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Additional bright sparkles */}
+      <group>
+        {sparkles.slice(0, 15).map((particle, index) => (
+          <mesh 
+            key={`bright-${index}`} 
+            position={[
+              particle.position[0] * 1.1,
+              particle.position[1] * 1.2,
+              particle.position[2] * 1.1
+            ]}
+          >
+            <sphereGeometry args={[particle.size * 1.5, 6, 6]} />
+            <meshBasicMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.6}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        ))}
+      </group>
 
       {/* Planet's own intense light source */}
       <pointLight
