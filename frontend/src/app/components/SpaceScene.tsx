@@ -273,13 +273,13 @@ function FloatingParticles() {
 function SpaceSceneContent() {
   return (
     <>
-      {/* Enhanced lighting setup for dramatic 3D effect */}
-      <ambientLight intensity={0.05} color="#001122" />
+      {/* Reduced ambient lighting to make planet glow more dramatic */}
+      <ambientLight intensity={0.02} color="#001122" />
       
       {/* Main directional light for dramatic shadows */}
       <directionalLight 
         position={[20, 20, 15]} 
-        intensity={0.8} 
+        intensity={0.6} 
         color="#ffffff"
         castShadow
         shadow-mapSize-width={2048}
@@ -294,67 +294,124 @@ function SpaceSceneContent() {
       {/* Fill light from opposite side */}
       <directionalLight 
         position={[-15, -15, -10]} 
-        intensity={0.4} 
+        intensity={0.2} 
         color="#224466"
       />
       
       {/* Rim lighting for dramatic edge highlights */}
       <directionalLight 
-        position={[0, 0, 30]} 
-        intensity={0.6} 
-        color="#0066ff"
+        position={[0, 0, 20]} 
+        intensity={0.3} 
+        color="#446688"
       />
-      
-      {/* Additional atmospheric lighting */}
-      <pointLight
-        position={[0, 0, 50]}
-        intensity={0.3}
-        color="#0044aa"
-        distance={200}
+
+      {/* Mystical aurora effect in background */}
+      <mesh position={[0, 0, -50]} rotation={[0, 0, 0]}>
+        <planeGeometry args={[200, 100]} />
+        <meshBasicMaterial
+          color="#00ff88"
+          transparent
+          opacity={0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Additional aurora layers for depth */}
+      <mesh position={[0, 0, -45]} rotation={[0, 0, Math.PI / 8]}>
+        <planeGeometry args={[180, 80]} />
+        <meshBasicMaterial
+          color="#0088ff"
+          transparent
+          opacity={0.08}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      <mesh position={[0, 0, -40]} rotation={[0, 0, -Math.PI / 6]}>
+        <planeGeometry args={[160, 60]} />
+        <meshBasicMaterial
+          color="#8800ff"
+          transparent
+          opacity={0.06}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Enhanced starfield with more stars */}
+      <Stars 
+        radius={100} 
+        depth={50} 
+        count={5000} 
+        factor={4} 
+        saturation={0} 
+        fade 
+        speed={0.5}
       />
-      
-      {/* Enhanced aurora strips */}
-      <AuroraStrips />
-      
-      {/* Enhanced floating particles */}
-      <FloatingParticles />
-      
-      {/* Enhanced realistic stars with twinkling */}
-      <RealisticStars />
-      
-      {/* Bright nearby stars */}
-      <BrightStars />
-      
-      {/* Realistic planets with different types */}
+
+      {/* Additional bright stars */}
+      <Stars 
+        radius={80} 
+        depth={30} 
+        count={200} 
+        factor={8} 
+        saturation={0.5} 
+        fade 
+        speed={1}
+      />
+
+      {/* Floating cosmic particles */}
+      {Array.from({ length: 100 }, (_, i) => (
+        <mesh
+          key={i}
+          position={[
+            (Math.random() - 0.5) * 200,
+            (Math.random() - 0.5) * 200,
+            (Math.random() - 0.5) * 200
+          ]}
+        >
+          <sphereGeometry args={[Math.random() * 0.5 + 0.1, 8, 8]} />
+          <meshBasicMaterial
+            color={`hsl(${200 + Math.random() * 60}, 70%, 60%)`}
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
+      ))}
+
+      {/* Realistic planets with enhanced lighting */}
       <Planet 
-        position={[-35, 0, 0]} 
-        size={6} 
-        color="#00ff88" 
+        position={[-15, 5, 0]} 
+        size={3} 
+        color="#ff6b35" 
         type="gas"
       />
+      
       <Planet 
-        position={[35, 0, 0]} 
-        size={7} 
-        color="#0088ff" 
+        position={[15, -8, 0]} 
+        size={2.5} 
+        color="#4ecdc4" 
         type="ocean"
       />
+      
       <Planet 
-        position={[0, 0, 40]} 
-        size={5} 
-        color="#8800ff" 
+        position={[0, 12, 0]} 
+        size={2} 
+        color="#45b7d1" 
+        type="ice"
+      />
+      
+      <Planet 
+        position={[-8, -12, 0]} 
+        size={1.8} 
+        color="#96ceb4" 
         type="terrestrial"
       />
+      
       <Planet 
-        position={[0, -30, 0]} 
-        size={4} 
-        color="#ff0088" 
+        position={[8, 8, 0]} 
+        size={1.5} 
+        color="#feca57" 
         type="desert"
-      />
-      <Planet 
-        position={[0, 30, 0]} 
-        size={5} 
-        color="#ffffff" 
-        type="ice"
       />
     </>
   );
