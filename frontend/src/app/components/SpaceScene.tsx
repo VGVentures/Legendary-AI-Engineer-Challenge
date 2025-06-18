@@ -273,23 +273,43 @@ function FloatingParticles() {
 function SpaceSceneContent() {
   return (
     <>
-      {/* Enhanced lighting setup for better 3D depth */}
-      <ambientLight intensity={0.08} color="#001122" />
+      {/* Enhanced lighting setup for dramatic 3D effect */}
+      <ambientLight intensity={0.05} color="#001122" />
+      
+      {/* Main directional light for dramatic shadows */}
       <directionalLight 
-        position={[15, 15, 10]} 
-        intensity={0.4} 
-        color="#224466"
+        position={[20, 20, 15]} 
+        intensity={0.8} 
+        color="#ffffff"
         castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={100}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
       />
+      
+      {/* Fill light from opposite side */}
       <directionalLight 
         position={[-15, -15, -10]} 
-        intensity={0.3} 
-        color="#442266"
+        intensity={0.4} 
+        color="#224466"
       />
+      
+      {/* Rim lighting for dramatic edge highlights */}
+      <directionalLight 
+        position={[0, 0, 30]} 
+        intensity={0.6} 
+        color="#0066ff"
+      />
+      
+      {/* Additional atmospheric lighting */}
       <pointLight
         position={[0, 0, 50]}
-        intensity={0.2}
-        color="#0066ff"
+        intensity={0.3}
+        color="#0044aa"
         distance={200}
       />
       
@@ -345,7 +365,13 @@ export default function SpaceScene() {
     <div className="w-full h-full">
       <Canvas
         camera={{ position: [0, 0, 50], fov: 75 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          shadowMap: true,
+          shadowMapType: THREE.PCFSoftShadowMap
+        }}
+        shadows
         style={{ 
           background: 'radial-gradient(ellipse at center, #000011 0%, #000055 25%, #000033 50%, #000022 75%, #000000 100%)'
         }}
