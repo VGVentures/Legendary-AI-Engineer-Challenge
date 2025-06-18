@@ -1,97 +1,108 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import SpaceScene from './components/SpaceScene';
+import ChatInterface from './components/ChatInterface';
+import { AnimatePresence, motion } from 'framer-motion';
+
+interface Planet {
+  id: string;
+  name: string;
+  type: string;
+  color: string;
+  personality: string;
+  description: string;
+}
 
 export default function Home() {
-  const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'ai', content: string }>>([]);
+  const [selectedPlanet, setSelectedPlanet] = useState<Planet | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  // Planet data with personalities and descriptions
+  const planets = {
+    'Nebula Prime': {
+      id: 'nebula-prime',
+      name: 'Nebula Prime',
+      type: 'gas-giant',
+      color: '#ff6b35',
+      personality: 'Ancient and wise, Nebula Prime has witnessed the birth of countless stars and holds cosmic knowledge spanning eons.',
+      description: 'I am a massive gas giant with swirling storms and colorful atmospheric bands. I have witnessed the birth of countless stars and hold ancient cosmic knowledge. What would you like to know about the universe, star formation, or the mysteries of space?'
+    },
+    'Aquaria': {
+      id: 'aquaria',
+      name: 'Aquaria',
+      type: 'ocean',
+      color: '#4ecdc4',
+      personality: 'Mysterious and deep, Aquaria knows the secrets of the ocean depths and the flow of cosmic currents.',
+      description: 'I am a beautiful ocean world covered in deep blue seas and mysterious underwater civilizations. I know the secrets of the deep, marine life, and the flow of cosmic currents. What would you like to learn about water, life, or the depths of existence?'
+    },
+    'Cryos': {
+      id: 'cryos',
+      name: 'Cryos',
+      type: 'ice',
+      color: '#45b7d1',
+      personality: 'Crystalline and contemplative, Cryos preserves ancient memories and understands the nature of time and preservation.',
+      description: 'I am a crystalline ice planet with frozen landscapes and aurora-filled skies. I preserve ancient memories in my ice and understand the nature of time, preservation, and the cold beauty of space. What insights would you like about time, memory, or the crystalline nature of reality?'
+    },
+    'Terra Nova': {
+      id: 'terra-nova',
+      name: 'Terra Nova',
+      type: 'terrestrial',
+      color: '#96ceb4',
+      personality: 'Lush and nurturing, Terra Nova represents the balance of nature and the connection between all living things.',
+      description: 'I am a lush terrestrial world with diverse ecosystems and ancient wisdom. I represent the balance of nature, growth, and the connection between all living things. What would you like to know about life, growth, or the harmony of existence?'
+    },
+    'Aridus': {
+      id: 'aridus',
+      name: 'Aridus',
+      type: 'desert',
+      color: '#feca57',
+      personality: 'Resilient and transformative, Aridus understands the beauty found in harsh environments and the nature of adaptation.',
+      description: 'I am a vast desert world with golden sands and hidden oases. I understand the nature of change, adaptation, and the beauty found in harsh environments. What wisdom would you seek about resilience, transformation, or finding beauty in adversity?'
+    }
+  };
 
-    // Add user message to chat
-    setChatHistory(prev => [...prev, { role: 'user', content: message }]);
-    
-    // TODO: Implement API call to backend
-    // For now, just echo the message
-    setChatHistory(prev => [...prev, { role: 'ai', content: `AI responds: ${message}` }]);
-    
-    setMessage('');
+  const handlePlanetClick = (planetName: string, planetType: string) => {
+    const planet = planets[planetName as keyof typeof planets];
+    if (planet) {
+      setSelectedPlanet(planet);
+    }
+  };
+
+  const handleCloseChat = () => {
+    setSelectedPlanet(null);
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      {/* Header with Enhanced Effects */}
-      <motion.div 
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="text-center mb-8 relative"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-neon-pink/20 via-electric-blue/20 to-plasma-purple/20 blur-3xl -z-10" />
-        <h1 className="font-orbitron text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-neon-pink via-electric-blue to-plasma-purple animate-neon-flicker">
-          AI Interface
-        </h1>
-        <p className="text-electric-blue mt-2 animate-pulse-glow">
-          Where Past Meets Future
-        </p>
-      </motion.div>
+    <main className="w-screen h-screen relative overflow-hidden">
+      {/* 3D Space Scene */}
+      <div className="w-full h-full">
+        <SpaceScene onPlanetClick={handlePlanetClick} />
+      </div>
 
-      {/* Chat Container with Enhanced Effects */}
-      <div className="max-w-4xl mx-auto">
-        <div className="glass-card p-4 mb-4 h-[60vh] overflow-y-auto relative">
-          {/* Background Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-neon-pink/10 via-electric-blue/10 to-plasma-purple/10 rounded-lg" />
-          
-          {/* Chat Messages */}
-          <div className="relative z-10">
-            {chatHistory.map((msg, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`mb-4 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}
-              >
-                <div className={`inline-block p-3 rounded-lg backdrop-blur-sm ${
-                  msg.role === 'user' 
-                    ? 'bg-gradient-to-r from-neon-pink/30 to-plasma-purple/30 text-white' 
-                    : 'bg-gradient-to-r from-electric-blue/30 to-quantum-green/30 text-white'
-                }`}>
-                  {msg.content}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Input Form with Enhanced Effects */}
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="flex-1 glass-card p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-neon-pink/50 transition-all duration-300"
-            placeholder="Type your message..."
-          />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="liquid-button relative overflow-hidden"
-            type="submit"
+      {/* Planet Selection Chat Interface */}
+      <AnimatePresence>
+        {selectedPlanet && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="absolute inset-0 z-50"
           >
-            <span className="relative z-10">Send</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-neon-pink to-electric-blue opacity-50 animate-gradient-shift" />
-          </motion.button>
-        </form>
-      </div>
+            <ChatInterface 
+              planet={selectedPlanet} 
+              onClose={handleCloseChat} 
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Decorative Elements */}
-      <div className="fixed bottom-4 left-4 text-neon-pink/20 font-orbitron text-sm animate-pulse-glow">
-        System Active
-      </div>
-      <div className="fixed bottom-4 right-4 text-electric-blue/20 font-orbitron text-sm animate-pulse-glow">
-        Ready
+      {/* Instructions overlay */}
+      <div className="absolute top-4 left-4 z-40 text-white/80 text-sm bg-black/20 backdrop-blur-sm rounded-lg p-3 max-w-xs">
+        <h3 className="font-semibold mb-2">🌌 Cosmic Exploration</h3>
+        <p className="text-xs leading-relaxed">
+          Click on any planet to begin a conversation with its unique AI personality. Each world holds different wisdom and knowledge about the universe.
+        </p>
       </div>
     </main>
   );
