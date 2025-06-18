@@ -39,24 +39,24 @@ function AuroraBorealis() {
   });
 
   return (
-    <group ref={auroraRef} position={[0, 0, -30]}>
+    <group ref={auroraRef} position={[0, 0, -20]}>
       {/* Multiple aurora curtains for depth and realism */}
       {Array.from({ length: 8 }, (_, i) => (
         <mesh
           key={i}
           ref={(el) => (curtainRefs.current[i] = el)}
           position={[
-            (i - 4) * 15,
-            Math.sin(i * 0.5) * 10,
-            -i * 2
+            (i - 4) * 20,
+            Math.sin(i * 0.5) * 15,
+            -i * 3
           ]}
           rotation={[0, 0, Math.PI / 2]}
         >
-          <planeGeometry args={[8, 40, 8, 16]} />
+          <planeGeometry args={[12, 60, 12, 20]} />
           <meshBasicMaterial
-            color={`hsl(${140 + i * 10}, 70%, 60%)`}
+            color={`hsl(${140 + i * 10}, 80%, 70%)`}
             transparent
-            opacity={0.3 - i * 0.02}
+            opacity={0.7 - i * 0.05}
             side={THREE.DoubleSide}
             blending={THREE.AdditiveBlending}
           />
@@ -68,17 +68,17 @@ function AuroraBorealis() {
         <mesh
           key={`strip-${i}`}
           position={[
-            (i - 3) * 20 + Math.sin(i) * 5,
-            Math.cos(i * 0.8) * 15,
-            -10 - i * 3
+            (i - 3) * 25 + Math.sin(i) * 8,
+            Math.cos(i * 0.8) * 20,
+            -8 - i * 4
           ]}
-          rotation={[0, 0, Math.PI / 2 + Math.sin(i) * 0.2]}
+          rotation={[0, 0, Math.PI / 2 + Math.sin(i) * 0.3]}
         >
-          <planeGeometry args={[4, 30, 4, 12]} />
+          <planeGeometry args={[6, 45, 6, 16]} />
           <meshBasicMaterial
-            color={`hsl(${160 + i * 15}, 80%, 70%)`}
+            color={`hsl(${160 + i * 15}, 90%, 80%)`}
             transparent
-            opacity={0.4}
+            opacity={0.8}
             side={THREE.DoubleSide}
             blending={THREE.AdditiveBlending}
           />
@@ -90,17 +90,39 @@ function AuroraBorealis() {
         <mesh
           key={`pillar-${i}`}
           position={[
-            (i - 2) * 25,
-            Math.sin(i * 1.2) * 8,
-            -15
+            (i - 2) * 30,
+            Math.sin(i * 1.2) * 12,
+            -12
           ]}
           rotation={[0, 0, Math.PI / 2]}
         >
-          <planeGeometry args={[6, 35, 6, 14]} />
+          <planeGeometry args={[8, 50, 8, 18]} />
           <meshBasicMaterial
-            color={`hsl(${150 + i * 8}, 75%, 65%)`}
+            color={`hsl(${150 + i * 8}, 85%, 75%)`}
             transparent
-            opacity={0.35}
+            opacity={0.75}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+
+      {/* Bright aurora highlights */}
+      {Array.from({ length: 4 }, (_, i) => (
+        <mesh
+          key={`highlight-${i}`}
+          position={[
+            (i - 2) * 35,
+            Math.cos(i * 1.5) * 18,
+            -6
+          ]}
+          rotation={[0, 0, Math.PI / 2]}
+        >
+          <planeGeometry args={[10, 40, 10, 14]} />
+          <meshBasicMaterial
+            color="#00ff88"
+            transparent
+            opacity={0.9}
             side={THREE.DoubleSide}
             blending={THREE.AdditiveBlending}
           />
@@ -108,12 +130,24 @@ function AuroraBorealis() {
       ))}
 
       {/* Ambient aurora glow */}
-      <mesh position={[0, 0, -20]}>
-        <sphereGeometry args={[50, 16, 16]} />
+      <mesh position={[0, 0, -15]}>
+        <sphereGeometry args={[80, 20, 20]} />
         <meshBasicMaterial
           color="#00ff88"
           transparent
-          opacity={0.05}
+          opacity={0.15}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Additional bright glow layer */}
+      <mesh position={[0, 0, -10]}>
+        <sphereGeometry args={[60, 16, 16]} />
+        <meshBasicMaterial
+          color="#00ffff"
+          transparent
+          opacity={0.2}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
         />
