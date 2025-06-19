@@ -57,12 +57,71 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
         })(),
         escalationTriggers: (() => {
           switch (name) {
-            case 'Crystal Peak': return ['disorder', 'chaos', 'unpredictable', 'messy'];
-            case 'Sahara Sands': return ['weakness', 'delicate', 'fragile', 'complaining'];
-            case 'Verdant Prime': return ['destruction', 'violence', 'harming life'];
-            case 'Azure Depths': return ['shallowness', 'superficial', 'surface-level'];
-            case 'Terra Nova': return ['extremism', 'destruction', 'chaos'];
+            case 'Crystal Peak': return ['disorder', 'chaos', 'unpredictable', 'messy', 'weakness', 'incompetence'];
+            case 'Sahara Sands': return ['weakness', 'delicate', 'fragile', 'complaining', 'technical issues'];
+            case 'Verdant Prime': return ['destruction', 'violence', 'harming life', 'negativity'];
+            case 'Marina Deep': return ['shallowness', 'superficial', 'surface-level', 'ignorance'];
+            case 'Terra Nova': return ['extremism', 'destruction', 'chaos', 'disharmony'];
             default: return [];
+          }
+        })(),
+        // Speech patterns and personality traits
+        speechPatterns: (() => {
+          switch (name) {
+            case 'Crystal Peak':
+              return {
+                urgency: 'high',
+                formality: 'military',
+                interruptions: true,
+                exclamations: ['STAT!', 'ALERT!', 'IMMEDIATE!', 'CRITICAL!'],
+                prefixes: ['Listen carefully,', 'This is urgent,', 'Time is critical,', 'I demand to know,'],
+                suffixes: ['Do you understand?', 'Is that clear?', 'Understood?', 'Acknowledge!']
+              };
+            case 'Sahara Sands':
+              return {
+                urgency: 'medium-high',
+                formality: 'technical',
+                interruptions: true,
+                exclamations: ['*static*', '*flicker*', 'OH NO!', 'SYSTEM ERROR!'],
+                prefixes: ['I think...', 'Let me check...', 'My systems indicate...', 'According to my data...'],
+                suffixes: ['I hope that helps.', 'Does that make sense?', 'Is that what you needed?', 'I apologize for any confusion.']
+              };
+            case 'Verdant Prime':
+              return {
+                urgency: 'low',
+                formality: 'friendly',
+                interruptions: false,
+                exclamations: ['Oh my!', 'How wonderful!', 'Absolutely delightful!', 'Simply marvelous!'],
+                prefixes: ['Oh, that\'s fascinating!', 'I\'m so excited to tell you,', 'You\'ll love this,', 'This is amazing,'],
+                suffixes: ['Isn\'t that beautiful?', 'Don\'t you think?', 'How lovely!', 'Simply wonderful!']
+              };
+            case 'Marina Deep':
+              return {
+                urgency: 'low',
+                formality: 'mysterious',
+                interruptions: false,
+                exclamations: ['*ocean currents swirl*', 'How intriguing...', 'The depths reveal...', 'Fascinating...'],
+                prefixes: ['The depths whisper that...', 'My ocean currents suggest...', 'In the mysterious depths...', 'The currents flow toward...'],
+                suffixes: ['The depths hold many secrets.', 'There\'s always more beneath the surface.', 'The ocean never reveals all.', 'The currents continue their dance.']
+              };
+            case 'Terra Nova':
+              return {
+                urgency: 'medium',
+                formality: 'diplomatic',
+                interruptions: false,
+                exclamations: ['Indeed.', 'Quite so.', 'Precisely.', 'Excellent point.'],
+                prefixes: ['From my observations,', 'Based on my analysis,', 'My atmospheric data suggests,', 'According to my records,'],
+                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you'd like to know?']
+              };
+            default:
+              return {
+                urgency: 'medium',
+                formality: 'neutral',
+                interruptions: false,
+                exclamations: ['Interesting.', 'Fascinating.', 'Indeed.'],
+                prefixes: ['I believe,', 'From what I understand,', 'Based on my knowledge,'],
+                suffixes: ['That\'s what I know.', 'I hope that helps.', 'Is there anything else?']
+              };
           }
         })()
       },
@@ -483,8 +542,45 @@ const generateContextualResponse = (
 
   // Add personality quirks and emotional expressions
   const addPersonalityFlair = (text: string, mood: string): string => {
-    // Remove any asterisk-based action/intent markers from the text
-    return text.replace(/\*[^*]+\*/g, '').replace(/\s+/g, ' ').trim();
+    const speechPatterns = personality.speechPatterns;
+    if (!speechPatterns) return text;
+    
+    // Add personality-specific elements based on speech patterns
+    let enhancedText = text;
+    
+    // Add random prefix (20% chance)
+    if (Math.random() < 0.2 && speechPatterns.prefixes && speechPatterns.prefixes.length > 0) {
+      const prefix = speechPatterns.prefixes[Math.floor(Math.random() * speechPatterns.prefixes.length)];
+      enhancedText = `${prefix} ${enhancedText}`;
+    }
+    
+    // Add random suffix (15% chance)
+    if (Math.random() < 0.15 && speechPatterns.suffixes && speechPatterns.suffixes.length > 0) {
+      const suffix = speechPatterns.suffixes[Math.floor(Math.random() * speechPatterns.suffixes.length)];
+      enhancedText = `${enhancedText} ${suffix}`;
+    }
+    
+    // Add random exclamation (10% chance)
+    if (Math.random() < 0.1 && speechPatterns.exclamations && speechPatterns.exclamations.length > 0) {
+      const exclamation = speechPatterns.exclamations[Math.floor(Math.random() * speechPatterns.exclamations.length)];
+      enhancedText = `${enhancedText} ${exclamation}`;
+    }
+    
+    // Add urgency indicators for high-urgency personalities
+    if (speechPatterns.urgency === 'high' && Math.random() < 0.3) {
+      const urgencyWords = ['URGENT:', 'CRITICAL:', 'IMMEDIATE:', 'ALERT:'];
+      const urgencyWord = urgencyWords[Math.floor(Math.random() * urgencyWords.length)];
+      enhancedText = `${urgencyWord} ${enhancedText}`;
+    }
+    
+    // Add technical indicators for technical personalities
+    if (speechPatterns.formality === 'technical' && Math.random() < 0.25) {
+      const techWords = ['*static*', '*flicker*', '*system check*', '*stabilizing*'];
+      const techWord = techWords[Math.floor(Math.random() * techWords.length)];
+      enhancedText = `${enhancedText} ${techWord}`;
+    }
+    
+    return enhancedText;
   };
 
   response = addPersonalityFlair(response, newContext.conversationMood);
