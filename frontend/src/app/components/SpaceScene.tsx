@@ -25,8 +25,8 @@ const celestialEntities: CelestialEntity[] = [
   // Terra Nova - at 0° (top) - Blue terrestrial world
   { id: 'terra-nova', position: [0, 0, -6] as [number, number, number], size: 0.8, color: '#4A90E2', type: 'terrestrial', name: 'Terra Nova', entityType: 'planet' },
   
-  // Verdant Prime - at 72° (top-right) - Green lush world
-  { id: 'verdant-prime', position: [5.7, 0, -1.9] as [number, number, number], size: 1.0, color: '#32CD32', type: 'terrestrial', name: 'Verdant Prime', entityType: 'planet' },
+  // Verdant Prime - at 72° (top-right) - Pink lush world
+  { id: 'verdant-prime', position: [5.7, 0, -1.9] as [number, number, number], size: 1.0, color: '#FF69B4', type: 'terrestrial', name: 'Verdant Prime', entityType: 'planet' },
   
   // Cryo Sphere - at 144° (bottom-right) - Ice world
   { id: 'cryo-sphere', position: [3.5, 0, 4.9] as [number, number, number], size: 0.6, color: '#87CEEB', type: 'ice', name: 'Cryo Sphere', entityType: 'planet' },
@@ -131,7 +131,7 @@ export default function SpaceScene() {
               <span className="text-purple-400 font-semibold">✨ Interactive Space Experience:</span> Click on any planet to chat with its consciousness
             </p>
             <p className="text-purple-200 text-xs mt-1">
-              Explore the 5 unique planets: Terra Nova (Blue), Verdant Prime (Green), Cryo Sphere (Ice), Marina Deep (Ocean), Sahara Sands (Desert)
+              Explore the 5 unique planets: Terra Nova (Blue), Verdant Prime (Pink), Cryo Sphere (Ice), Marina Deep (Ocean), Sahara Sands (Desert)
             </p>
             <button
               onClick={() => setShowInstructions(false)}
