@@ -276,17 +276,6 @@ function PlanetNameLabel({ position, name, color, size }: {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Glowing background ring */}
-      <mesh>
-        <ringGeometry args={[0.8, 1.2, 32]} />
-        <meshBasicMaterial 
-          color={color} 
-          transparent 
-          opacity={hovered ? 0.3 : 0.1}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      
       {/* Text label */}
       <Html
         center
