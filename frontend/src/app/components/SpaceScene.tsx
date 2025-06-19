@@ -39,36 +39,44 @@ const celestialEntities: CelestialEntity[] = [
 ];
 
 // Camera controller component
-function CameraController({ targetPosition }: { targetPosition: [number, number, number] | null }) {
+function CameraController({ targetPosition, targetSize }: { targetPosition: [number, number, number] | null; targetSize: number | null }) {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
 
   useFrame(() => {
-    if (targetPosition && controlsRef.current) {
-      // Calculate zoom position (much closer to the planet)
-      const zoomDistance = 4; // Much closer distance from planet
+    if (targetPosition && targetSize && controlsRef.current) {
       const [x, y, z] = targetPosition;
       
-      // Calculate camera position based on planet's actual position
-      // Position camera with very subtle angles for gentle viewing
-      const angle = Math.atan2(x, z); // Calculate angle from center to planet
-      const cameraOffset = 0.5; // Very subtle offset for gentle angle
+      // Calculate optimal zoom distance based on planet size
+      // Larger planets need more distance to be fully visible
+      const baseDistance = 3; // Base distance from planet surface
+      const sizeMultiplier = targetSize * 2; // Distance scales with planet size
+      const zoomDistance = baseDistance + sizeMultiplier;
+      
+      // Calculate camera position with precise offset
+      // Position camera at an angle for better perspective
+      const angle = Math.atan2(z, x); // Calculate angle from center to planet
+      const offsetX = Math.cos(angle) * 0.5; // Small offset for perspective
+      const offsetZ = Math.sin(angle) * 0.5;
       
       const cameraPosition = new THREE.Vector3(
-        x + Math.sin(angle) * cameraOffset, // Very subtle offset perpendicular to planet direction
-        y + 0.3, // Very subtle elevation for gentle view
-        z + Math.cos(angle) * zoomDistance // Distance from planet along its direction
+        x + offsetX,
+        y + 0.5, // Slight elevation for better view
+        z + zoomDistance + offsetZ
       );
       
-      // Smoothly animate camera to new position
-      camera.position.lerp(cameraPosition, 0.03);
+      // Smoothly animate camera to new position with better interpolation
+      camera.position.lerp(cameraPosition, 0.05); // Faster, more responsive
       
-      // Look directly at the planet
+      // Look exactly at the planet center
       const target = new THREE.Vector3(x, y, z);
       camera.lookAt(target);
       
-      // Update controls target to the planet
-      controlsRef.current.target.lerp(target, 0.03);
+      // Update controls target smoothly
+      controlsRef.current.target.lerp(target, 0.05);
+      
+      // Ensure controls are updated immediately for better responsiveness
+      controlsRef.current.update();
     }
   });
 
@@ -79,7 +87,7 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
       enableZoom={true}
       enableRotate={true}
       maxDistance={50}
-      minDistance={5}
+      minDistance={2} // Allow even closer zoom for accuracy
     />
   );
 }
@@ -116,12 +124,14 @@ export default function SpaceScene() {
   const [selectedEntity, setSelectedEntity] = useState<CelestialEntity | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [targetPosition, setTargetPosition] = useState<[number, number, number] | null>(null);
+  const [targetSize, setTargetSize] = useState<number | null>(null);
 
   const handleEntityClick = (entityData: CelestialEntity) => {
     setSelectedEntity(entityData);
     setIsChatOpen(true);
-    // Set target position for camera zoom
+    // Set target position and size for camera zoom
     setTargetPosition(entityData.position);
+    setTargetSize(entityData.size);
   };
 
   const handleCloseChat = () => {
@@ -129,6 +139,7 @@ export default function SpaceScene() {
     setSelectedEntity(null);
     // Reset camera position when chat closes
     setTargetPosition(null);
+    setTargetSize(null);
   };
 
   return (
@@ -153,7 +164,7 @@ export default function SpaceScene() {
         
         <SpaceEnvironment onEntityClick={handleEntityClick} />
         
-        <CameraController targetPosition={targetPosition} />
+        <CameraController targetPosition={targetPosition} targetSize={targetSize} />
       </Canvas>
 
       {/* Chat Interface - Now outside Canvas context */}
