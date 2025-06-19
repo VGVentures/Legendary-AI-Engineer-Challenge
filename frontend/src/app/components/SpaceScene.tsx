@@ -344,50 +344,55 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
   const cryo = planetPositions['Cryo Sphere'];
   if (!sahara || !cryo) return null;
 
-  // Animate offset for flicker
-  const flicker = Math.sin(progress * 20) * 0.05;
-  const saharaToCryo = [
-    sahara[0] + flicker, sahara[1] + 0.1, sahara[2] + flicker
-  ];
-  const cryoToSahara = [
-    cryo[0] - flicker, cryo[1] + 0.1, cryo[2] - flicker
-  ];
-
   // Fade out effect
   const opacity = 1 - Math.min(progress, 1);
+  
+  // Flicker effect
+  const flicker = Math.sin(progress * 30) * 0.3 + 0.7;
 
   return (
     <group ref={groupRef}>
       {/* Sahara Sands fires orange laser at Cryo Sphere */}
-      <mesh>
-        <cylinderGeometry args={[0.04, 0.08, 1, 8]} />
-        <meshBasicMaterial color={'#ffb300'} transparent opacity={opacity} />
-        <primitive
-          object={new THREE.Object3D()}
-          position={[(sahara[0] + cryo[0]) / 2, (sahara[1] + cryo[1]) / 2 + 0.1, (sahara[2] + cryo[2]) / 2]}
-          rotation={new THREE.Euler(
-            Math.atan2(cryo[2] - sahara[2], cryo[1] - sahara[1]),
-            Math.atan2(cryo[0] - sahara[0], cryo[2] - sahara[2]),
-            0
-          )}
-          scale={[1, new THREE.Vector3(...cryo).distanceTo(new THREE.Vector3(...sahara)), 1]}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              sahara[0], sahara[1] + 0.2, sahara[2],
+              cryo[0], cryo[1] + 0.2, cryo[2]
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff6b35" 
+          transparent 
+          opacity={opacity * flicker}
+          linewidth={3}
         />
-      </mesh>
+      </line>
+      
       {/* Cryo Sphere fires blue laser at Sahara Sands */}
-      <mesh>
-        <cylinderGeometry args={[0.04, 0.08, 1, 8]} />
-        <meshBasicMaterial color={'#00eaff'} transparent opacity={opacity} />
-        <primitive
-          object={new THREE.Object3D()}
-          position={[(sahara[0] + cryo[0]) / 2, (sahara[1] + cryo[1]) / 2 + 0.1, (sahara[2] + cryo[2]) / 2]}
-          rotation={new THREE.Euler(
-            Math.atan2(sahara[2] - cryo[2], sahara[1] - cryo[1]),
-            Math.atan2(sahara[0] - cryo[0], sahara[2] - cryo[2]),
-            0
-          )}
-          scale={[1, new THREE.Vector3(...cryo).distanceTo(new THREE.Vector3(...sahara)), 1]}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              cryo[0], cryo[1] + 0.2, cryo[2],
+              sahara[0], sahara[1] + 0.2, sahara[2]
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#4ecdc4" 
+          transparent 
+          opacity={opacity * flicker}
+          linewidth={3}
         />
-      </mesh>
+      </line>
     </group>
   );
 }
