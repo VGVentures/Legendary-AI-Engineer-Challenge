@@ -326,14 +326,12 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const groupRef = useRef<THREE.Group>(null);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
-  const [currentCrystalPos, setCurrentCrystalPos] = useState<[number, number, number]>([0, 0, 0]);
-  const [currentSaharaPos, setCurrentSaharaPos] = useState<[number, number, number]>([0, 0, 0]);
   const { camera } = useThree();
 
   // Debug: log planet positions
   console.log('PlanetLaserBattle - Planet positions:', planetPositions);
 
-  // Animation: continuous periodic laser firing and position updates
+  // Animation: continuous periodic laser firing
   useFrame((state) => {
     if (startTimeRef.current === null) startTimeRef.current = state.clock.getElapsedTime();
     const elapsed = (state.clock.getElapsedTime() - startTimeRef.current) * 1000;
@@ -341,43 +339,45 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     // Laser firing phases - every 800ms, continuous
     const laserTime = elapsed % 800;
     setLaserPhase(laserTime / 800);
-    
-    // Use the exact same rotation speed as the planets
-    const rotationAngle = state.clock.elapsedTime * 0.001; // Same as SpaceEnvironment
+  });
+
+  // Calculate current planet positions directly in render function
+  const getCurrentPlanetPositions = () => {
+    // Use performance.now() to get current time for immediate calculation
+    const rotationAngle = (performance.now() * 0.001) % (2 * Math.PI);
     
     // Get base positions
     const crystal = planetPositions['Crystal Peak'];
     const sahara = planetPositions['Sahara Sands'];
     
-    if (crystal && sahara) {
-      // Apply rotation to Crystal Peak position
-      const crystalRadius = Math.sqrt(crystal[0] * crystal[0] + crystal[2] * crystal[2]);
-      const crystalAngle = Math.atan2(crystal[2], crystal[0]) + rotationAngle;
-      const newCrystalPos: [number, number, number] = [
-        Math.cos(crystalAngle) * crystalRadius,
-        crystal[1],
-        Math.sin(crystalAngle) * crystalRadius
-      ];
-      setCurrentCrystalPos(newCrystalPos);
-      
-      // Apply rotation to Sahara Sands position
-      const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
-      const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
-      const newSaharaPos: [number, number, number] = [
-        Math.cos(saharaAngle) * saharaRadius,
-        sahara[1],
-        Math.sin(saharaAngle) * saharaRadius
-      ];
-      setCurrentSaharaPos(newSaharaPos);
-    }
-  });
+    if (!crystal || !sahara) return { crystal: null, sahara: null };
+    
+    // Apply rotation to Crystal Peak position
+    const crystalRadius = Math.sqrt(crystal[0] * crystal[0] + crystal[2] * crystal[2]);
+    const crystalAngle = Math.atan2(crystal[2], crystal[0]) + rotationAngle;
+    const currentCrystalPos: [number, number, number] = [
+      Math.cos(crystalAngle) * crystalRadius,
+      crystal[1],
+      Math.sin(crystalAngle) * crystalRadius
+    ];
+    
+    // Apply rotation to Sahara Sands position
+    const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
+    const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
+    const currentSaharaPos: [number, number, number] = [
+      Math.cos(saharaAngle) * saharaRadius,
+      sahara[1],
+      Math.sin(saharaAngle) * saharaRadius
+    ];
+    
+    return { crystal: currentCrystalPos, sahara: currentSaharaPos };
+  };
 
-  const crystal = currentCrystalPos;
-  const sahara = currentSaharaPos;
+  const { crystal, sahara } = getCurrentPlanetPositions();
   
   console.log('Current Crystal Peak position:', crystal, 'Current Sahara Sands position:', sahara);
   
-  if (!crystal || !sahara || (crystal[0] === 0 && crystal[1] === 0 && crystal[2] === 0)) {
+  if (!crystal || !sahara) {
     console.log('Missing planet positions, not rendering lasers');
     return null;
   }
