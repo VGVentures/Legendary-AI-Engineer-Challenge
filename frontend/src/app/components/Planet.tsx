@@ -318,77 +318,81 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         sparkleCount: 2    // Drastically reduced from 10
       };
     } else {
-      // Enhanced Planet rings with multiple layers using planet's actual color
-      const baseColor = color;
-      const lighterColor = color + '80'; // 50% opacity
-      const darkerColor = color + '40';  // 25% opacity
-      const veryLightColor = color + '20'; // 12% opacity
+      // Enhanced Planet rings with beautiful color variations using planet's actual color
+      const baseColor = new THREE.Color(color);
+      
+      // Create beautiful complementary color variations
+      const lighterColor = baseColor.clone().multiplyScalar(1.4).getHexString();
+      const darkerColor = baseColor.clone().multiplyScalar(0.6).getHexString();
+      const complementaryColor = baseColor.clone().offsetHSL(180, 0, 0).getHexString();
+      const warmAccent = baseColor.clone().offsetHSL(30, 0.2, 0.1).getHexString();
+      const coolAccent = baseColor.clone().offsetHSL(-30, 0.2, 0.1).getHexString();
       
       const configs = {
         gas: {
           // Saturn-like rings with multiple bands using planet color
           rings: [
-            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.9, color: baseColor },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.7, color: lighterColor },
-            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.8, color: darkerColor },
-            { innerRadius: 2.2, outerRadius: 2.4, opacity: 0.6, color: veryLightColor },
-            { innerRadius: 2.5, outerRadius: 2.7, opacity: 0.5, color: baseColor }
+            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.9, color: '#' + baseColor.getHexString() },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.8, color: '#' + lighterColor },
+            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.7, color: '#' + complementaryColor },
+            { innerRadius: 2.2, outerRadius: 2.4, opacity: 0.6, color: '#' + warmAccent },
+            { innerRadius: 2.5, outerRadius: 2.7, opacity: 0.5, color: '#' + baseColor.getHexString() }
           ],
-          colors: [baseColor, lighterColor, darkerColor, veryLightColor, baseColor],
+          colors: ['#' + baseColor.getHexString(), '#' + lighterColor, '#' + complementaryColor, '#' + warmAccent, '#' + baseColor.getHexString()],
           opacity: 0.8,
-          particleCount: 15, // Drastically reduced from 75
-          sparkleCount: 8    // Drastically reduced from 38
+          particleCount: 15,
+          sparkleCount: 8
         },
         ice: {
           // Uranus-like rings with icy particles using planet color
           rings: [
-            { innerRadius: 1.4, outerRadius: 1.6, opacity: 0.6, color: baseColor },
-            { innerRadius: 1.7, outerRadius: 1.9, opacity: 0.5, color: lighterColor },
-            { innerRadius: 2.0, outerRadius: 2.2, opacity: 0.4, color: darkerColor },
-            { innerRadius: 2.3, outerRadius: 2.5, opacity: 0.3, color: veryLightColor }
+            { innerRadius: 1.4, outerRadius: 1.6, opacity: 0.7, color: '#' + baseColor.getHexString() },
+            { innerRadius: 1.7, outerRadius: 1.9, opacity: 0.6, color: '#' + lighterColor },
+            { innerRadius: 2.0, outerRadius: 2.2, opacity: 0.5, color: '#' + coolAccent },
+            { innerRadius: 2.3, outerRadius: 2.5, opacity: 0.4, color: '#' + complementaryColor }
           ],
-          colors: [baseColor, lighterColor, darkerColor, veryLightColor],
+          colors: ['#' + baseColor.getHexString(), '#' + lighterColor, '#' + coolAccent, '#' + complementaryColor],
           opacity: 0.6,
-          particleCount: 10, // Drastically reduced from 50
-          sparkleCount: 5    // Drastically reduced from 25
+          particleCount: 10,
+          sparkleCount: 5
         },
         ocean: {
           // Neptune-like rings with water ice using planet color
           rings: [
-            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.7, color: baseColor },
-            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.6, color: lighterColor },
-            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.5, color: darkerColor },
-            { innerRadius: 2.4, outerRadius: 2.6, opacity: 0.4, color: veryLightColor }
+            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.8, color: '#' + baseColor.getHexString() },
+            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.7, color: '#' + lighterColor },
+            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.6, color: '#' + coolAccent },
+            { innerRadius: 2.4, outerRadius: 2.6, opacity: 0.5, color: '#' + complementaryColor }
           ],
-          colors: [baseColor, lighterColor, darkerColor, veryLightColor],
+          colors: ['#' + baseColor.getHexString(), '#' + lighterColor, '#' + coolAccent, '#' + complementaryColor],
           opacity: 0.7,
-          particleCount: 12, // Drastically reduced from 60
-          sparkleCount: 6    // Drastically reduced from 30
+          particleCount: 12,
+          sparkleCount: 6
         },
         desert: {
           // Mars-like rings with dust and sand using planet color
           rings: [
-            { innerRadius: 1.2, outerRadius: 1.4, opacity: 0.5, color: baseColor },
-            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.4, color: lighterColor },
-            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.3, color: darkerColor },
-            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.2, color: veryLightColor }
+            { innerRadius: 1.2, outerRadius: 1.4, opacity: 0.6, color: '#' + baseColor.getHexString() },
+            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.5, color: '#' + warmAccent },
+            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.4, color: '#' + darkerColor },
+            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.3, color: '#' + complementaryColor }
           ],
-          colors: [baseColor, lighterColor, darkerColor, veryLightColor],
+          colors: ['#' + baseColor.getHexString(), '#' + warmAccent, '#' + darkerColor, '#' + complementaryColor],
           opacity: 0.5,
-          particleCount: 8,   // Drastically reduced from 40
-          sparkleCount: 4     // Drastically reduced from 20
+          particleCount: 8,
+          sparkleCount: 4
         },
         terrestrial: {
-          // Earth-like rings using planet's actual color
+          // Earth-like rings using planet's actual color with beautiful variations
           rings: [
-            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.4, color: baseColor },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.3, color: lighterColor },
-            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.2, color: darkerColor }
+            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.5, color: '#' + baseColor.getHexString() },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.4, color: '#' + lighterColor },
+            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.3, color: '#' + complementaryColor }
           ],
-          colors: [baseColor, lighterColor, darkerColor],
+          colors: ['#' + baseColor.getHexString(), '#' + lighterColor, '#' + complementaryColor],
           opacity: 0.4,
-          particleCount: 6,   // Drastically reduced from 30
-          sparkleCount: 3     // Drastically reduced from 15
+          particleCount: 6,
+          sparkleCount: 3
         }
       };
       
@@ -623,32 +627,54 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Special Effects */}
       {renderSpecialEffects()}
 
-      {/* Reduced Atmospheric Glow */}
-      {[1.1, 1.3, 1.5].map((scale, index) => (
-        <mesh key={`atmosphere-${index}`}>
-          <sphereGeometry args={[size * scale, 32, 32]} />
-          <meshBasicMaterial
-            color={animatedColors[index % animatedColors.length]}
-            transparent
-            opacity={0.15 - index * 0.05}
-            blending={THREE.AdditiveBlending}
-            side={THREE.BackSide}
-          />
-        </mesh>
-      ))}
+      {/* Enhanced Atmospheric Glow with Beautiful Color Variations */}
+      {(() => {
+        const baseColor = new THREE.Color(color);
+        const lighterColor = baseColor.clone().multiplyScalar(1.3);
+        const complementaryColor = baseColor.clone().offsetHSL(180, 0, 0);
+        const warmAccent = baseColor.clone().offsetHSL(30, 0.2, 0.1);
+        
+        return [1.1, 1.3, 1.5].map((scale, index) => {
+          const glowColors = [baseColor, lighterColor, complementaryColor];
+          const glowColor = glowColors[index % glowColors.length];
+          
+          return (
+            <mesh key={`atmosphere-${index}`}>
+              <sphereGeometry args={[size * scale, 32, 32]} />
+              <meshBasicMaterial
+                color={glowColor}
+                transparent
+                opacity={0.2 - index * 0.05}
+                blending={THREE.AdditiveBlending}
+                side={THREE.BackSide}
+              />
+            </mesh>
+          );
+        });
+      })()}
 
-      {/* Enhanced Luminous Core - creates the vibrant yellow center point */}
-      {[0.15, 0.25, 0.35, 0.45, 0.6, 0.8, 1.0].map((scale, index) => (
-        <mesh key={`core-${index}`}>
-          <sphereGeometry args={[size * scale, 24 + index * 4, 24 + index * 4]} />
-          <meshBasicMaterial
-            color={animatedColors[index % animatedColors.length]}
-            transparent
-            opacity={0.9 - index * 0.12}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      ))}
+      {/* Enhanced Luminous Core with Beautiful Color Variations */}
+      {(() => {
+        const baseColor = new THREE.Color(color);
+        const lighterColor = baseColor.clone().multiplyScalar(1.5);
+        const complementaryColor = baseColor.clone().offsetHSL(180, 0, 0);
+        const warmAccent = baseColor.clone().offsetHSL(30, 0.3, 0.2);
+        const coolAccent = baseColor.clone().offsetHSL(-30, 0.3, 0.2);
+        
+        const coreColors = [baseColor, lighterColor, complementaryColor, warmAccent, coolAccent, baseColor, lighterColor];
+        
+        return [0.15, 0.25, 0.35, 0.45, 0.6, 0.8, 1.0].map((scale, index) => (
+          <mesh key={`core-${index}`}>
+            <sphereGeometry args={[size * scale, 24 + index * 4, 24 + index * 4]} />
+            <meshBasicMaterial
+              color={coreColors[index % coreColors.length]}
+              transparent
+              opacity={0.9 - index * 0.12}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        ));
+      })()}
 
       {/* Pulsing Core Effect */}
       {[0.2, 0.4, 0.6].map((scale, index) => (
