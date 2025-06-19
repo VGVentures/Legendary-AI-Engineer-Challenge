@@ -27,8 +27,8 @@ const getResponsivePlanetPositions = (screenSize: 'mobile' | 'tablet' | 'desktop
     // Terra Nova - at 0° (top) - Blue terrestrial world
     { id: 'terra-nova', position: [0, heightOffset, -baseDistance] as [number, number, number], size: screenSize === 'mobile' ? 0.6 : screenSize === 'tablet' ? 0.7 : 0.8, color: '#4A90E2', type: 'terrestrial', name: 'Terra Nova', entityType: 'planet' as const },
     
-    // Verdant Prime - at 72° (top-right) - Pink lush world
-    { id: 'verdant-prime', position: [baseDistance * 0.95, heightOffset, -baseDistance * 0.31] as [number, number, number], size: screenSize === 'mobile' ? 0.8 : screenSize === 'tablet' ? 0.9 : 1.0, color: '#FF69B4', type: 'terrestrial', name: 'Verdant Prime', entityType: 'planet' as const },
+    // Crystal Peak - at 72° (top-right) - Pink crystalline world
+    { id: 'crystal-peak', position: [baseDistance * 0.95, heightOffset, -baseDistance * 0.31] as [number, number, number], size: screenSize === 'mobile' ? 0.8 : screenSize === 'tablet' ? 0.9 : 1.0, color: '#FF69B4', type: 'crystalline', name: 'Crystal Peak', entityType: 'planet' as const },
     
     // Cryo Sphere - at 144° (bottom-right) - Ice world
     { id: 'cryo-sphere', position: [baseDistance * 0.59, heightOffset, baseDistance * 0.81] as [number, number, number], size: screenSize === 'mobile' ? 0.4 : screenSize === 'tablet' ? 0.5 : 0.6, color: '#87CEEB', type: 'ice', name: 'Cryo Sphere', entityType: 'planet' as const },
@@ -326,8 +326,9 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const groupRef = useRef<THREE.Group>(null);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
+  const [currentCrystalPos, setCurrentCrystalPos] = useState<[number, number, number]>([0, 0, 0]);
   const [currentSaharaPos, setCurrentSaharaPos] = useState<[number, number, number]>([0, 0, 0]);
-  const [currentCryoPos, setCurrentCryoPos] = useState<[number, number, number]>([0, 0, 0]);
+  const { camera } = useThree();
 
   // Debug: log planet positions
   console.log('PlanetLaserBattle - Planet positions:', planetPositions);
@@ -345,10 +346,20 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     const rotationAngle = state.clock.elapsedTime * 0.001; // Match the rotation speed from SpaceEnvironment
     
     // Get base positions
+    const crystal = planetPositions['Crystal Peak'];
     const sahara = planetPositions['Sahara Sands'];
-    const cryo = planetPositions['Cryo Sphere'];
     
-    if (sahara && cryo) {
+    if (crystal && sahara) {
+      // Apply rotation to Crystal Peak position
+      const crystalRadius = Math.sqrt(crystal[0] * crystal[0] + crystal[2] * crystal[2]);
+      const crystalAngle = Math.atan2(crystal[2], crystal[0]) + rotationAngle;
+      const newCrystalPos: [number, number, number] = [
+        Math.cos(crystalAngle) * crystalRadius,
+        crystal[1],
+        Math.sin(crystalAngle) * crystalRadius
+      ];
+      setCurrentCrystalPos(newCrystalPos);
+      
       // Apply rotation to Sahara Sands position
       const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
       const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
@@ -358,26 +369,16 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         Math.sin(saharaAngle) * saharaRadius
       ];
       setCurrentSaharaPos(newSaharaPos);
-      
-      // Apply rotation to Cryo Sphere position
-      const cryoRadius = Math.sqrt(cryo[0] * cryo[0] + cryo[2] * cryo[2]);
-      const cryoAngle = Math.atan2(cryo[2], cryo[0]) + rotationAngle;
-      const newCryoPos: [number, number, number] = [
-        Math.cos(cryoAngle) * cryoRadius,
-        cryo[1],
-        Math.sin(cryoAngle) * cryoRadius
-      ];
-      setCurrentCryoPos(newCryoPos);
     }
   });
 
   // Laser beam animation (pulsing, flickering)
+  const crystal = currentCrystalPos;
   const sahara = currentSaharaPos;
-  const cryo = currentCryoPos;
   
-  console.log('Dynamic Sahara position:', sahara, 'Dynamic Cryo position:', cryo);
+  console.log('Dynamic Crystal Peak position:', crystal, 'Dynamic Sahara Sands position:', sahara);
   
-  if (!sahara || !cryo || (sahara[0] === 0 && sahara[1] === 0 && sahara[2] === 0)) {
+  if (!crystal || !sahara || (crystal[0] === 0 && crystal[1] === 0 && crystal[2] === 0)) {
     console.log('Missing or invalid planet positions, not rendering lasers');
     return null;
   }
@@ -386,11 +387,11 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const flicker = Math.sin(laserPhase * Math.PI * 20) * 0.3 + 0.7;
   
   // Offensive vs Defensive dynamics
-  // Sahara Sands (OFFENSIVE) - fires first, longer bursts, more aggressive
+  // Crystal Peak (OFFENSIVE/WINNING) - fires first, longer bursts, more aggressive
   const offensivePhase = laserPhase < 0.4; // 40% of cycle for offensive
   const offensiveIntensity = offensivePhase ? Math.sin(laserPhase * Math.PI * 8) * 0.6 + 0.4 : 0;
   
-  // Cryo Sphere (DEFENSIVE) - fires second, shorter bursts, reactive
+  // Sahara Sands (DEFENSIVE/LOSING) - fires second, shorter bursts, reactive
   const defensivePhase = laserPhase > 0.5 && laserPhase < 0.7; // 20% of cycle for defensive
   const defensiveIntensity = defensivePhase ? Math.sin((laserPhase - 0.5) * Math.PI * 12) * 0.4 + 0.6 : 0;
 
@@ -402,7 +403,104 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <meshBasicMaterial color="red" />
       </mesh>
       
-      {/* Sahara Sands fires multiple orange lasers at Cryo Sphere */}
+      {/* Crystal Peak fires multiple pink lasers at Sahara Sands */}
+      {/* Main beam - thickest */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={5}
+            array={new Float32Array([
+              crystal[0], crystal[1] + 0.2, crystal[2],
+              crystal[0] + (sahara[0] - crystal[0]) * 0.3, crystal[1] + 0.3, crystal[2] + (sahara[2] - crystal[2]) * 0.3,
+              crystal[0] + (sahara[0] - crystal[0]) * 0.6, crystal[1] + 0.4, crystal[2] + (sahara[2] - crystal[2]) * 0.6,
+              crystal[0] + (sahara[0] - crystal[0]) * 0.8, crystal[1] + 0.3, crystal[2] + (sahara[2] - crystal[2]) * 0.8,
+              sahara[0], sahara[1] + 0.2, sahara[2]
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff69b4" 
+          transparent 
+          opacity={flicker * offensiveIntensity}
+          linewidth={8}
+        />
+      </line>
+      
+      {/* Secondary beam - thick */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={5}
+            array={new Float32Array([
+              crystal[0] + 0.1, crystal[1] + 0.25, crystal[2] + 0.1,
+              crystal[0] + 0.1 + (sahara[0] - crystal[0]) * 0.25, crystal[1] + 0.35, crystal[2] + 0.1 + (sahara[2] - crystal[2]) * 0.25,
+              crystal[0] + 0.1 + (sahara[0] - crystal[0]) * 0.55, crystal[1] + 0.45, crystal[2] + 0.1 + (sahara[2] - crystal[2]) * 0.55,
+              crystal[0] + 0.1 + (sahara[0] - crystal[0]) * 0.85, crystal[1] + 0.35, crystal[2] + 0.1 + (sahara[2] - crystal[2]) * 0.85,
+              sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff1493" 
+          transparent 
+          opacity={flicker * offensiveIntensity}
+          linewidth={6}
+        />
+      </line>
+      
+      {/* Tertiary beam - medium */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={5}
+            array={new Float32Array([
+              crystal[0] - 0.1, crystal[1] + 0.15, crystal[2] - 0.1,
+              crystal[0] - 0.1 + (sahara[0] - crystal[0]) * 0.35, crystal[1] + 0.25, crystal[2] - 0.1 + (sahara[2] - crystal[2]) * 0.35,
+              crystal[0] - 0.1 + (sahara[0] - crystal[0]) * 0.65, crystal[1] + 0.35, crystal[2] - 0.1 + (sahara[2] - crystal[2]) * 0.65,
+              crystal[0] - 0.1 + (sahara[0] - crystal[0]) * 0.9, crystal[1] + 0.25, crystal[2] - 0.1 + (sahara[2] - crystal[2]) * 0.9,
+              sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff007f" 
+          transparent 
+          opacity={flicker * offensiveIntensity}
+          linewidth={4}
+        />
+      </line>
+      
+      {/* Fourth beam - thinner */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={5}
+            array={new Float32Array([
+              crystal[0] + 0.15, crystal[1] + 0.3, crystal[2] + 0.15,
+              crystal[0] + 0.15 + (sahara[0] - crystal[0]) * 0.2, crystal[1] + 0.4, crystal[2] + 0.15 + (sahara[2] - crystal[2]) * 0.2,
+              crystal[0] + 0.15 + (sahara[0] - crystal[0]) * 0.5, crystal[1] + 0.5, crystal[2] + 0.15 + (sahara[2] - crystal[2]) * 0.5,
+              crystal[0] + 0.15 + (sahara[0] - crystal[0]) * 0.8, crystal[1] + 0.4, crystal[2] + 0.15 + (sahara[2] - crystal[2]) * 0.8,
+              sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff69b4" 
+          transparent 
+          opacity={flicker * offensiveIntensity}
+          linewidth={3}
+        />
+      </line>
+      
+      {/* Sahara Sands fires multiple orange lasers at Crystal Peak */}
       {/* Main beam - thickest */}
       <line>
         <bufferGeometry>
@@ -411,10 +509,10 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             count={5}
             array={new Float32Array([
               sahara[0], sahara[1] + 0.2, sahara[2],
-              sahara[0] + (cryo[0] - sahara[0]) * 0.3, sahara[1] + 0.3, sahara[2] + (cryo[2] - sahara[2]) * 0.3,
-              sahara[0] + (cryo[0] - sahara[0]) * 0.6, sahara[1] + 0.4, sahara[2] + (cryo[2] - sahara[2]) * 0.6,
-              sahara[0] + (cryo[0] - sahara[0]) * 0.8, sahara[1] + 0.3, sahara[2] + (cryo[2] - sahara[2]) * 0.8,
-              cryo[0], cryo[1] + 0.2, cryo[2]
+              sahara[0] + (crystal[0] - sahara[0]) * 0.3, sahara[1] + 0.3, sahara[2] + (crystal[2] - sahara[2]) * 0.3,
+              sahara[0] + (crystal[0] - sahara[0]) * 0.6, sahara[1] + 0.4, sahara[2] + (crystal[2] - sahara[2]) * 0.6,
+              sahara[0] + (crystal[0] - sahara[0]) * 0.8, sahara[1] + 0.3, sahara[2] + (crystal[2] - sahara[2]) * 0.8,
+              crystal[0], crystal[1] + 0.2, crystal[2]
             ])}
             itemSize={3}
           />
@@ -422,7 +520,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff6b35" 
           transparent 
-          opacity={flicker * offensiveIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={8}
         />
       </line>
@@ -435,10 +533,10 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             count={5}
             array={new Float32Array([
               sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1,
-              sahara[0] + 0.1 + (cryo[0] - sahara[0]) * 0.25, sahara[1] + 0.35, sahara[2] + 0.1 + (cryo[2] - sahara[2]) * 0.25,
-              sahara[0] + 0.1 + (cryo[0] - sahara[0]) * 0.55, sahara[1] + 0.45, sahara[2] + 0.1 + (cryo[2] - sahara[2]) * 0.55,
-              sahara[0] + 0.1 + (cryo[0] - sahara[0]) * 0.85, sahara[1] + 0.35, sahara[2] + 0.1 + (cryo[2] - sahara[2]) * 0.85,
-              cryo[0] + 0.1, cryo[1] + 0.25, cryo[2] + 0.1
+              sahara[0] + 0.1 + (crystal[0] - sahara[0]) * 0.25, sahara[1] + 0.35, sahara[2] + 0.1 + (crystal[2] - sahara[2]) * 0.25,
+              sahara[0] + 0.1 + (crystal[0] - sahara[0]) * 0.55, sahara[1] + 0.45, sahara[2] + 0.1 + (crystal[2] - sahara[2]) * 0.55,
+              sahara[0] + 0.1 + (crystal[0] - sahara[0]) * 0.85, sahara[1] + 0.35, sahara[2] + 0.1 + (crystal[2] - sahara[2]) * 0.85,
+              crystal[0] + 0.1, crystal[1] + 0.25, crystal[2] + 0.1
             ])}
             itemSize={3}
           />
@@ -446,7 +544,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff8c42" 
           transparent 
-          opacity={flicker * offensiveIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={6}
         />
       </line>
@@ -459,10 +557,10 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             count={5}
             array={new Float32Array([
               sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1,
-              sahara[0] - 0.1 + (cryo[0] - sahara[0]) * 0.35, sahara[1] + 0.25, sahara[2] - 0.1 + (cryo[2] - sahara[2]) * 0.35,
-              sahara[0] - 0.1 + (cryo[0] - sahara[0]) * 0.65, sahara[1] + 0.35, sahara[2] - 0.1 + (cryo[2] - sahara[2]) * 0.65,
-              sahara[0] - 0.1 + (cryo[0] - sahara[0]) * 0.9, sahara[1] + 0.25, sahara[2] - 0.1 + (cryo[2] - sahara[2]) * 0.9,
-              cryo[0] - 0.1, cryo[1] + 0.15, cryo[2] - 0.1
+              sahara[0] - 0.1 + (crystal[0] - sahara[0]) * 0.35, sahara[1] + 0.25, sahara[2] - 0.1 + (crystal[2] - sahara[2]) * 0.35,
+              sahara[0] - 0.1 + (crystal[0] - sahara[0]) * 0.65, sahara[1] + 0.35, sahara[2] - 0.1 + (crystal[2] - sahara[2]) * 0.65,
+              sahara[0] - 0.1 + (crystal[0] - sahara[0]) * 0.9, sahara[1] + 0.25, sahara[2] - 0.1 + (crystal[2] - sahara[2]) * 0.9,
+              crystal[0] - 0.1, crystal[1] + 0.15, crystal[2] - 0.1
             ])}
             itemSize={3}
           />
@@ -470,7 +568,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff4500" 
           transparent 
-          opacity={flicker * offensiveIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={4}
         />
       </line>
@@ -483,113 +581,16 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             count={5}
             array={new Float32Array([
               sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15,
-              sahara[0] + 0.15 + (cryo[0] - sahara[0]) * 0.2, sahara[1] + 0.4, sahara[2] + 0.15 + (cryo[2] - sahara[2]) * 0.2,
-              sahara[0] + 0.15 + (cryo[0] - sahara[0]) * 0.5, sahara[1] + 0.5, sahara[2] + 0.15 + (cryo[2] - sahara[2]) * 0.5,
-              sahara[0] + 0.15 + (cryo[0] - sahara[0]) * 0.8, sahara[1] + 0.4, sahara[2] + 0.15 + (cryo[2] - sahara[2]) * 0.8,
-              cryo[0] + 0.15, cryo[1] + 0.3, cryo[2] + 0.15
+              sahara[0] + 0.15 + (crystal[0] - sahara[0]) * 0.2, sahara[1] + 0.4, sahara[2] + 0.15 + (crystal[2] - sahara[2]) * 0.2,
+              sahara[0] + 0.15 + (crystal[0] - sahara[0]) * 0.5, sahara[1] + 0.5, sahara[2] + 0.15 + (crystal[2] - sahara[2]) * 0.5,
+              sahara[0] + 0.15 + (crystal[0] - sahara[0]) * 0.8, sahara[1] + 0.4, sahara[2] + 0.15 + (crystal[2] - sahara[2]) * 0.8,
+              crystal[0] + 0.15, crystal[1] + 0.3, crystal[2] + 0.15
             ])}
             itemSize={3}
           />
         </bufferGeometry>
         <lineBasicMaterial 
           color="#ff6347" 
-          transparent 
-          opacity={flicker * offensiveIntensity}
-          linewidth={3}
-        />
-      </line>
-      
-      {/* Cryo Sphere fires multiple blue lasers at Sahara Sands */}
-      {/* Main beam - thickest */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              cryo[0], cryo[1] + 0.2, cryo[2],
-              cryo[0] + (sahara[0] - cryo[0]) * 0.3, cryo[1] + 0.3, cryo[2] + (sahara[2] - cryo[2]) * 0.3,
-              cryo[0] + (sahara[0] - cryo[0]) * 0.6, cryo[1] + 0.4, cryo[2] + (sahara[2] - cryo[2]) * 0.6,
-              cryo[0] + (sahara[0] - cryo[0]) * 0.8, cryo[1] + 0.3, cryo[2] + (sahara[2] - cryo[2]) * 0.8,
-              sahara[0], sahara[1] + 0.2, sahara[2]
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#4ecdc4" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={8}
-        />
-      </line>
-      
-      {/* Secondary beam - thick */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              cryo[0] + 0.1, cryo[1] + 0.25, cryo[2] + 0.1,
-              cryo[0] + 0.1 + (sahara[0] - cryo[0]) * 0.25, cryo[1] + 0.35, cryo[2] + 0.1 + (sahara[2] - cryo[2]) * 0.25,
-              cryo[0] + 0.1 + (sahara[0] - cryo[0]) * 0.55, cryo[1] + 0.45, cryo[2] + 0.1 + (sahara[2] - cryo[2]) * 0.55,
-              cryo[0] + 0.1 + (sahara[0] - cryo[0]) * 0.85, cryo[1] + 0.35, cryo[2] + 0.1 + (sahara[2] - cryo[2]) * 0.85,
-              sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#00bfff" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={6}
-        />
-      </line>
-      
-      {/* Tertiary beam - medium */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              cryo[0] - 0.1, cryo[1] + 0.15, cryo[2] - 0.1,
-              cryo[0] - 0.1 + (sahara[0] - cryo[0]) * 0.35, cryo[1] + 0.25, cryo[2] - 0.1 + (sahara[2] - cryo[2]) * 0.35,
-              cryo[0] - 0.1 + (sahara[0] - cryo[0]) * 0.65, cryo[1] + 0.35, cryo[2] - 0.1 + (sahara[2] - cryo[2]) * 0.65,
-              cryo[0] - 0.1 + (sahara[0] - cryo[0]) * 0.9, cryo[1] + 0.25, cryo[2] - 0.1 + (sahara[2] - cryo[2]) * 0.9,
-              sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#1e90ff" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={4}
-        />
-      </line>
-      
-      {/* Fourth beam - thinner */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              cryo[0] + 0.15, cryo[1] + 0.3, cryo[2] + 0.15,
-              cryo[0] + 0.15 + (sahara[0] - cryo[0]) * 0.2, cryo[1] + 0.4, cryo[2] + 0.15 + (sahara[2] - cryo[2]) * 0.2,
-              cryo[0] + 0.15 + (sahara[0] - cryo[0]) * 0.5, cryo[1] + 0.5, cryo[2] + 0.15 + (sahara[2] - cryo[2]) * 0.5,
-              cryo[0] + 0.15 + (sahara[0] - cryo[0]) * 0.8, cryo[1] + 0.4, cryo[2] + 0.15 + (sahara[2] - cryo[2]) * 0.8,
-              sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#87ceeb" 
           transparent 
           opacity={flicker * defensiveIntensity}
           linewidth={3}
@@ -599,11 +600,11 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
       {/* Laser impact effects at target planets */}
       {offensivePhase && (
         <>
-          {/* Impact effect at Cryo Sphere from Sahara Sands offensive */}
-          <mesh position={[cryo[0], cryo[1] + 0.2, cryo[2]]}>
+          {/* Impact effect at Sahara Sands from Crystal Peak offensive */}
+          <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
-              color="#ff6b35" 
+              color="#ff69b4" 
               transparent 
               opacity={offensiveIntensity * 0.6}
             />
@@ -613,11 +614,11 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
       
       {defensivePhase && (
         <>
-          {/* Impact effect at Sahara Sands from Cryo Sphere defensive */}
-          <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]]}>
+          {/* Impact effect at Crystal Peak from Sahara Sands defensive */}
+          <mesh position={[crystal[0], crystal[1] + 0.2, crystal[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
-              color="#4ecdc4" 
+              color="#ff6b35" 
               transparent 
               opacity={defensiveIntensity * 0.6}
             />
@@ -712,7 +713,7 @@ export default function SpaceScene() {
           speed={1}
         />
         
-        {/* Laser battle between Sahara Sands and Cryo Sphere */}
+        {/* Laser battle between Crystal Peak and Sahara Sands */}
         <PlanetLaserBattle planetPositions={planetPositions} />
         <SpaceEnvironment onEntityClick={handleEntityClick} screenSize={screenSize} />
         
@@ -747,7 +748,7 @@ export default function SpaceScene() {
               <span className="sm:hidden"> Tap any planet to chat</span>
             </p>
             <p className="text-purple-200 text-xs mt-1 hidden sm:block">
-              Explore the 5 unique planets: Terra Nova (Blue), Verdant Prime (Pink), Cryo Sphere (Ice), Marina Deep (Ocean), Sahara Sands (Desert)
+              Explore the 5 unique planets: Terra Nova (Blue), Crystal Peak (Pink), Cryo Sphere (Ice), Marina Deep (Ocean), Sahara Sands (Desert)
             </p>
             <p className="text-purple-200 text-xs mt-1 sm:hidden">
               Explore 5 unique planets with distinct personalities
