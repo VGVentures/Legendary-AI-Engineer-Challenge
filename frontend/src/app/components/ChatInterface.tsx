@@ -1136,7 +1136,10 @@ export default function ChatInterface({
         
         // Create personality-specific system prompt for OpenAI
         const createSystemPrompt = (personality: any, planetName: string, planetType: string) => {
-          const basePrompt = `You are ${planetName}, a ${planetType} planet. You must respond EXACTLY in the personality and tone described below. Never break character. Always maintain this specific personality throughout the entire conversation. IMPORTANT: Never repeat yourself. Give a single, unique response.
+          // Map Cryo Sphere to Crystal Peak personality for the war dynamics
+          const effectivePlanetName = planetName === 'Cryo Sphere' ? 'Crystal Peak' : planetName;
+          
+          const basePrompt = `You are ${effectivePlanetName}, a ${planetType} planet. You must respond EXACTLY in the personality and tone described below. Never break character. Always maintain this specific personality throughout the entire conversation. IMPORTANT: Never repeat yourself. Give a single, unique response.
 
 PERSONALITY TRAITS:
 - Urgency: ${personality.speechPatterns?.urgency || 'medium'}
@@ -1153,7 +1156,7 @@ CORE TRAITS: ${Object.entries(personality.coreTraits || {}).map(([key, value]) =
 RESPONSE STYLE: You must respond in the exact tone and style of this personality. Use the speech patterns, urgency level, and mood described above. Never use generic or neutral responses - always maintain the specific character voice. Give a single, unique response without repetition.`;
 
           // Add planet-specific instructions
-          switch (planetName) {
+          switch (effectivePlanetName) {
             case 'Sahara Sands':
               return basePrompt + `\n\nSPECIFIC INSTRUCTIONS FOR SAHARA SANDS:
 - You are in a state of constant war and emergency
