@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { useRef, useState, useCallback } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import Planet from './Planet';
@@ -38,6 +38,32 @@ const celestialEntities: CelestialEntity[] = [
   { id: 'sahara-sands', position: [-5.7, 0, -1.9] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
 ];
 
+// Camera controller component
+function CameraController({ targetPosition, isZooming }: { targetPosition: [number, number, number] | null, isZooming: boolean }) {
+  const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
+  
+  useFrame(() => {
+    if (isZooming && targetPosition) {
+      // Calculate zoom position (closer to the planet)
+      const zoomDistance = 8; // Distance from planet
+      const direction = new THREE.Vector3(...targetPosition).normalize();
+      const zoomPosition = direction.multiplyScalar(zoomDistance);
+      
+      // Smooth camera movement
+      camera.position.lerp(zoomPosition, 0.02);
+      camera.lookAt(new THREE.Vector3(...targetPosition));
+    } else {
+      // Return to default position
+      const defaultPosition = new THREE.Vector3(0, 0, 25);
+      camera.position.lerp(defaultPosition, 0.02);
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+    }
+  });
+
+  return null;
+}
+
 function SpaceEnvironment({ onEntityClick }: { onEntityClick: (entity: CelestialEntity) => void }) {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -69,16 +95,19 @@ export default function SpaceScene() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [selectedEntity, setSelectedEntity] = useState<CelestialEntity | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
 
-  const handleEntityClick = (entityData: CelestialEntity) => {
+  const handleEntityClick = useCallback((entityData: CelestialEntity) => {
     setSelectedEntity(entityData);
+    setIsZooming(true);
     setIsChatOpen(true);
-  };
+  }, []);
 
-  const handleCloseChat = () => {
+  const handleCloseChat = useCallback(() => {
     setIsChatOpen(false);
+    setIsZooming(false);
     setSelectedEntity(null);
-  };
+  }, []);
 
   return (
     <div className="w-full h-screen relative">
@@ -102,12 +131,18 @@ export default function SpaceScene() {
         
         <SpaceEnvironment onEntityClick={handleEntityClick} />
         
+        <CameraController 
+          targetPosition={selectedEntity?.position || null}
+          isZooming={isZooming}
+        />
+        
         <OrbitControls 
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
           maxDistance={50}
           minDistance={5}
+          enabled={!isZooming} // Disable controls when zooming
         />
       </Canvas>
 
