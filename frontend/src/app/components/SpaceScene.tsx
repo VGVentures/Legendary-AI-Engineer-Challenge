@@ -354,9 +354,14 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   // Flicker effect for continuous animation
   const flicker = Math.sin(laserPhase * Math.PI * 20) * 0.3 + 0.7;
   
-  // Laser firing effect - only show during firing phases
-  const isFiring = laserPhase < 0.3; // Laser fires for 30% of the cycle
-  const laserIntensity = isFiring ? Math.sin(laserPhase * Math.PI * 10) * 0.5 + 0.5 : 0;
+  // Offensive vs Defensive dynamics
+  // Sahara Sands (OFFENSIVE) - fires first, longer bursts, more aggressive
+  const offensivePhase = laserPhase < 0.4; // 40% of cycle for offensive
+  const offensiveIntensity = offensivePhase ? Math.sin(laserPhase * Math.PI * 8) * 0.6 + 0.4 : 0;
+  
+  // Cryo Sphere (DEFENSIVE) - fires second, shorter bursts, reactive
+  const defensivePhase = laserPhase > 0.5 && laserPhase < 0.7; // 20% of cycle for defensive
+  const defensiveIntensity = defensivePhase ? Math.sin((laserPhase - 0.5) * Math.PI * 12) * 0.4 + 0.6 : 0;
 
   return (
     <group ref={groupRef}>
@@ -383,7 +388,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff6b35" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * offensiveIntensity}
           linewidth={8}
         />
       </line>
@@ -404,7 +409,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff8c42" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * offensiveIntensity}
           linewidth={6}
         />
       </line>
@@ -425,7 +430,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff4500" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * offensiveIntensity}
           linewidth={4}
         />
       </line>
@@ -446,7 +451,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#ff6347" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * offensiveIntensity}
           linewidth={3}
         />
       </line>
@@ -468,7 +473,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#4ecdc4" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={8}
         />
       </line>
@@ -489,7 +494,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#00bfff" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={6}
         />
       </line>
@@ -510,7 +515,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#1e90ff" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={4}
         />
       </line>
@@ -531,31 +536,35 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         <lineBasicMaterial 
           color="#87ceeb" 
           transparent 
-          opacity={flicker * laserIntensity}
+          opacity={flicker * defensiveIntensity}
           linewidth={3}
         />
       </line>
       
       {/* Laser impact effects at target planets */}
-      {isFiring && (
+      {offensivePhase && (
         <>
-          {/* Impact effect at Cryo Sphere */}
+          {/* Impact effect at Cryo Sphere from Sahara Sands offensive */}
           <mesh position={[cryo[0], cryo[1] + 0.2, cryo[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
               color="#ff6b35" 
               transparent 
-              opacity={laserIntensity * 0.6}
+              opacity={offensiveIntensity * 0.6}
             />
           </mesh>
-          
-          {/* Impact effect at Sahara Sands */}
+        </>
+      )}
+      
+      {defensivePhase && (
+        <>
+          {/* Impact effect at Sahara Sands from Cryo Sphere defensive */}
           <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
               color="#4ecdc4" 
               transparent 
-              opacity={laserIntensity * 0.6}
+              opacity={defensiveIntensity * 0.6}
             />
           </mesh>
         </>
