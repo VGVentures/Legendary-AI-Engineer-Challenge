@@ -398,10 +398,11 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const defensivePhase = laserPhase > 0.5 && laserPhase < 0.7; // 20% of cycle for defensive
   const defensiveIntensity = defensivePhase ? Math.sin((laserPhase - 0.5) * Math.PI * 12) * 0.4 + 0.6 : 0;
 
-  // Calculate laser path points between planets
-  const createLaserPath = (from: [number, number, number], to: [number, number, number], offset: [number, number, number] = [0, 0, 0]) => {
-    const start = [from[0] + offset[0], from[1] + offset[1] + 0.2, from[2] + offset[2]];
-    const end = [to[0] + offset[0], to[1] + offset[1] + 0.2, to[2] + offset[2]];
+  // Calculate laser path points between planet cores
+  const createLaserPath = (from: [number, number, number], to: [number, number, number]) => {
+    // Connect directly from core to core - no offsets
+    const start = [from[0], from[1], from[2]];
+    const end = [to[0], to[1], to[2]];
     
     // Create curved path with multiple points
     const points = [];
@@ -447,7 +448,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               <bufferAttribute
                 attach="attributes-position"
                 count={11}
-                array={new Float32Array(createLaserPath(crystal, sahara, [0.1, 0.05, 0.1]))}
+                array={new Float32Array(createLaserPath(crystal, sahara))}
                 itemSize={3}
               />
             </bufferGeometry>
@@ -465,7 +466,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               <bufferAttribute
                 attach="attributes-position"
                 count={11}
-                array={new Float32Array(createLaserPath(crystal, sahara, [-0.1, -0.05, -0.1]))}
+                array={new Float32Array(createLaserPath(crystal, sahara))}
                 itemSize={3}
               />
             </bufferGeometry>
@@ -483,7 +484,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               <bufferAttribute
                 attach="attributes-position"
                 count={11}
-                array={new Float32Array(createLaserPath(crystal, sahara, [0.15, 0.1, 0.15]))}
+                array={new Float32Array(createLaserPath(crystal, sahara))}
                 itemSize={3}
               />
             </bufferGeometry>
@@ -495,8 +496,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             />
           </line>
           
-          {/* Impact effect at Sahara Sands */}
-          <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]]}>
+          {/* Impact effect at Sahara Sands core */}
+          <mesh position={[sahara[0], sahara[1], sahara[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
               color="#ff69b4" 
@@ -534,7 +535,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               <bufferAttribute
                 attach="attributes-position"
                 count={11}
-                array={new Float32Array(createLaserPath(sahara, crystal, [0.1, 0.05, 0.1]))}
+                array={new Float32Array(createLaserPath(sahara, crystal))}
                 itemSize={3}
               />
             </bufferGeometry>
@@ -552,7 +553,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               <bufferAttribute
                 attach="attributes-position"
                 count={11}
-                array={new Float32Array(createLaserPath(sahara, crystal, [-0.1, -0.05, -0.1]))}
+                array={new Float32Array(createLaserPath(sahara, crystal))}
                 itemSize={3}
               />
             </bufferGeometry>
@@ -570,7 +571,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               <bufferAttribute
                 attach="attributes-position"
                 count={11}
-                array={new Float32Array(createLaserPath(sahara, crystal, [0.15, 0.1, 0.15]))}
+                array={new Float32Array(createLaserPath(sahara, crystal))}
                 itemSize={3}
               />
             </bufferGeometry>
@@ -582,8 +583,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             />
           </line>
           
-          {/* Impact effect at Crystal Peak */}
-          <mesh position={[crystal[0], crystal[1] + 0.2, crystal[2]]}>
+          {/* Impact effect at Crystal Peak core */}
+          <mesh position={[crystal[0], crystal[1], crystal[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
               color="#ff6b35" 
