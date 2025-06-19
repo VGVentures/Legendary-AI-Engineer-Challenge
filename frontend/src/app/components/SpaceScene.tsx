@@ -22,19 +22,19 @@ const celestialEntities: CelestialEntity[] = [
   // Each planet is positioned at 72 degrees apart (360° / 5 = 72°)
   // All planets are at the same distance (6 units) from center for visual balance
   
-  // Terra Nova - at 0° (top)
+  // Terra Nova - at 0° (top) - Blue terrestrial world
   { id: 'terra-nova', position: [0, 0, -6] as [number, number, number], size: 0.8, color: '#4A90E2', type: 'terrestrial', name: 'Terra Nova', entityType: 'planet' },
   
-  // Nebula Prime - at 72° (top-right)
-  { id: 'nebula-prime', position: [5.7, 0, -1.9] as [number, number, number], size: 1.2, color: '#FF6B6B', type: 'gas', name: 'Nebula Prime', entityType: 'planet' },
+  // Verdant Prime - at 72° (top-right) - Green lush world
+  { id: 'verdant-prime', position: [5.7, 0, -1.9] as [number, number, number], size: 1.0, color: '#32CD32', type: 'terrestrial', name: 'Verdant Prime', entityType: 'planet' },
   
-  // Cryo Sphere - at 144° (bottom-right)
+  // Cryo Sphere - at 144° (bottom-right) - Ice world
   { id: 'cryo-sphere', position: [3.5, 0, 4.9] as [number, number, number], size: 0.6, color: '#87CEEB', type: 'ice', name: 'Cryo Sphere', entityType: 'planet' },
   
-  // Marina Deep - at 216° (bottom-left)
+  // Marina Deep - at 216° (bottom-left) - Ocean world
   { id: 'marina-deep', position: [-3.5, 0, 4.9] as [number, number, number], size: 0.9, color: '#20B2AA', type: 'ocean', name: 'Marina Deep', entityType: 'planet' },
   
-  // Sahara Sands - at 288° (top-left)
+  // Sahara Sands - at 288° (top-left) - Desert world
   { id: 'sahara-sands', position: [-5.7, 0, -1.9] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
 ];
 
@@ -131,7 +131,7 @@ export default function SpaceScene() {
               <span className="text-purple-400 font-semibold">✨ Interactive Space Experience:</span> Click on any planet to chat with its consciousness
             </p>
             <p className="text-purple-200 text-xs mt-1">
-              Explore the 5 unique planets of this cosmic system
+              Explore the 5 unique planets: Terra Nova (Blue), Verdant Prime (Green), Cryo Sphere (Ice), Marina Deep (Ocean), Sahara Sands (Desert)
             </p>
             <button
               onClick={() => setShowInstructions(false)}
