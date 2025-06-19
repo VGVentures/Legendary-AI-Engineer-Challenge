@@ -427,28 +427,25 @@ export default function ChatInterface({
                   boxShadow: `0 2px 8px ${styling.glowColor}10`
                 }}
               >
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm opacity-70">Thinking</span>
-                  <div className="flex space-x-1">
-                    <div 
-                      className="w-3 h-3 rounded-full animate-bounce"
-                      style={{ backgroundColor: styling.accentColor }}
-                    ></div>
-                    <div 
-                      className="w-3 h-3 rounded-full animate-bounce" 
-                      style={{ 
-                        backgroundColor: styling.accentColor,
-                        animationDelay: '0.1s' 
-                      }}
-                    ></div>
-                    <div 
-                      className="w-3 h-3 rounded-full animate-bounce" 
-                      style={{ 
-                        backgroundColor: styling.accentColor,
-                        animationDelay: '0.2s' 
-                      }}
-                    ></div>
-                  </div>
+                <div className="flex space-x-1">
+                  <div 
+                    className="w-3 h-3 rounded-full animate-bounce"
+                    style={{ backgroundColor: styling.accentColor }}
+                  ></div>
+                  <div 
+                    className="w-3 h-3 rounded-full animate-bounce" 
+                    style={{ 
+                      backgroundColor: styling.accentColor,
+                      animationDelay: '0.1s' 
+                    }}
+                  ></div>
+                  <div 
+                    className="w-3 h-3 rounded-full animate-bounce" 
+                    style={{ 
+                      backgroundColor: styling.accentColor,
+                      animationDelay: '0.2s' 
+                    }}
+                  ></div>
                 </div>
               </div>
             </div>
