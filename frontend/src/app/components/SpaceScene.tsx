@@ -378,7 +378,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
       </mesh>
       
       {/* Sahara Sands fires multiple orange lasers at Cryo Sphere */}
-      {/* Main beam */}
+      {/* Main beam - thickest */}
       <line>
         <bufferGeometry>
           <bufferAttribute
@@ -395,19 +395,19 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#ff6b35" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={3}
+          linewidth={8}
         />
       </line>
       
-      {/* Secondary beam */}
+      {/* Secondary beam - thick */}
       <line>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              sahara[0] + 0.1, sahara[1] + 0.3, sahara[2] + 0.1,
-              cryo[0] + 0.1, cryo[1] + 0.3, cryo[2] + 0.1
+              sahara[0] + 0.15, sahara[1] + 0.35, sahara[2] + 0.15,
+              cryo[0] + 0.15, cryo[1] + 0.35, cryo[2] + 0.15
             ])}
             itemSize={3}
           />
@@ -416,19 +416,19 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#ff8c42" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={2}
+          linewidth={6}
         />
       </line>
       
-      {/* Tertiary beam */}
+      {/* Tertiary beam - medium */}
       <line>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              sahara[0] - 0.1, sahara[1] + 0.1, sahara[2] - 0.1,
-              cryo[0] - 0.1, cryo[1] + 0.1, cryo[2] - 0.1
+              sahara[0] - 0.15, sahara[1] + 0.05, sahara[2] - 0.15,
+              cryo[0] - 0.15, cryo[1] + 0.05, cryo[2] - 0.15
             ])}
             itemSize={3}
           />
@@ -437,19 +437,19 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#ff4500" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={1.5}
+          linewidth={4}
         />
       </line>
       
-      {/* Fourth beam */}
+      {/* Fourth beam - thinner */}
       <line>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              sahara[0] + 0.2, sahara[1] + 0.4, sahara[2] + 0.2,
-              cryo[0] + 0.2, cryo[1] + 0.4, cryo[2] + 0.2
+              sahara[0] + 0.25, sahara[1] + 0.45, sahara[2] + 0.25,
+              cryo[0] + 0.25, cryo[1] + 0.45, cryo[2] + 0.25
             ])}
             itemSize={3}
           />
@@ -458,12 +458,12 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#ff6347" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={1}
+          linewidth={3}
         />
       </line>
       
       {/* Cryo Sphere fires multiple blue lasers at Sahara Sands */}
-      {/* Main beam */}
+      {/* Main beam - thickest */}
       <line>
         <bufferGeometry>
           <bufferAttribute
@@ -480,19 +480,19 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#4ecdc4" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={3}
+          linewidth={8}
         />
       </line>
       
-      {/* Secondary beam */}
+      {/* Secondary beam - thick */}
       <line>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              cryo[0] + 0.1, cryo[1] + 0.3, cryo[2] + 0.1,
-              sahara[0] + 0.1, sahara[1] + 0.3, sahara[2] + 0.1
+              cryo[0] + 0.15, cryo[1] + 0.35, cryo[2] + 0.15,
+              sahara[0] + 0.15, sahara[1] + 0.35, sahara[2] + 0.15
             ])}
             itemSize={3}
           />
@@ -501,19 +501,19 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#00bfff" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={2}
+          linewidth={6}
         />
       </line>
       
-      {/* Tertiary beam */}
+      {/* Tertiary beam - medium */}
       <line>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              cryo[0] - 0.1, cryo[1] + 0.1, cryo[2] - 0.1,
-              sahara[0] - 0.1, sahara[1] + 0.1, sahara[2] - 0.1
+              cryo[0] - 0.15, cryo[1] + 0.05, cryo[2] - 0.15,
+              sahara[0] - 0.15, sahara[1] + 0.05, sahara[2] - 0.15
             ])}
             itemSize={3}
           />
@@ -522,19 +522,19 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#1e90ff" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={1.5}
+          linewidth={4}
         />
       </line>
       
-      {/* Fourth beam */}
+      {/* Fourth beam - thinner */}
       <line>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              cryo[0] + 0.2, cryo[1] + 0.4, cryo[2] + 0.2,
-              sahara[0] + 0.2, sahara[1] + 0.4, sahara[2] + 0.2
+              cryo[0] + 0.25, cryo[1] + 0.45, cryo[2] + 0.25,
+              sahara[0] + 0.25, sahara[1] + 0.45, sahara[2] + 0.25
             ])}
             itemSize={3}
           />
@@ -543,7 +543,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           color="#87ceeb" 
           transparent 
           opacity={opacity * flicker * laserIntensity}
-          linewidth={1}
+          linewidth={3}
         />
       </line>
       
