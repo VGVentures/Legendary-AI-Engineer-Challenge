@@ -283,13 +283,41 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const texture = useEntityTexture(entityType, type, color, size);
   const animatedColors = getAnimatedColors(entityType, type, state?.clock?.elapsedTime || 0);
 
-  // Animation frame updates - simplified to prevent crashes
+  // Ring configuration function
+  const getRingConfig = () => {
+    const baseConfig = {
+      innerRadius: size * 1.5,
+      outerRadius: size * 2.0,
+      segments: 64,
+      opacity: 0.4
+    };
+
+    switch (type) {
+      case 'gas':
+        return { ...baseConfig, innerRadius: size * 1.8, outerRadius: size * 2.5, opacity: 0.6 };
+      case 'ice':
+        return { ...baseConfig, innerRadius: size * 1.3, outerRadius: size * 1.8, opacity: 0.3 };
+      case 'ocean':
+        return { ...baseConfig, innerRadius: size * 1.6, outerRadius: size * 2.2, opacity: 0.5 };
+      case 'desert':
+        return { ...baseConfig, innerRadius: size * 1.4, outerRadius: size * 2.1, opacity: 0.4 };
+      default:
+        return baseConfig;
+    }
+  };
+
+  // Animation frame updates
   useFrame((state) => {
     setState({ clock: state.clock });
     
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.008; // Normal planet rotation
-      meshRef.current.rotation.x += 0.004; // Normal planet rotation
+      // Rotate the planet
+      meshRef.current.rotation.y += 0.005;
+    }
+
+    if (groupRef.current) {
+      // Rotate the entire group for orbital movement
+      groupRef.current.rotation.y += 0.002;
     }
   });
 
@@ -542,6 +570,117 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       ))}
+
+      {/* Complex Ring System with Particles and Animations */}
+      {entityType === 'planet' && (
+        <>
+          {/* Main Ring System */}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[size * 1.5, size * 2.0, 64]} />
+            <meshBasicMaterial
+              color={color}
+              transparent
+              opacity={0.4}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          
+          {/* Secondary Ring Layer */}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[size * 1.8, size * 2.3, 64]} />
+            <meshBasicMaterial
+              color={color + 'CC'}
+              transparent
+              opacity={0.3}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
+          {/* Ring Particles - creates sparkle effect around rings */}
+          {Array.from({ length: 80 }, (_, i) => {
+            const angle = (i / 80) * Math.PI * 2;
+            const radius = size * 1.5 + Math.random() * size * 0.8;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            const y = (Math.random() - 0.5) * size * 0.1;
+            
+            return (
+              <mesh key={`ring-particle-${i}`} position={[x, y, z]}>
+                <sphereGeometry args={[0.01 + Math.random() * 0.02, 8, 8]} />
+                <meshBasicMaterial
+                  color={animatedColors[i % animatedColors.length]}
+                  transparent
+                  opacity={0.6 + Math.random() * 0.4}
+                  blending={THREE.AdditiveBlending}
+                />
+              </mesh>
+            );
+          })}
+
+          {/* Orbiting Sparkles */}
+          {Array.from({ length: 25 }, (_, i) => {
+            const angle = (i / 25) * Math.PI * 2;
+            const radius = size * 1.6 + Math.random() * size * 0.4;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            const y = (Math.random() - 0.5) * size * 0.2;
+            
+            return (
+              <mesh key={`sparkle-${i}`} position={[x, y, z]}>
+                <sphereGeometry args={[0.015 + Math.random() * 0.01, 12, 12]} />
+                <meshBasicMaterial
+                  color={animatedColors[i % animatedColors.length]}
+                  transparent
+                  opacity={0.8 + Math.random() * 0.2}
+                  blending={THREE.AdditiveBlending}
+                />
+              </mesh>
+            );
+          })}
+
+          {/* Enhanced Glow Spheres around rings */}
+          {[0.1, 0.2, 0.3].map((scale, index) => (
+            <mesh key={`ring-glow-${index}`} rotation={[Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[size * (1.4 + index * 0.1), size * (2.1 + index * 0.1), 32]} />
+              <meshBasicMaterial
+                color={animatedColors[index % animatedColors.length]}
+                transparent
+                opacity={0.1 - index * 0.02}
+                blending={THREE.AdditiveBlending}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+          ))}
+
+          {/* Eerie Rotating Rings - creates mysterious atmosphere */}
+          {[0, 1].map((ringIndex) => (
+            <mesh 
+              key={`eerie-ring-${ringIndex}`} 
+              rotation={[Math.PI / 2, 0, 0]}
+              position={[0, ringIndex * 0.1, 0]}
+            >
+              <ringGeometry args={[size * (1.3 + ringIndex * 0.2), size * (2.2 + ringIndex * 0.2), 48]} />
+              <meshBasicMaterial
+                color={animatedColors[ringIndex % animatedColors.length]}
+                transparent
+                opacity={0.15}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+          ))}
+
+          {/* Inner Ring System - closer to planet */}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[size * 1.2, size * 1.4, 32]} />
+            <meshBasicMaterial
+              color={color}
+              transparent
+              opacity={0.25}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </>
+      )}
 
       {/* Enhanced Hover Effect */}
       {hovered && (
