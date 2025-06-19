@@ -189,7 +189,7 @@ function useEntityTexture(entityType: string, type: string, color: string, size:
 }
 
 // Enhanced animated colors function
-const getAnimatedColors = (entityType: string, type: string, time: number) => {
+const getAnimatedColors = (entityType: string, type: string, time: number, planetColor: string) => {
   if (entityType === 'star') {
     const starColors = {
       'yellow-dwarf': ['#FFD700', '#FFA500', '#FF8C00', '#FFD700'],
@@ -250,24 +250,22 @@ const getAnimatedColors = (entityType: string, type: string, time: number) => {
       new THREE.Color('#A0522D')
     ];
   } else {
-    // Planet colors (existing logic)
-    const baseColors = {
-      terrestrial: ['#228B22', '#32CD32', '#90EE90', '#98FB98', '#00FF7F'],
-      gas: ['#FF6B35', '#F7931E', '#FFD23F', '#FFA500', '#FF8C00'],
-      ice: ['#87CEEB', '#B0E0E6', '#E0F6FF', '#F0F8FF', '#ADD8E6'],
-      ocean: ['#006994', '#0099CC', '#00BFFF', '#1E90FF', '#4169E1'],
-      desert: ['#D2691E', '#CD853F', '#F4A460', '#DEB887', '#D2B48C']
-    };
+    // Planet colors using the planet's actual color
+    const baseColor = new THREE.Color(planetColor);
+    const lighterColor = baseColor.clone().multiplyScalar(1.3);
+    const darkerColor = baseColor.clone().multiplyScalar(0.7);
+    const veryLightColor = baseColor.clone().multiplyScalar(1.6);
+    const veryDarkColor = baseColor.clone().multiplyScalar(0.4);
     
-    const colors = baseColors[type as keyof typeof baseColors] || baseColors.terrestrial;
+    const colors = [baseColor, lighterColor, darkerColor, veryLightColor, veryDarkColor];
     const phase = (time * 0.1) % colors.length;
     const index1 = Math.floor(phase);
     const index2 = (index1 + 1) % colors.length;
     const t = phase - index1;
     
     return colors.map((_, i) => {
-      const color1 = new THREE.Color(colors[(index1 + i) % colors.length]);
-      const color2 = new THREE.Color(colors[(index2 + i) % colors.length]);
+      const color1 = colors[(index1 + i) % colors.length];
+      const color2 = colors[(index2 + i) % colors.length];
       return color1.clone().lerp(color2, t);
     });
   }
@@ -286,7 +284,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const texture = useEntityTexture(entityType, type, color, size);
   
   // Initialize animated colors with current time
-  const [animatedColors, setAnimatedColors] = useState(() => getAnimatedColors(entityType, type, 0));
+  const [animatedColors, setAnimatedColors] = useState(() => getAnimatedColors(entityType, type, 0, color));
 
   const getRingConfig = (entityType: string, planetType: string) => {
     if (entityType === 'star') {
@@ -436,7 +434,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   useFrame((state) => {
     try {
       const time = state?.clock?.elapsedTime || 0;
-      const newColors = getAnimatedColors(entityType, type, time);
+      const newColors = getAnimatedColors(entityType, type, time, color);
       
       // Update animated colors state
       setAnimatedColors(newColors);
@@ -696,7 +694,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         <mesh key={`inner-glow-${index}`}>
           <sphereGeometry args={[size * scale, 16, 16]} />
           <meshBasicMaterial
-            color="#FFFF00"
+            color={color}
             transparent
             opacity={1.0 - index * 0.3}
             blending={THREE.AdditiveBlending}
