@@ -368,46 +368,6 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
   // Laser firing effect - only show during firing phases
   const isFiring = laserPhase < 0.3; // Laser fires for 30% of the cycle
   const laserIntensity = isFiring ? Math.sin(laserPhase * Math.PI * 10) * 0.5 + 0.5 : 0;
-  
-  // Multiple laser beam variations
-  const createLaserBeam = (
-    startPos: [number, number, number], 
-    endPos: [number, number, number], 
-    color: string, 
-    width: number = 1,
-    offset: number = 0
-  ) => {
-    const beamOffset = offset * 0.1;
-    const start = [
-      startPos[0] + beamOffset,
-      startPos[1] + 0.2 + beamOffset,
-      startPos[2] + beamOffset
-    ];
-    const end = [
-      endPos[0] + beamOffset,
-      endPos[1] + 0.2 + beamOffset,
-      endPos[2] + beamOffset
-    ];
-    
-    return (
-      <line key={`${color}-${width}-${offset}`}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={2}
-            array={new Float32Array([...start, ...end])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color={color} 
-          transparent 
-          opacity={opacity * flicker * laserIntensity}
-          linewidth={width}
-        />
-      </line>
-    );
-  };
 
   return (
     <group ref={groupRef}>
@@ -418,22 +378,180 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
       </mesh>
       
       {/* Sahara Sands fires multiple orange lasers at Cryo Sphere */}
-      {createLaserBeam(sahara, cryo, "#ff6b35", 3, 0)} {/* Main beam */}
-      {createLaserBeam(sahara, cryo, "#ff8c42", 2, 1)} {/* Secondary beam */}
-      {createLaserBeam(sahara, cryo, "#ff4500", 1.5, -1)} {/* Tertiary beam */}
-      {createLaserBeam(sahara, cryo, "#ff6347", 1, 2)} {/* Fourth beam */}
+      {/* Main beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              sahara[0], sahara[1] + 0.2, sahara[2],
+              cryo[0], cryo[1] + 0.2, cryo[2]
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff6b35" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={3}
+        />
+      </line>
+      
+      {/* Secondary beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              sahara[0] + 0.1, sahara[1] + 0.3, sahara[2] + 0.1,
+              cryo[0] + 0.1, cryo[1] + 0.3, cryo[2] + 0.1
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff8c42" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={2}
+        />
+      </line>
+      
+      {/* Tertiary beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              sahara[0] - 0.1, sahara[1] + 0.1, sahara[2] - 0.1,
+              cryo[0] - 0.1, cryo[1] + 0.1, cryo[2] - 0.1
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff4500" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={1.5}
+        />
+      </line>
+      
+      {/* Fourth beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              sahara[0] + 0.2, sahara[1] + 0.4, sahara[2] + 0.2,
+              cryo[0] + 0.2, cryo[1] + 0.4, cryo[2] + 0.2
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#ff6347" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={1}
+        />
+      </line>
       
       {/* Cryo Sphere fires multiple blue lasers at Sahara Sands */}
-      {createLaserBeam(cryo, sahara, "#4ecdc4", 3, 0)} {/* Main beam */}
-      {createLaserBeam(cryo, sahara, "#00bfff", 2, 1)} {/* Secondary beam */}
-      {createLaserBeam(cryo, sahara, "#1e90ff", 1.5, -1)} {/* Tertiary beam */}
-      {createLaserBeam(cryo, sahara, "#87ceeb", 1, 2)} {/* Fourth beam */}
+      {/* Main beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              cryo[0], cryo[1] + 0.2, cryo[2],
+              sahara[0], sahara[1] + 0.2, sahara[2]
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#4ecdc4" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={3}
+        />
+      </line>
+      
+      {/* Secondary beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              cryo[0] + 0.1, cryo[1] + 0.3, cryo[2] + 0.1,
+              sahara[0] + 0.1, sahara[1] + 0.3, sahara[2] + 0.1
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#00bfff" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={2}
+        />
+      </line>
+      
+      {/* Tertiary beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              cryo[0] - 0.1, cryo[1] + 0.1, cryo[2] - 0.1,
+              sahara[0] - 0.1, sahara[1] + 0.1, sahara[2] - 0.1
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#1e90ff" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={1.5}
+        />
+      </line>
+      
+      {/* Fourth beam */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([
+              cryo[0] + 0.2, cryo[1] + 0.4, cryo[2] + 0.2,
+              sahara[0] + 0.2, sahara[1] + 0.4, sahara[2] + 0.2
+            ])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color="#87ceeb" 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={1}
+        />
+      </line>
       
       {/* Laser impact effects at target planets */}
       {isFiring && (
         <>
           {/* Impact effect at Cryo Sphere */}
-          <mesh position={[cryo[0], cryo[1] + 0.2, cryo[2]}>
+          <mesh position={[cryo[0], cryo[1] + 0.2, cryo[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
               color="#ff6b35" 
@@ -443,7 +561,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
           </mesh>
           
           {/* Impact effect at Sahara Sands */}
-          <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]}>
+          <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
               color="#4ecdc4" 
