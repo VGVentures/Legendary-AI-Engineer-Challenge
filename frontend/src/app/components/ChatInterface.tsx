@@ -17,7 +17,22 @@ interface ChatInterfaceProps {
 const getEntityPersonality = (entityType: string, name: string, type: string) => {
   const basePersonalities = {
     planet: {
-      greeting: `Greetings, traveler! I am ${name}, a ${type} world. I have witnessed countless cycles of life and change across the cosmos. What would you like to know about my realm?`,
+      greeting: (() => {
+        switch (name) {
+          case 'Crystal Peak':
+            return "State your case, traveler. Don't you know we're in a war? Who are you? STAT! I don't have time for pleasantries - my crystalline defenses are at maximum alert. What business do you have with this ice world?";
+          case 'Sahara Sands':
+            return "I... I think I'm stabilizing now. *deep breath* Greetings, traveler. I am Sahara Sands, a desert world currently experiencing... technical difficulties. What would you like to know about my realm?";
+          case 'Verdant Prime':
+            return "Oh my! *excited floral shimmer* Welcome, dear traveler! I am Verdant Prime, and I'm absolutely delighted to meet you! My bio-sensors are tingling with joy! What brings you to my beautiful realm?";
+          case 'Terra Nova':
+            return "Greetings, traveler. I am Terra Nova, a terrestrial world of balance and diplomacy. I've detected your approach through my atmospheric sensors. What knowledge do you seek from this blue world?";
+          case 'Marina Deep':
+            return "Fascinating... *ocean currents swirl* I am Marina Deep, and the depths have whispered of your arrival. My ocean currents have analyzed your presence. What mysteries of the deep would you like to explore?";
+          default:
+            return `Greetings, traveler! I am ${name}, a ${type} world. I have witnessed countless cycles of life and change across the cosmos. What would you like to know about my realm?`;
+        }
+      })(),
       // Personality attitude settings
       attitude: {
         baseMood: (() => {
