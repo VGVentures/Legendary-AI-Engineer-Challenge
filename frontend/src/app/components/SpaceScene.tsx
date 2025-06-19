@@ -45,32 +45,26 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
 
   useFrame(() => {
     if (targetPosition && controlsRef.current) {
-      // Calculate very intimate zoom position for face-to-face conversation
-      const zoomDistance = 2.5; // Much closer for intimate conversation feel
+      // Calculate intimate zoom position (much closer to the planet)
+      const zoomDistance = 3; // Much closer distance from planet
       const [x, y, z] = targetPosition;
       
-      // Get the planet's position vector
-      const planetPos = new THREE.Vector3(x, y, z);
-      
-      // Calculate the direction from origin to planet (this is the planet's radial direction)
-      const directionFromOrigin = planetPos.clone().normalize();
-      
-      // For planets positioned around a circle, we want to view them from slightly outside
-      // Calculate camera position by extending from planet position in the radial direction
+      // Position camera more precisely at the planet
       const cameraPosition = new THREE.Vector3(
-        x + (directionFromOrigin.x * zoomDistance),
-        y + 0.8, // Slight elevation for better conversation angle
-        z + (directionFromOrigin.z * zoomDistance)
+        x + (x * 0.1), // Minimal offset for better viewing angle
+        y + 1, // Slight elevation for intimate view
+        z + zoomDistance // Intimate zoom distance from planet
       );
       
-      // Smoothly animate camera to new position
-      camera.position.lerp(cameraPosition, 0.04);
+      // Smoothly animate camera to new position with faster transition
+      camera.position.lerp(cameraPosition, 0.05);
       
       // Look directly at the planet center
-      camera.lookAt(planetPos);
+      const target = new THREE.Vector3(x, y, z);
+      camera.lookAt(target);
       
-      // Update controls target smoothly
-      controlsRef.current.target.lerp(planetPos, 0.04);
+      // Update controls target more quickly
+      controlsRef.current.target.lerp(target, 0.05);
     }
   });
 
@@ -81,7 +75,7 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
       enableZoom={true}
       enableRotate={true}
       maxDistance={50}
-      minDistance={1.5} // Allow very close zoom for intimate conversation
+      minDistance={2} // Allow closer zoom
     />
   );
 }
