@@ -10,11 +10,32 @@
     "routes": [
       { 
         "src": "/api/(.*)", 
-        "dest": "api/app.py"
+        "dest": "api/app.py",
+        "headers": {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        }
       },
       { 
         "src": "/(.*)", 
         "dest": "frontend/$1"
+      }
+    ],
+    "functions": {
+      "api/app.py": {
+        "maxDuration": 30
+      }
+    },
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          }
+        ]
       }
     ]
   } 
