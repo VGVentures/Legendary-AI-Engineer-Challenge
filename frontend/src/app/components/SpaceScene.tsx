@@ -326,6 +326,7 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const groupRef = useRef<THREE.Group>(null);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
+  const rotationAngleRef = useRef(0); // Track rotation angle to match planet speed
   const { camera } = useThree();
 
   // Debug: log planet positions
@@ -339,12 +340,15 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     // Laser firing phases - every 800ms, continuous
     const laserTime = elapsed % 800;
     setLaserPhase(laserTime / 800);
+    
+    // Increment rotation angle at the same speed as planets (0.001 per frame)
+    rotationAngleRef.current += 0.001;
   });
 
   // Calculate current planet positions directly in render function
   const getCurrentPlanetPositions = () => {
-    // Use performance.now() to get current time for immediate calculation
-    const rotationAngle = (performance.now() * 0.001) % (2 * Math.PI);
+    // Use the tracked rotation angle that matches planet speed
+    const rotationAngle = rotationAngleRef.current;
     
     // Get base positions
     const crystal = planetPositions['Crystal Peak'];
