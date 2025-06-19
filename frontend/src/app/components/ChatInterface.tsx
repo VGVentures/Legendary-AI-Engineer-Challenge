@@ -994,16 +994,16 @@ export default function ChatInterface({
         {/* Messages with enhanced tech styling */}
         <div className={responsiveStyles.messagesClass} style={{ fontFamily: ALIEN_FONT }}>
           {messages.map((message, index) => {
-            const isInterjection = message.text.includes('joins the conversation');
-            const isShortCircuitMessage = message.text.includes('ELECTRICAL DISTURBANCE') || 
-                                         message.text.includes('SYSTEMS COMPROMISED') || 
-                                         message.text.includes('WARNING') ||
-                                         message.text.includes('technical difficulties') ||
-                                         message.text.includes('circuits are frying') ||
-                                         message.text.includes('panicked') ||
-                                         message.text.includes('disaster') ||
-                                         message.text.includes('emergency') ||
-                                         message.text.includes('system-wide failure');
+            const isInterjection = message.text?.includes('joins the conversation') || false;
+            const isShortCircuitMessage = message.text?.includes('ELECTRICAL DISTURBANCE') || 
+                                         message.text?.includes('SYSTEMS COMPROMISED') || 
+                                         message.text?.includes('WARNING') ||
+                                         message.text?.includes('technical difficulties') ||
+                                         message.text?.includes('circuits are frying') ||
+                                         message.text?.includes('panicked') ||
+                                         message.text?.includes('disaster') ||
+                                         message.text?.includes('emergency') ||
+                                         message.text?.includes('system-wide failure') || false;
             const techStyling = getPlanetTechStyling(planetColor);
             
             return (
