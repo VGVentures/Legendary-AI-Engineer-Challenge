@@ -49,26 +49,28 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
       const zoomDistance = 2.5; // Much closer for intimate conversation feel
       const [x, y, z] = targetPosition;
       
-      // Calculate direction from origin to planet for more accurate positioning
-      const planetVector = new THREE.Vector3(x, y, z);
-      const direction = planetVector.clone().normalize();
+      // Get the planet's position vector
+      const planetPos = new THREE.Vector3(x, y, z);
       
-      // Position camera very close for intimate conversation
+      // Calculate the direction from origin to planet (this is the planet's radial direction)
+      const directionFromOrigin = planetPos.clone().normalize();
+      
+      // For planets positioned around a circle, we want to view them from slightly outside
+      // Calculate camera position by extending from planet position in the radial direction
       const cameraPosition = new THREE.Vector3(
-        x + (direction.x * zoomDistance), // Close offset in planet's direction
-        y + 0.8, // Lower elevation for more personal angle
-        z + (direction.z * zoomDistance) // Close offset in planet's direction
+        x + (directionFromOrigin.x * zoomDistance),
+        y + 0.8, // Slight elevation for better conversation angle
+        z + (directionFromOrigin.z * zoomDistance)
       );
       
       // Smoothly animate camera to new position
-      camera.position.lerp(cameraPosition, 0.04); // Faster for more responsive feel
+      camera.position.lerp(cameraPosition, 0.04);
       
       // Look directly at the planet center
-      const target = new THREE.Vector3(x, y, z);
-      camera.lookAt(target);
+      camera.lookAt(planetPos);
       
       // Update controls target smoothly
-      controlsRef.current.target.lerp(target, 0.04);
+      controlsRef.current.target.lerp(planetPos, 0.04);
     }
   });
 
