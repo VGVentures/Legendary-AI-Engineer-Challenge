@@ -365,12 +365,12 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   
   // Offensive vs Defensive dynamics
   // Crystal Peak (OFFENSIVE/WINNING) - fires first, longer bursts, more aggressive
-  const offensivePhase = laserPhase < 0.4; // 40% of cycle for offensive
+  const offensivePhase = laserPhase < 0.35; // 35% of cycle for offensive (reduced from 40%)
   const offensiveIntensity = offensivePhase ? Math.sin(laserPhase * Math.PI * 8) * 0.6 + 0.4 : 0;
   
-  // Sahara Sands (DEFENSIVE/LOSING) - fires second, shorter bursts, reactive
-  const defensivePhase = laserPhase > 0.5 && laserPhase < 0.7; // 20% of cycle for defensive
-  const defensiveIntensity = defensivePhase ? Math.sin((laserPhase - 0.5) * Math.PI * 12) * 0.4 + 0.6 : 0;
+  // Sahara Sands (DEFENSIVE/LOSING) - fires second, but with more frequent and longer counter-attacks
+  const defensivePhase = laserPhase > 0.4 && laserPhase < 0.8; // 40% of cycle for defensive (increased from 20%)
+  const defensiveIntensity = defensivePhase ? Math.sin((laserPhase - 0.4) * Math.PI * 6) * 0.5 + 0.5 : 0;
 
   // Calculate laser path points between planet cores
   const createLaserPath = (from: [number, number, number], to: [number, number, number]) => {
@@ -551,13 +551,13 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
           </line>
           
           {/* Energy particles along the beam */}
-          {Array.from({ length: 6 }, (_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <mesh 
               key={i}
               position={[
-                sahara[0] + (crystal[0] - sahara[0]) * (i / 6),
-                sahara[1] + (crystal[1] - sahara[1]) * (i / 6) + Math.sin((i / 6) * Math.PI) * 0.5,
-                sahara[2] + (crystal[2] - sahara[2]) * (i / 6)
+                sahara[0] + (crystal[0] - sahara[0]) * (i / 8),
+                sahara[1] + (crystal[1] - sahara[1]) * (i / 8) + Math.sin((i / 8) * Math.PI) * 0.5,
+                sahara[2] + (crystal[2] - sahara[2]) * (i / 8)
               ]}
             >
               <sphereGeometry args={[0.15, 8, 8]} />
@@ -568,6 +568,41 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               />
             </mesh>
           ))}
+          
+          {/* Additional counter-attack beams for more firepower */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={16}
+                array={new Float32Array(createLaserPath(sahara, crystal))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff6347" 
+              transparent 
+              opacity={flicker * defensiveIntensity * 0.6}
+              linewidth={15}
+            />
+          </line>
+          
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={16}
+                array={new Float32Array(createLaserPath(sahara, crystal))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff4500" 
+              transparent 
+              opacity={flicker * defensiveIntensity * 0.4}
+              linewidth={12}
+            />
+          </line>
           
           {/* Impact effect at Crystal Peak core - much bigger */}
           <mesh position={[crystal[0], crystal[1], crystal[2]]}>
