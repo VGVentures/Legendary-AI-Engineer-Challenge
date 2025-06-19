@@ -18,6 +18,9 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable is not set")
 
+# Debug: Print first few characters of API key to verify it's loaded correctly
+print(f"API Key loaded: {api_key[:10]}..." if api_key else "No API key found")
+
 # Access control token (optional - for additional security)
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "cosmic-ai-2024")
 
