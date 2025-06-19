@@ -45,18 +45,18 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
 
   useFrame(() => {
     if (targetPosition && controlsRef.current) {
-      // Calculate zoom position (closer to the planet)
-      const zoomDistance = 12; // Distance from planet
+      // Calculate zoom position (much closer to the planet)
+      const zoomDistance = 4; // Much closer distance from planet
       const [x, y, z] = targetPosition;
       
       // Calculate camera position based on planet's actual position
       // Position camera at an angle that shows the planet clearly
       const angle = Math.atan2(x, z); // Calculate angle from center to planet
-      const cameraOffset = 3; // Offset from direct line to planet
+      const cameraOffset = 1.5; // Smaller offset for closer view
       
       const cameraPosition = new THREE.Vector3(
         x + Math.sin(angle) * cameraOffset, // Offset perpendicular to planet direction
-        y + 2, // Slight elevation
+        y + 1, // Lower elevation for closer view
         z + Math.cos(angle) * zoomDistance // Distance from planet along its direction
       );
       
