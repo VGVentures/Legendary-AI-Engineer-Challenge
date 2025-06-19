@@ -281,6 +281,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   // Initialize animated colors with current time
   const [animatedColors, setAnimatedColors] = useState(() => getAnimatedColors(entityType, type, 0, color));
 
+  // Short-circuit effect for Sahara Sands (desert planet)
+  const isShortCircuiting = name === 'Sahara Sands';
+  const [shortCircuitIntensity, setShortCircuitIntensity] = useState(0);
+  const [flickerState, setFlickerState] = useState(false);
+
   const getRingConfig = (entityType: string, planetType: string) => {
     if (entityType === 'star') {
       return {
@@ -438,10 +443,37 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       // Update animated colors state
       setAnimatedColors(newColors);
       
+      // Short-circuit effect animation
+      if (isShortCircuiting) {
+        // Random flickering pattern
+        const flickerChance = Math.random();
+        if (flickerChance > 0.95) { // 5% chance per frame
+          setFlickerState(!flickerState);
+        }
+        
+        // Intense short-circuit moments
+        const shortCircuitChance = Math.random();
+        if (shortCircuitChance > 0.98) { // 2% chance per frame
+          setShortCircuitIntensity(1);
+          setTimeout(() => setShortCircuitIntensity(0), 200);
+        } else {
+          setShortCircuitIntensity(Math.max(0, shortCircuitIntensity - 0.02));
+        }
+      }
+      
       if (meshRef.current) {
         const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
         if (material?.emissive) {
-          material.emissive.copy(newColors[0]);
+          // Apply short-circuit effect to emissive
+          if (isShortCircuiting) {
+            const baseEmissive = newColors[0].clone();
+            const flickerIntensity = flickerState ? 0.8 : 0.2;
+            const shortCircuitColor = new THREE.Color(0xffff00); // Yellow for electrical effect
+            material.emissive.copy(baseEmissive.lerp(shortCircuitColor, shortCircuitIntensity * flickerIntensity));
+            material.emissiveIntensity = 0.5 + shortCircuitIntensity * 2;
+          } else {
+            material.emissive.copy(newColors[0]);
+          }
         }
       }
 
@@ -456,6 +488,14 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           sparkle.position.x = Math.cos(angle) * radius;
           sparkle.position.z = Math.sin(angle) * radius;
           sparkle.position.y = Math.sin(time * 0.01 + index * 0.1) * size * 0.05; // Much slower vertical movement
+          
+          // Add short-circuit effect to sparkles
+          if (isShortCircuiting && sparkle.material) {
+            const sparkleMaterial = sparkle.material as THREE.MeshBasicMaterial;
+            const flickerIntensity = flickerState ? 1 : 0.3;
+            sparkleMaterial.opacity = 0.6 * flickerIntensity * (1 + shortCircuitIntensity);
+            sparkleMaterial.color.setHex(shortCircuitIntensity > 0.5 ? 0xffff00 : parseInt(color.replace('#', '0x')));
+          }
         }
       });
 

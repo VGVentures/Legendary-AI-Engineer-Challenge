@@ -707,11 +707,53 @@ export default function ChatInterface({
       setAlienTyping(false);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       if (alienGagTimeoutRef.current) clearTimeout(alienGagTimeoutRef.current);
-      // Initial greeting with a slight delay
-      const greetingTimeout = setTimeout(() => {
-        setMessages([{ text: personality.greeting, isUser: false, timestamp: new Date() }]);
-      }, 500);
-      return () => clearTimeout(greetingTimeout);
+      
+      // Special short-circuit experience for Sahara Sands
+      if (planetName === 'Sahara Sands') {
+        const shortCircuitMessages = [
+          "⚠️ *ELECTRICAL DISTURBANCE DETECTED* ⚡",
+          "SYSTEMS COMPROMISED... SHORT-CIRCUIT IN PROGRESS...",
+          "WARNING: CRITICAL MALFUNCTION DETECTED!",
+          "I-I-I'm experiencing technical difficulties... *static*",
+          "OH NO! My circuits are frying! Everything's going haywire!",
+          "*panicked* I'm so sorry! My systems are in complete chaos!",
+          "This is a disaster! My communication protocols are corrupted!",
+          "I can barely maintain this connection... *flickering*",
+          "Please forgive the technical difficulties! I'm in a state of emergency!",
+          "My apologies for the erratic behavior - I'm experiencing a system-wide failure!"
+        ];
+        
+        let messageIndex = 0;
+        const showShortCircuitMessage = () => {
+          if (messageIndex < shortCircuitMessages.length) {
+            setMessages(prev => [...prev, { 
+              text: shortCircuitMessages[messageIndex], 
+              isUser: false, 
+              timestamp: new Date(),
+              isAlien: false
+            }]);
+            messageIndex++;
+            setTimeout(showShortCircuitMessage, 800 + Math.random() * 400);
+          } else {
+            // After the panic, show the normal greeting
+            setTimeout(() => {
+              setMessages(prev => [...prev, { 
+                text: "I... I think I'm stabilizing now. *deep breath* Greetings, traveler. I am Sahara Sands, a desert world currently experiencing... technical difficulties. What would you like to know about my realm?", 
+                isUser: false, 
+                timestamp: new Date() 
+              }]);
+            }, 1000);
+          }
+        };
+        
+        setTimeout(showShortCircuitMessage, 500);
+      } else {
+        // Normal greeting for other planets
+        const greetingTimeout = setTimeout(() => {
+          setMessages([{ text: personality.greeting, isUser: false, timestamp: new Date() }]);
+        }, 500);
+        return () => clearTimeout(greetingTimeout);
+      }
     }
   }, [isOpen, planetName, planetType, entityType]);
 
@@ -953,6 +995,15 @@ export default function ChatInterface({
         <div className={responsiveStyles.messagesClass} style={{ fontFamily: ALIEN_FONT }}>
           {messages.map((message, index) => {
             const isInterjection = message.text.includes('joins the conversation');
+            const isShortCircuitMessage = message.text.includes('ELECTRICAL DISTURBANCE') || 
+                                         message.text.includes('SYSTEMS COMPROMISED') || 
+                                         message.text.includes('WARNING') ||
+                                         message.text.includes('technical difficulties') ||
+                                         message.text.includes('circuits are frying') ||
+                                         message.text.includes('panicked') ||
+                                         message.text.includes('disaster') ||
+                                         message.text.includes('emergency') ||
+                                         message.text.includes('system-wide failure');
             const techStyling = getPlanetTechStyling(planetColor);
             
             return (
@@ -969,27 +1020,34 @@ export default function ChatInterface({
                       ? techStyling.userBackground
                       : isInterjection
                         ? 'rgba(255, 165, 0, 0.15)'
-                        : `linear-gradient(135deg, ${planetColor}15 0%, rgba(10,15,28,0.8) 100%)`,
+                        : isShortCircuitMessage
+                          ? 'linear-gradient(135deg, rgba(255, 255, 0, 0.2) 0%, rgba(255, 0, 0, 0.1) 100%)'
+                          : `linear-gradient(135deg, ${planetColor}15 0%, rgba(10,15,28,0.8) 100%)`,
                     fontFamily: ALIEN_FONT,
                     fontSize: message.isAlien ? (screenSize === 'mobile' ? '1.1rem' : '1.25rem') : undefined,
                     letterSpacing: message.isAlien ? '0.15em' : '0.05em',
-                    color: message.isUser ? '#ffffff' : (isInterjection ? '#FFA500' : planetColor),
+                    color: message.isUser ? '#ffffff' : (isInterjection ? '#FFA500' : isShortCircuitMessage ? '#FFFF00' : planetColor),
                     boxShadow: message.isUser 
                       ? techStyling.userGlow
                       : isInterjection
                         ? '0 0 20px rgba(255, 165, 0, 0.3)'
-                        : techStyling.primaryGlow,
+                        : isShortCircuitMessage
+                          ? '0 0 25px rgba(255, 255, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.4)'
+                          : techStyling.primaryGlow,
                     border: message.isUser 
                       ? techStyling.userBorder
                       : isInterjection
                         ? '1px solid rgba(255, 165, 0, 0.4)'
-                        : `2px solid ${planetColor}40`,
+                        : isShortCircuitMessage
+                          ? '2px solid #FFFF00'
+                          : `2px solid ${planetColor}40`,
                     position: 'relative',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    animation: isShortCircuitMessage ? 'flicker 0.3s infinite alternate' : undefined
                   }}
                 >
                   {/* Tech circuit pattern for alien messages */}
-                  {!message.isUser && !isInterjection && (
+                  {!message.isUser && !isInterjection && !isShortCircuitMessage && (
                     <div 
                       className="absolute inset-0 pointer-events-none opacity-20"
                       style={{
@@ -998,17 +1056,29 @@ export default function ChatInterface({
                     />
                   )}
                   
+                  {/* Electrical disturbance effect for short-circuit messages */}
+                  {isShortCircuitMessage && (
+                    <div 
+                      className="absolute inset-0 pointer-events-none opacity-30"
+                      style={{
+                        background: 'radial-gradient(circle, rgba(255, 255, 0, 0.3) 0%, transparent 70%)',
+                        animation: 'pulse 0.5s infinite'
+                      }}
+                    />
+                  )}
+                  
                   {/* Message content */}
                   <div className="relative z-10">
                     <p className={`${screenSize === 'mobile' ? 'text-xs' : 'text-sm'} leading-relaxed`} style={{ 
-                      color: message.isUser ? '#ffffff' : (isInterjection ? '#FFA500' : planetColor), 
+                      color: message.isUser ? '#ffffff' : (isInterjection ? '#FFA500' : isShortCircuitMessage ? '#FFFF00' : planetColor), 
                       fontFamily: ALIEN_FONT,
-                      textShadow: message.isUser ? 'none' : `0 0 4px ${planetColor}40`
+                      textShadow: message.isUser ? 'none' : (isShortCircuitMessage ? '0 0 8px #FFFF00, 0 0 4px #FF0000' : `0 0 4px ${planetColor}40`),
+                      fontWeight: isShortCircuitMessage ? 'bold' : 'normal'
                     }}>
                       {message.text}
                     </p>
                     <p className="text-xs opacity-60 mt-2 tracking-wider" style={{ 
-                      color: message.isUser ? '#cccccc' : (isInterjection ? '#FFB84D' : `${planetColor}cc`), 
+                      color: message.isUser ? '#cccccc' : (isInterjection ? '#FFB84D' : isShortCircuitMessage ? '#FFE066' : `${planetColor}cc`), 
                       fontFamily: ALIEN_FONT,
                       letterSpacing: '0.1em'
                     }}>

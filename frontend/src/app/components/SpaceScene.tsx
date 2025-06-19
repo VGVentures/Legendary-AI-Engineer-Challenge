@@ -6,6 +6,7 @@ import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import Planet from './Planet';
 import ChatInterface from './ChatInterface';
+import { Html } from '@react-three/drei';
 
 interface CelestialEntity {
   id: string;
@@ -101,8 +102,8 @@ function CameraController({
         orbitAngleRef.current = 0;
       }
       
-      // Smooth zoom progress
-      zoomProgressRef.current = Math.min(zoomProgressRef.current + 0.02, 1);
+      // Much more gradual zoom progress - slowed down significantly
+      zoomProgressRef.current = Math.min(zoomProgressRef.current + 0.008, 1); // Reduced from 0.02 to 0.008
       
       // Calculate zoom distance based on planet size and screen size
       const planetSize = getResponsivePlanetPositions(screenSize).find(e => 
@@ -115,10 +116,12 @@ function CameraController({
       // Calculate camera position for zoom
       const zoomCameraPosition = target.clone().add(new THREE.Vector3(0, cameraSettings.orbitHeight, zoomDistance));
       
-      // Smooth camera movement to zoom position
+      // Smooth camera movement to zoom position with easing
       if (initialCameraPositionRef.current) {
-        camera.position.lerpVectors(initialCameraPositionRef.current, zoomCameraPosition, zoomProgressRef.current);
-        controlsRef.current.target.lerpVectors(initialTargetRef.current!, target, zoomProgressRef.current);
+        // Use easing function for smoother transition
+        const easedProgress = 1 - Math.pow(1 - zoomProgressRef.current, 3); // Cubic ease-out
+        camera.position.lerpVectors(initialCameraPositionRef.current, zoomCameraPosition, easedProgress);
+        controlsRef.current.target.lerpVectors(initialTargetRef.current!, target, easedProgress);
       }
       
       // Once zoomed in and chat is open, maintain close position with some movement
@@ -233,6 +236,89 @@ function SpaceEnvironment({
           onPlanetClick={() => onEntityClick(entity)}
         />
       ))}
+      
+      {/* Planet Name Labels */}
+      {celestialEntities.map((entity) => (
+        <PlanetNameLabel
+          key={`label-${entity.id}`}
+          position={entity.position}
+          name={entity.name}
+          color={entity.color}
+          size={entity.size}
+        />
+      ))}
+    </group>
+  );
+}
+
+// Cool planet name label component
+function PlanetNameLabel({ position, name, color, size }: { 
+  position: [number, number, number]; 
+  name: string; 
+  color: string; 
+  size: number;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const labelRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (labelRef.current) {
+      // Gentle floating animation
+      labelRef.current.position.y = position[1] + size + 0.5 + Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+      labelRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+    }
+  });
+
+  return (
+    <group 
+      ref={labelRef}
+      position={[position[0], position[1] + size + 0.5, position[2]]}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+    >
+      {/* Glowing background ring */}
+      <mesh>
+        <ringGeometry args={[0.8, 1.2, 32]} />
+        <meshBasicMaterial 
+          color={color} 
+          transparent 
+          opacity={hovered ? 0.3 : 0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      
+      {/* Text label */}
+      <Html
+        center
+        position={[0, 0, 0.1]}
+        style={{
+          pointerEvents: 'none',
+          userSelect: 'none',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <div
+          className={`transition-all duration-300 ${
+            hovered ? 'scale-110 opacity-100' : 'scale-100 opacity-60'
+          }`}
+          style={{
+            color: color,
+            textShadow: `0 0 10px ${color}, 0 0 20px ${color}`,
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            background: `linear-gradient(45deg, ${color}20, transparent)`,
+            padding: '4px 8px',
+            borderRadius: '4px',
+            border: `1px solid ${color}40`,
+            backdropFilter: 'blur(4px)'
+          }}
+        >
+          {name}
+        </div>
+      </Html>
     </group>
   );
 }

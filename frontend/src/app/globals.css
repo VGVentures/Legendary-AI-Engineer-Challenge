@@ -98,6 +98,22 @@ a {
   animation: bounce 1.4s ease-in-out infinite both;
 }
 
+/* Short-circuit flicker animation */
+@keyframes flicker {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+.flicker {
+  animation: flicker 0.3s infinite alternate;
+}
+
 /* Responsive utilities */
 @media (max-width: 640px) {
   /* Mobile-specific styles */
