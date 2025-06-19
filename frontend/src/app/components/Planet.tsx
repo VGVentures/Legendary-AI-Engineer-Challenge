@@ -10,6 +10,7 @@ interface PlanetProps {
   color: string;
   type?: 'terrestrial' | 'gas' | 'ice' | 'ocean' | 'desert';
   name: string;
+  onPlanetClick?: (planetData: { name: string; type: string; color: string }) => void;
 }
 
 // Utility to generate a canvas-based texture for planet surfaces
@@ -93,8 +94,10 @@ const getAnimatedColors = (type: string, time: number) => {
   });
 };
 
-export default function Planet({ position, size, color, type = 'terrestrial', name }: PlanetProps) {
+export default function Planet({ position, size, color, type = 'terrestrial', name, onPlanetClick }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const [hovered, setHovered] = useState(false);
   const texture = usePlanetTexture(type, color, size);
   
   const getRingConfig = (planetType: string) => {
@@ -136,10 +139,34 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const ringConfig = getRingConfig(type);
   const animatedColors = getAnimatedColors(type, 0); // We'll update this in useFrame
 
+  const handleClick = (event: any) => {
+    event.stopPropagation();
+    if (onPlanetClick) {
+      onPlanetClick({ name, type, color });
+    }
+  };
+
+  const handlePointerOver = (event: any) => {
+    event.stopPropagation();
+    setHovered(true);
+    document.body.style.cursor = 'pointer';
+  };
+
+  const handlePointerOut = (event: any) => {
+    event.stopPropagation();
+    setHovered(false);
+    document.body.style.cursor = 'auto';
+  };
+
   return (
     <>
       {/* Main Planet Body with Animated Gradient */}
-      <mesh ref={meshRef} position={position}>
+      <mesh 
+        ref={meshRef}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
         <sphereGeometry args={[size, 64, 64]} />
         <meshPhysicalMaterial
           map={texture}
@@ -347,6 +374,19 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       ))}
+
+      {/* Hover Effect */}
+      {hovered && (
+        <mesh position={position}>
+          <sphereGeometry args={[size * 1.2, 32, 32]} />
+          <meshBasicMaterial
+            color={color}
+            transparent
+            opacity={0.1}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      )}
     </>
   );
 } 
