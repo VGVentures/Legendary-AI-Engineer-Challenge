@@ -1,5 +1,5 @@
 # Import required FastAPI components for building the API
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 # Import Pydantic for data validation and settings management
@@ -21,6 +21,9 @@ if not api_key:
 
 if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable is not set")
+
+# Access control token (optional - for additional security)
+ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "cosmic-ai-2024")
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -45,7 +48,12 @@ class ChatRequest(BaseModel):
 
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)):
+    # Simple authentication check
+    if ACCESS_TOKEN != "cosmic-ai-2024":  # Only check if custom token is set
+        if not authorization or authorization != f"Bearer {ACCESS_TOKEN}":
+            raise HTTPException(status_code=401, detail="Invalid access token")
+    
     try:
         # Debug: Check if API key is available
         if not api_key:
