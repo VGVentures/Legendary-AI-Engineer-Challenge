@@ -38,16 +38,37 @@ const celestialEntities: CelestialEntity[] = [
   { id: 'sahara-sands', position: [-5.7, 0, -1.9] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
 ];
 
-function SpaceEnvironment() {
+function SpaceEnvironment({ onEntityClick }: { onEntityClick: (entity: CelestialEntity) => void }) {
   const groupRef = useRef<THREE.Group>(null);
-  const [selectedEntity, setSelectedEntity] = useState<CelestialEntity | null>(null);
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.rotation.y += 0.001;
     }
   });
+
+  return (
+    <group ref={groupRef}>
+      {celestialEntities.map((entity) => (
+        <Planet
+          key={entity.id}
+          position={entity.position}
+          size={entity.size}
+          color={entity.color}
+          type={entity.type}
+          name={entity.name}
+          entityType={entity.entityType}
+          onPlanetClick={() => onEntityClick(entity)}
+        />
+      ))}
+    </group>
+  );
+}
+
+export default function SpaceScene() {
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [selectedEntity, setSelectedEntity] = useState<CelestialEntity | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleEntityClick = (entityData: CelestialEntity) => {
     setSelectedEntity(entityData);
@@ -58,41 +79,6 @@ function SpaceEnvironment() {
     setIsChatOpen(false);
     setSelectedEntity(null);
   };
-
-  return (
-    <>
-      <group ref={groupRef}>
-        {celestialEntities.map((entity) => (
-          <Planet
-            key={entity.id}
-            position={entity.position}
-            size={entity.size}
-            color={entity.color}
-            type={entity.type}
-            name={entity.name}
-            entityType={entity.entityType}
-            onPlanetClick={() => handleEntityClick(entity)}
-          />
-        ))}
-      </group>
-
-      {/* Chat Interface */}
-      {selectedEntity && (
-        <ChatInterface
-          isOpen={isChatOpen}
-          onClose={handleCloseChat}
-          planetName={selectedEntity.name}
-          planetType={selectedEntity.type}
-          planetColor={selectedEntity.color}
-          entityType={selectedEntity.entityType}
-        />
-      )}
-    </>
-  );
-}
-
-export default function SpaceScene() {
-  const [showInstructions, setShowInstructions] = useState(true);
 
   return (
     <div className="w-full h-screen relative">
@@ -114,7 +100,7 @@ export default function SpaceScene() {
           speed={1}
         />
         
-        <SpaceEnvironment />
+        <SpaceEnvironment onEntityClick={handleEntityClick} />
         
         <OrbitControls 
           enablePan={true}
@@ -124,6 +110,18 @@ export default function SpaceScene() {
           minDistance={5}
         />
       </Canvas>
+
+      {/* Chat Interface - Now outside Canvas context */}
+      {selectedEntity && (
+        <ChatInterface
+          isOpen={isChatOpen}
+          onClose={handleCloseChat}
+          planetName={selectedEntity.name}
+          planetType={selectedEntity.type}
+          planetColor={selectedEntity.color}
+          entityType={selectedEntity.entityType}
+        />
+      )}
 
       {/* Instructions Overlay */}
       {showInstructions && (
