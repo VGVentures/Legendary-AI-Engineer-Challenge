@@ -1255,8 +1255,7 @@ INTERPLANETARY RELATIONSHIPS:
             body: JSON.stringify({
               developer_message: systemPrompt,
               user_message: userMessage,
-              model: "gpt-4.1-mini",
-              api_key: process.env.NEXT_PUBLIC_OPENAI_API_KEY || "your-api-key-here"
+              model: "gpt-4.1-mini"
             })
           });
 
