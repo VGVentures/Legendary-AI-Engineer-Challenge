@@ -424,8 +424,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   // Drastically slowed down particle animations for better performance
-  const ultraSlowSpeed = 0.01;  // 10x slower than before
-  const verySlowSpeed = 0.02;   // 5x slower than before
+  const ultraSlowSpeed = 0.001;  // 100x slower than before
+  const verySlowSpeed = 0.002;   // 50x slower than before
 
   // Simplified animation with better error handling
   useFrame((state) => {
@@ -443,31 +443,31 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         }
       }
 
-      // Animate sparkles with very slow speed
+      // Animate sparkles with extremely slow speed
       sparkleRefs.current.forEach((sparkle, index) => {
         if (sparkle) {
-          const speed = verySlowSpeed + Math.sin(index * 0.8) * 0.005; // Reduced variation
+          const speed = verySlowSpeed + Math.sin(index * 0.8) * 0.0005; // Much reduced variation
           const radius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
           const direction = index % 2 === 0 ? 1 : -1;
           const angle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
           
           sparkle.position.x = Math.cos(angle) * radius;
           sparkle.position.z = Math.sin(angle) * radius;
-          sparkle.position.y = Math.sin(time * 0.1 + index * 0.1) * size * 0.05; // Slowed down vertical movement
+          sparkle.position.y = Math.sin(time * 0.01 + index * 0.1) * size * 0.05; // Much slower vertical movement
         }
       });
 
       // Animate regular particles with ultra slow speed
       particleRefs.current.forEach((particle, index) => {
         if (particle) {
-          const speed = ultraSlowSpeed + Math.sin(index * 0.9) * 0.005; // Reduced variation
+          const speed = ultraSlowSpeed + Math.sin(index * 0.9) * 0.0005; // Much reduced variation
           const radius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
           const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
           const angle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
           
           particle.position.x = Math.cos(angle) * radius;
           particle.position.z = Math.sin(angle) * radius;
-          particle.position.y = Math.sin(time * 0.05 + index * 0.05) * size * 0.02; // Slowed down vertical movement
+          particle.position.y = Math.sin(time * 0.005 + index * 0.05) * size * 0.02; // Much slower vertical movement
         }
       });
     } catch (error) {
