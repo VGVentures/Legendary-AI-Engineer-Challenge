@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface ChatInterfaceProps {
   isOpen: boolean;
@@ -154,18 +154,40 @@ export default function ChatInterface({
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const personality = getEntityPersonality(entityType, planetName, planetType);
   const styling = getEntityStyling(entityType, planetColor);
 
+  // Reset messages when chat opens with a new entity
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      // Initial greeting
-      setTimeout(() => {
+    if (isOpen) {
+      setMessages([]);
+      setInputValue('');
+      setIsTyping(false);
+      
+      // Clear any existing typing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      // Initial greeting with a slight delay
+      const greetingTimeout = setTimeout(() => {
         setMessages([{ text: personality.greeting, isUser: false, timestamp: new Date() }]);
       }, 500);
+      
+      return () => clearTimeout(greetingTimeout);
     }
-  }, [isOpen, messages.length, personality.greeting]);
+  }, [isOpen, planetName, planetType, entityType]); // Removed personality.greeting from dependencies
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -177,7 +199,7 @@ export default function ChatInterface({
     }
   }, [isOpen]);
 
-  const generateResponse = (userMessage: string) => {
+  const generateResponse = useCallback((userMessage: string) => {
     const responses = personality.responses;
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     
@@ -204,10 +226,10 @@ export default function ChatInterface({
     }
     
     return contextualResponse;
-  };
+  }, [personality.responses, planetName, planetType, entityType]);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  const handleSendMessage = useCallback(async () => {
+    if (!inputValue.trim() || isTyping) return;
 
     const userMessage = inputValue.trim();
     setInputValue('');
@@ -218,19 +240,30 @@ export default function ChatInterface({
     // Simulate typing
     setIsTyping(true);
     
+    // Clear any existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
     // Generate response after a delay
-    setTimeout(() => {
-      const response = generateResponse(userMessage);
-      setMessages(prev => [...prev, { text: response, isUser: false, timestamp: new Date() }]);
-      setIsTyping(false);
+    typingTimeoutRef.current = setTimeout(() => {
+      try {
+        const response = generateResponse(userMessage);
+        setMessages(prev => [...prev, { text: response, isUser: false, timestamp: new Date() }]);
+      } catch (error) {
+        console.error('Error generating response:', error);
+        setMessages(prev => [...prev, { text: "I apologize, but I seem to be experiencing a cosmic disturbance. Please try again.", isUser: false, timestamp: new Date() }]);
+      } finally {
+        setIsTyping(false);
+      }
     }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
-  };
+  }, [inputValue, isTyping, generateResponse]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isTyping) {
       handleSendMessage();
     }
-  };
+  }, [handleSendMessage, isTyping]);
 
   if (!isOpen) return null;
 
@@ -270,7 +303,7 @@ export default function ChatInterface({
         <div className="flex-1 p-4 overflow-y-auto space-y-4 max-h-[400px]">
           {messages.map((message, index) => (
             <div
-              key={index}
+              key={`${message.timestamp.getTime()}-${index}`}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
@@ -321,11 +354,12 @@ export default function ChatInterface({
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask me about the cosmos..."
-              className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+              disabled={isTyping}
+              className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-600 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
             />
             <button
               onClick={handleSendMessage}
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() || isTyping}
               className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
