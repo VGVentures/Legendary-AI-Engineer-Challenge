@@ -349,7 +349,7 @@ export default function ChatInterface({
         style={{
           background: styling.background,
           border: `2px solid ${styling.borderColor} !important`,
-          boxShadow: `0 0 30px ${styling.glowColor}40`
+          boxShadow: `0 0 15px ${styling.glowColor}20`
         }}
       >
         {/* Header */}
@@ -406,8 +406,8 @@ export default function ChatInterface({
                     ? `linear-gradient(135deg, ${styling.accentColor} 0%, ${styling.borderColor} 100%)`
                     : 'rgba(31, 41, 55, 0.9)',
                   boxShadow: message.isUser 
-                    ? styling.messageGlow
-                    : styling.messageGlow
+                    ? `0 2px 8px ${styling.glowColor}15`
+                    : `0 2px 8px ${styling.glowColor}10`
                 }}
               >
                 <p className="text-sm">{message.text}</p>
@@ -424,7 +424,7 @@ export default function ChatInterface({
                 className="text-gray-100 p-3 rounded-2xl"
                 style={{ 
                   background: 'rgba(31, 41, 55, 0.9)',
-                  boxShadow: styling.messageGlow 
+                  boxShadow: `0 2px 8px ${styling.glowColor}10`
                 }}
               >
                 <div className="flex space-x-1">
@@ -478,7 +478,7 @@ export default function ChatInterface({
               className="px-4 py-2 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               style={{
                 background: `linear-gradient(135deg, ${styling.accentColor} 0%, ${styling.borderColor} 100%)`,
-                boxShadow: styling.messageGlow
+                boxShadow: `0 2px 8px ${styling.glowColor}15`
               }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
