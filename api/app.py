@@ -10,8 +10,17 @@ import os
 from typing import Optional
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables - try multiple approaches for Vercel
 load_dotenv()
+
+# For Vercel deployment, also try loading from system environment
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    # Fallback for Vercel environment
+    api_key = os.environ.get("OPENAI_API_KEY")
+
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -38,8 +47,12 @@ class ChatRequest(BaseModel):
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     try:
+        # Debug: Check if API key is available
+        if not api_key:
+            raise HTTPException(status_code=500, detail="API key not configured")
+        
         # Initialize OpenAI client with the API key from environment variable
-        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        client = OpenAI(api_key=api_key)
         
         # Create an async generator function for streaming responses
         async def generate():
