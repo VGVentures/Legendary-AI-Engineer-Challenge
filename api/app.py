@@ -8,6 +8,10 @@ from pydantic import BaseModel
 from openai import OpenAI
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
