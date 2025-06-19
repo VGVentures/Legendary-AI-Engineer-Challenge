@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
@@ -38,48 +38,29 @@ const celestialEntities: CelestialEntity[] = [
   { id: 'sahara-sands', position: [-5.7, 0, -1.9] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
 ];
 
-// Camera controller component
-function CameraController({ targetPosition }: { targetPosition: [number, number, number] | null }) {
+// Camera animation component
+function CameraController({ targetPlanet, isAnimating }: { targetPlanet: CelestialEntity | null, isAnimating: boolean }) {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
-
+  
   useFrame(() => {
-    if (targetPosition && controlsRef.current) {
-      const [x, y, z] = targetPosition;
-      const target = new THREE.Vector3(x, y, z);
+    if (targetPlanet && isAnimating) {
+      // Calculate intimate zoom position (close to the planet)
+      const zoomDistance = targetPlanet.size * 3; // Intimate distance based on planet size
+      const targetPosition = new THREE.Vector3(...targetPlanet.position);
       
-      // Create a consistent, good viewing angle for all planets
-      const zoomDistance = 4;
-      const angleOffset = Math.PI / 6; // 30 degrees for a nice viewing angle
-      
-      // Calculate camera position with consistent angle
-      const newCameraPosition = new THREE.Vector3(
-        x + Math.sin(angleOffset) * zoomDistance,
-        y + 1.5, // Slight elevation for good view
-        z + Math.cos(angleOffset) * zoomDistance
-      );
-      
-      // Smoothly animate camera to new position
-      camera.position.lerp(newCameraPosition, 0.05);
-      
-      // Look directly at the planet center
-      camera.lookAt(target);
+      // Smoothly animate camera to planet position
+      camera.position.lerp(targetPosition.clone().add(new THREE.Vector3(0, 0, zoomDistance)), 0.02);
+      camera.lookAt(targetPosition);
       
       // Update controls target
-      controlsRef.current.target.lerp(target, 0.05);
+      if (controlsRef.current) {
+        controlsRef.current.target.lerp(targetPosition, 0.02);
+      }
     }
   });
-
-  return (
-    <OrbitControls 
-      ref={controlsRef}
-      enablePan={true}
-      enableZoom={true}
-      enableRotate={true}
-      maxDistance={50}
-      minDistance={2} // Allow closer zoom
-    />
-  );
+  
+  return null;
 }
 
 function SpaceEnvironment({ onEntityClick }: { onEntityClick: (entity: CelestialEntity) => void }) {
@@ -113,20 +94,23 @@ export default function SpaceScene() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [selectedEntity, setSelectedEntity] = useState<CelestialEntity | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [targetPosition, setTargetPosition] = useState<[number, number, number] | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const handleEntityClick = (entityData: CelestialEntity) => {
+  const handleEntityClick = useCallback((entityData: CelestialEntity) => {
     setSelectedEntity(entityData);
+    setIsAnimating(true);
     setIsChatOpen(true);
-    // Set target position for camera zoom
-    setTargetPosition(entityData.position);
-  };
+    
+    // Stop animation after a delay to allow camera to settle
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 2000);
+  }, []);
 
   const handleCloseChat = () => {
     setIsChatOpen(false);
     setSelectedEntity(null);
-    // Reset camera position when chat closes
-    setTargetPosition(null);
+    setIsAnimating(false);
   };
 
   return (
@@ -151,7 +135,15 @@ export default function SpaceScene() {
         
         <SpaceEnvironment onEntityClick={handleEntityClick} />
         
-        <CameraController targetPosition={targetPosition} />
+        <CameraController targetPlanet={selectedEntity} isAnimating={isAnimating} />
+        
+        <OrbitControls 
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          maxDistance={50}
+          minDistance={5}
+        />
       </Canvas>
 
       {/* Chat Interface - Now outside Canvas context */}
