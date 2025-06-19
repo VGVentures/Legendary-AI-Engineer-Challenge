@@ -275,7 +275,6 @@ const getAnimatedColors = (entityType: string, type: string, time: number) => {
 
 export default function Planet({ position, size, color, type = 'terrestrial', name, entityType = 'planet', onPlanetClick }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   const texture = useEntityTexture(entityType, type, color, size);
@@ -401,7 +400,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         <>
           {/* Star corona */}
           {[1.2, 1.4, 1.6, 1.8, 2.0].map((scale, index) => (
-            <mesh key={`corona-${index}`} position={position}>
+            <mesh key={`corona-${index}`}>
               <sphereGeometry args={[size * scale, 32, 32]} />
               <meshBasicMaterial
                 color={animatedColors[index % animatedColors.length]}
@@ -420,7 +419,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             const z = Math.sin(angle) * size * 2;
             
             return (
-              <mesh key={`flare-${i}`} position={[position[0] + x, position[1], position[2] + z]}>
+              <mesh key={`flare-${i}`} position={[x, 0, z]}>
                 <planeGeometry args={[size * 0.5, size * 2]} />
                 <meshBasicMaterial
                   color={animatedColors[i % animatedColors.length]}
@@ -446,7 +445,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             const y = (Math.random() - 0.5) * size * 0.5;
             
             return (
-              <mesh key={`cloud-${i}`} position={[position[0] + x, position[1] + y, position[2] + z]}>
+              <mesh key={`cloud-${i}`} position={[x, y, z]}>
                 <sphereGeometry args={[size * 0.3, 16, 16]} />
                 <meshBasicMaterial
                   color={animatedColors[i % animatedColors.length]}
@@ -463,7 +462,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       return (
         <>
           {/* Event horizon */}
-          <mesh position={position}>
+          <mesh>
             <sphereGeometry args={[size * 1.1, 32, 32]} />
             <meshBasicMaterial
               color="#000000"
@@ -474,7 +473,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           </mesh>
           
           {/* Accretion disk */}
-          <mesh position={position} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
             <ringGeometry args={[size * 1.2, size * 2.5, 64]} />
             <meshBasicMaterial
               color="#FFD700"
@@ -490,7 +489,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       return (
         <>
           {/* Comet tail */}
-          <mesh position={[position[0] - size * 2, position[1], position[2]]}>
+          <mesh position={[-size * 2, 0, 0]}>
             <cylinderGeometry args={[0, size * 0.5, size * 4, 8]} />
             <meshBasicMaterial
               color={color}
@@ -508,7 +507,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   return (
-    <>
+    <group position={position}>
       {/* Main Entity Body */}
       <mesh 
         ref={meshRef}
@@ -534,57 +533,83 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Special Effects */}
       {renderSpecialEffects()}
 
-      {/* Enhanced Atmospheric Glow */}
-      {[1.1, 1.3, 1.5, 1.7, 1.9, 2.1, 2.3].map((scale, index) => (
-        <mesh key={`atmosphere-${index}`} position={position}>
+      {/* Reduced Atmospheric Glow */}
+      {[1.1, 1.3, 1.5].map((scale, index) => (
+        <mesh key={`atmosphere-${index}`}>
           <sphereGeometry args={[size * scale, 32, 32]} />
           <meshBasicMaterial
             color={animatedColors[index % animatedColors.length]}
             transparent
-            opacity={0.3 - index * 0.04}
+            opacity={0.15 - index * 0.05}
             blending={THREE.AdditiveBlending}
             side={THREE.BackSide}
           />
         </mesh>
       ))}
 
-      {/* Luminous Core */}
-      {[0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].map((scale, index) => (
-        <mesh key={`core-${index}`} position={position}>
-          <sphereGeometry args={[size * scale, 16 + index * 2, 16 + index * 2]} />
+      {/* Enhanced Luminous Core - creates the vibrant yellow center point */}
+      {[0.15, 0.25, 0.35, 0.45, 0.6, 0.8, 1.0].map((scale, index) => (
+        <mesh key={`core-${index}`}>
+          <sphereGeometry args={[size * scale, 24 + index * 4, 24 + index * 4]} />
           <meshBasicMaterial
             color={animatedColors[index % animatedColors.length]}
             transparent
-            opacity={1.0 - index * 0.1}
+            opacity={0.9 - index * 0.12}
             blending={THREE.AdditiveBlending}
           />
         </mesh>
       ))}
 
-      {/* Core Energy Particles */}
-      {Array.from({ length: 50 }, (_, i) => {
-        const angle = (i / 50) * Math.PI * 2;
-        const radius = size * 0.4 + Math.random() * size * 0.3;
+      {/* Pulsing Core Effect */}
+      {[0.2, 0.4, 0.6].map((scale, index) => (
+        <mesh key={`pulse-${index}`}>
+          <sphereGeometry args={[size * scale, 32, 32]} />
+          <meshBasicMaterial
+            color={animatedColors[0]}
+            transparent
+            opacity={0.4 - index * 0.1}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+
+      {/* Enhanced Core Energy Particles - more vibrant center point effect */}
+      {Array.from({ length: 35 }, (_, i) => {
+        const angle = (i / 35) * Math.PI * 2;
+        const radius = size * 0.3 + Math.random() * size * 0.4;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.2;
+        const y = (Math.random() - 0.5) * size * 0.3;
         
         return (
-          <mesh key={`core-particle-${i}`} position={[position[0] + x, position[1] + y, position[2] + z]}>
-            <sphereGeometry args={[0.015, 6, 6]} />
+          <mesh key={`core-particle-${i}`} position={[x, y, z]}>
+            <sphereGeometry args={[0.02 + Math.random() * 0.01, 8, 8]} />
             <meshBasicMaterial
               color={animatedColors[i % animatedColors.length]}
               transparent
-              opacity={0.9}
+              opacity={0.8 + Math.random() * 0.2}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
         );
       })}
 
+      {/* Inner Core Glow */}
+      {[0.1, 0.15, 0.2].map((scale, index) => (
+        <mesh key={`inner-glow-${index}`}>
+          <sphereGeometry args={[size * scale, 16, 16]} />
+          <meshBasicMaterial
+            color="#FFFF00"
+            transparent
+            opacity={1.0 - index * 0.3}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+
       {/* Ring System */}
       {[1.5, 1.8, 2.1, 2.4].map((ringScale, ringIndex) => (
-        <mesh key={`ring-${ringIndex}`} position={position} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[size * ringScale, size * (ringScale + 0.1), 64]} />
           <meshBasicMaterial
             color={ringConfig.colors[ringIndex % ringConfig.colors.length]}
@@ -605,7 +630,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         const y = (Math.random() - 0.5) * size * 0.1;
         
         return (
-          <mesh key={`particle-${i}`} position={[position[0] + x, position[1] + y, position[2] + z]}>
+          <mesh key={`particle-${i}`} position={[x, y, z]}>
             <sphereGeometry args={[0.02, 8, 8]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
@@ -626,7 +651,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         const y = (Math.random() - 0.5) * size * 0.2;
         
         return (
-          <mesh key={`sparkle-${i}`} position={[position[0] + x, position[1] + y, position[2] + z]}>
+          <mesh key={`sparkle-${i}`} position={[x, y, z]}>
             <sphereGeometry args={[0.01, 6, 6]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
@@ -638,14 +663,14 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         );
       })}
 
-      {/* Enhanced Glow Spheres */}
-      {[0.7, 0.9, 1.1, 1.3, 1.5].map((glowScale, glowIndex) => (
-        <mesh key={`glow-${glowIndex}`} position={position}>
+      {/* Reduced Enhanced Glow Spheres */}
+      {[0.7, 0.9, 1.1].map((glowScale, glowIndex) => (
+        <mesh key={`glow-${glowIndex}`}>
           <sphereGeometry args={[size * glowScale, 24, 24]} />
           <meshBasicMaterial
             color={animatedColors[glowIndex % animatedColors.length]}
             transparent
-            opacity={0.4 - glowIndex * 0.05}
+            opacity={0.2 - glowIndex * 0.05}
             blending={THREE.AdditiveBlending}
             side={THREE.BackSide}
           />
@@ -656,7 +681,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {hovered && (
         <>
           {/* Outer Hover Ring */}
-          <mesh position={position} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
             <ringGeometry args={[size * 1.4, size * 1.6, 64]} />
             <meshBasicMaterial
               color={color}
@@ -667,7 +692,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           </mesh>
           
           {/* Hover Glow */}
-          <mesh position={position}>
+          <mesh>
             <sphereGeometry args={[size * 1.3, 32, 32]} />
             <meshBasicMaterial
               color={color}
@@ -681,7 +706,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Click Animation Effect */}
       {clicked && (
-        <mesh position={position}>
+        <mesh>
           <sphereGeometry args={[size * 1.5, 32, 32]} />
           <meshBasicMaterial
             color={color}
@@ -691,6 +716,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       )}
-    </>
+    </group>
   );
 } 
