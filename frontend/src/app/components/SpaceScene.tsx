@@ -400,8 +400,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              sahara[0] + 0.15, sahara[1] + 0.35, sahara[2] + 0.15,
-              cryo[0] + 0.15, cryo[1] + 0.35, cryo[2] + 0.15
+              sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1,
+              cryo[0] + 0.1, cryo[1] + 0.25, cryo[2] + 0.1
             ])}
             itemSize={3}
           />
@@ -421,8 +421,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              sahara[0] - 0.15, sahara[1] + 0.05, sahara[2] - 0.15,
-              cryo[0] - 0.15, cryo[1] + 0.05, cryo[2] - 0.15
+              sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1,
+              cryo[0] - 0.1, cryo[1] + 0.15, cryo[2] - 0.1
             ])}
             itemSize={3}
           />
@@ -442,8 +442,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              sahara[0] + 0.25, sahara[1] + 0.45, sahara[2] + 0.25,
-              cryo[0] + 0.25, cryo[1] + 0.45, cryo[2] + 0.25
+              sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15,
+              cryo[0] + 0.15, cryo[1] + 0.3, cryo[2] + 0.15
             ])}
             itemSize={3}
           />
@@ -485,8 +485,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              cryo[0] + 0.15, cryo[1] + 0.35, cryo[2] + 0.15,
-              sahara[0] + 0.15, sahara[1] + 0.35, sahara[2] + 0.15
+              cryo[0] + 0.1, cryo[1] + 0.25, cryo[2] + 0.1,
+              sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1
             ])}
             itemSize={3}
           />
@@ -506,8 +506,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              cryo[0] - 0.15, cryo[1] + 0.05, cryo[2] - 0.15,
-              sahara[0] - 0.15, sahara[1] + 0.05, sahara[2] - 0.15
+              cryo[0] - 0.1, cryo[1] + 0.15, cryo[2] - 0.1,
+              sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1
             ])}
             itemSize={3}
           />
@@ -527,8 +527,8 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             attach="attributes-position"
             count={2}
             array={new Float32Array([
-              cryo[0] + 0.25, cryo[1] + 0.45, cryo[2] + 0.25,
-              sahara[0] + 0.25, sahara[1] + 0.45, sahara[2] + 0.25
+              cryo[0] + 0.15, cryo[1] + 0.3, cryo[2] + 0.15,
+              sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15
             ])}
             itemSize={3}
           />
