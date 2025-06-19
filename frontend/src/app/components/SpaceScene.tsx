@@ -66,24 +66,24 @@ function CameraController({
     switch (screenSize) {
       case 'mobile':
         return {
-          maxDistance: isChatOpen ? 6 : 30,
-          minDistance: isChatOpen ? 1.5 : 2,
-          zoomDistance: 2.5,
-          orbitHeight: 1.2
+          maxDistance: isChatOpen ? 4 : 30,
+          minDistance: isChatOpen ? 1.2 : 2,
+          zoomDistance: 1.8,
+          orbitHeight: 1.0
         };
       case 'tablet':
         return {
-          maxDistance: isChatOpen ? 7 : 40,
-          minDistance: isChatOpen ? 2 : 2.5,
-          zoomDistance: 3.5,
-          orbitHeight: 1.3
+          maxDistance: isChatOpen ? 5 : 40,
+          minDistance: isChatOpen ? 1.5 : 2.5,
+          zoomDistance: 2.2,
+          orbitHeight: 1.1
         };
       default: // desktop
         return {
-          maxDistance: isChatOpen ? 8 : 50,
-          minDistance: isChatOpen ? 2 : 3,
-          zoomDistance: 3 + (targetPosition ? 2 : 0),
-          orbitHeight: 1.5
+          maxDistance: isChatOpen ? 6 : 50,
+          minDistance: isChatOpen ? 1.8 : 3,
+          zoomDistance: 2.5,
+          orbitHeight: 1.2
         };
     }
   };
@@ -103,7 +103,7 @@ function CameraController({
       }
       
       // Much more gradual zoom progress - slowed down significantly
-      zoomProgressRef.current = Math.min(zoomProgressRef.current + 0.008, 1); // Reduced from 0.02 to 0.008
+      zoomProgressRef.current = Math.min(zoomProgressRef.current + 0.003, 1); // Reduced from 0.008 to 0.003 for much smoother zoom
       
       // Calculate zoom distance based on planet size and screen size
       const planetSize = getResponsivePlanetPositions(screenSize).find(e => 
@@ -111,15 +111,15 @@ function CameraController({
         e.position[1] === targetPosition[1] && 
         e.position[2] === targetPosition[2]
       )?.size || 0.8;
-      const zoomDistance = cameraSettings.zoomDistance + (planetSize * 1.5);
+      const zoomDistance = cameraSettings.zoomDistance + (planetSize * 0.8); // Reduced multiplier from 1.5 to 0.8 for closer zoom
       
-      // Calculate camera position for zoom
-      const zoomCameraPosition = target.clone().add(new THREE.Vector3(0, cameraSettings.orbitHeight, zoomDistance));
+      // Calculate camera position for zoom - much closer to planet
+      const zoomCameraPosition = target.clone().add(new THREE.Vector3(0, cameraSettings.orbitHeight * 0.7, zoomDistance * 0.6)); // Closer and lower
       
       // Smooth camera movement to zoom position with easing
       if (initialCameraPositionRef.current) {
         // Use easing function for smoother transition
-        const easedProgress = 1 - Math.pow(1 - zoomProgressRef.current, 3); // Cubic ease-out
+        const easedProgress = 1 - Math.pow(1 - zoomProgressRef.current, 4); // Changed from cubic to quartic for even smoother easing
         camera.position.lerpVectors(initialCameraPositionRef.current, zoomCameraPosition, easedProgress);
         controlsRef.current.target.lerpVectors(initialTargetRef.current!, target, easedProgress);
       }
