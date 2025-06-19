@@ -1683,7 +1683,9 @@ INTERPLANETARY RELATIONSHIPS:
                         setMessages(prev => prev.slice(0, -1));
                         if (messages.length > 1) {
                           const userMessage = messages[messages.length - 2];
-                          handleSendMessage(userMessage.text);
+                          // Set the input value and trigger the send
+                          setInputValue(userMessage.text);
+                          setTimeout(() => handleSendMessage(), 100);
                         }
                       } else {
                         handleSendMessage(lastMessage.text);
