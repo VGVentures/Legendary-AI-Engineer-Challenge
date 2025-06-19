@@ -18,12 +18,24 @@ interface CelestialEntity {
 }
 
 const celestialEntities: CelestialEntity[] = [
-  // Original 5 planets - Sahara Sands at center with yellow core
-  { id: 'terra-nova', position: [6, 0, 0] as [number, number, number], size: 0.8, color: '#4A90E2', type: 'terrestrial', name: 'Terra Nova', entityType: 'planet' },
-  { id: 'nebula-prime', position: [-8, 0, 0] as [number, number, number], size: 1.2, color: '#FF6B6B', type: 'gas', name: 'Nebula Prime', entityType: 'planet' },
-  { id: 'cryo-sphere', position: [3, 0, 0] as [number, number, number], size: 0.6, color: '#87CEEB', type: 'ice', name: 'Cryo Sphere', entityType: 'planet' },
-  { id: 'marina-deep', position: [-5, 0, 0] as [number, number, number], size: 0.9, color: '#20B2AA', type: 'ocean', name: 'Marina Deep', entityType: 'planet' },
-  { id: 'sahara-sands', position: [0, 0, 0] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
+  // 5 planets evenly spaced in a circle around the center
+  // Each planet is positioned at 72 degrees apart (360° / 5 = 72°)
+  // All planets are at the same distance (6 units) from center for visual balance
+  
+  // Terra Nova - at 0° (top)
+  { id: 'terra-nova', position: [0, 0, -6] as [number, number, number], size: 0.8, color: '#4A90E2', type: 'terrestrial', name: 'Terra Nova', entityType: 'planet' },
+  
+  // Nebula Prime - at 72° (top-right)
+  { id: 'nebula-prime', position: [5.7, 0, -1.9] as [number, number, number], size: 1.2, color: '#FF6B6B', type: 'gas', name: 'Nebula Prime', entityType: 'planet' },
+  
+  // Cryo Sphere - at 144° (bottom-right)
+  { id: 'cryo-sphere', position: [3.5, 0, 4.9] as [number, number, number], size: 0.6, color: '#87CEEB', type: 'ice', name: 'Cryo Sphere', entityType: 'planet' },
+  
+  // Marina Deep - at 216° (bottom-left)
+  { id: 'marina-deep', position: [-3.5, 0, 4.9] as [number, number, number], size: 0.9, color: '#20B2AA', type: 'ocean', name: 'Marina Deep', entityType: 'planet' },
+  
+  // Sahara Sands - at 288° (top-left)
+  { id: 'sahara-sands', position: [-5.7, 0, -1.9] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
 ];
 
 function SpaceEnvironment() {
