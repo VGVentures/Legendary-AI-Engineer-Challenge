@@ -2,7 +2,6 @@
 
 import React, { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface PlanetProps {
@@ -294,36 +293,36 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       return {
         colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
         opacity: 0.9,
-        particleCount: 60, // Reduced from 120
-        sparkleCount: 30   // Reduced from 60
+        particleCount: 12, // Drastically reduced from 60
+        sparkleCount: 6    // Drastically reduced from 30
       };
     } else if (entityType === 'nebula') {
       return {
         colors: [color, color + '80', color + '40', color + '20'],
         opacity: 0.7,
-        particleCount: 40, // Reduced from 80
-        sparkleCount: 20   // Reduced from 40
+        particleCount: 8,  // Drastically reduced from 40
+        sparkleCount: 4    // Drastically reduced from 20
       };
     } else if (entityType === 'blackhole') {
       return {
         colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
         opacity: 0.8,
-        particleCount: 50, // Reduced from 100
-        sparkleCount: 25   // Reduced from 50
+        particleCount: 10, // Drastically reduced from 50
+        sparkleCount: 5    // Drastically reduced from 25
       };
     } else if (entityType === 'comet') {
       return {
         colors: ['#FFFFFF', '#F0E68C', '#E6E6FA', '#FFFFFF'],
         opacity: 0.6,
-        particleCount: 30, // Reduced from 60
-        sparkleCount: 15   // Reduced from 30
+        particleCount: 6,  // Drastically reduced from 30
+        sparkleCount: 3    // Drastically reduced from 15
       };
     } else if (entityType === 'asteroid') {
       return {
         colors: ['#8B4513', '#A0522D', '#CD853F', '#8B4513'],
         opacity: 0.4,
-        particleCount: 20, // Reduced from 40
-        sparkleCount: 10   // Reduced from 20
+        particleCount: 4,  // Drastically reduced from 20
+        sparkleCount: 2    // Drastically reduced from 10
       };
     } else {
       // Enhanced Planet rings with multiple layers and realistic characteristics
@@ -339,8 +338,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500', '#CD853F'],
           opacity: 0.8,
-          particleCount: 75,  // Reduced from 150
-          sparkleCount: 38   // Reduced from 75
+          particleCount: 15, // Drastically reduced from 75
+          sparkleCount: 8    // Drastically reduced from 38
         },
         ice: {
           // Uranus-like rings with icy particles
@@ -352,8 +351,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#87CEEB', '#B0E0E6', '#E0F6FF', '#F0F8FF'],
           opacity: 0.6,
-          particleCount: 50,  // Reduced from 100
-          sparkleCount: 25   // Reduced from 50
+          particleCount: 10, // Drastically reduced from 50
+          sparkleCount: 5    // Drastically reduced from 25
         },
         ocean: {
           // Neptune-like rings with water ice
@@ -365,8 +364,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#00BFFF', '#1E90FF', '#4169E1', '#0000CD'],
           opacity: 0.7,
-          particleCount: 60,  // Reduced from 120
-          sparkleCount: 30   // Reduced from 60
+          particleCount: 12, // Drastically reduced from 60
+          sparkleCount: 6    // Drastically reduced from 30
         },
         desert: {
           // Mars-like rings with dust and sand
@@ -378,8 +377,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#D2691E', '#CD853F', '#F4A460', '#DEB887'],
           opacity: 0.5,
-          particleCount: 40,  // Reduced from 80
-          sparkleCount: 20   // Reduced from 40
+          particleCount: 8,   // Drastically reduced from 40
+          sparkleCount: 4     // Drastically reduced from 20
         },
         terrestrial: {
           // Earth-like rings (rare but possible)
@@ -390,8 +389,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#32CD32', '#90EE90', '#98FB98'],
           opacity: 0.4,
-          particleCount: 30,  // Reduced from 60
-          sparkleCount: 15   // Reduced from 30
+          particleCount: 6,   // Drastically reduced from 30
+          sparkleCount: 3     // Drastically reduced from 15
         }
       };
       
@@ -424,6 +423,10 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
     setHovered(false);
   };
 
+  // Drastically slowed down particle animations for better performance
+  const ultraSlowSpeed = 0.01;  // 10x slower than before
+  const verySlowSpeed = 0.02;   // 5x slower than before
+
   // Simplified animation with better error handling
   useFrame((state) => {
     try {
@@ -440,35 +443,31 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         }
       }
 
-      // Simplified particle animations - reduced complexity
-      const slowSpeed = 0.1;
-      const mediumSpeed = 0.2;
-
-      // Animate sparkles with medium speed
+      // Animate sparkles with very slow speed
       sparkleRefs.current.forEach((sparkle, index) => {
         if (sparkle) {
-          const speed = mediumSpeed + Math.sin(index * 0.8) * 0.02;
+          const speed = verySlowSpeed + Math.sin(index * 0.8) * 0.005; // Reduced variation
           const radius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
           const direction = index % 2 === 0 ? 1 : -1;
           const angle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
           
           sparkle.position.x = Math.cos(angle) * radius;
           sparkle.position.z = Math.sin(angle) * radius;
-          sparkle.position.y = Math.sin(time * 0.3 + index * 0.1) * size * 0.05;
+          sparkle.position.y = Math.sin(time * 0.1 + index * 0.1) * size * 0.05; // Slowed down vertical movement
         }
       });
 
-      // Animate regular particles with slow speed
+      // Animate regular particles with ultra slow speed
       particleRefs.current.forEach((particle, index) => {
         if (particle) {
-          const speed = slowSpeed + Math.sin(index * 0.9) * 0.02;
+          const speed = ultraSlowSpeed + Math.sin(index * 0.9) * 0.005; // Reduced variation
           const radius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
           const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
           const angle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
           
           particle.position.x = Math.cos(angle) * radius;
           particle.position.z = Math.sin(angle) * radius;
-          particle.position.y = Math.sin(time * 0.2 + index * 0.05) * size * 0.02;
+          particle.position.y = Math.sin(time * 0.05 + index * 0.05) * size * 0.02; // Slowed down vertical movement
         }
       });
     } catch (error) {
@@ -505,9 +504,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             </mesh>
           ))}
           
-          {/* Star flares */}
-          {Array.from({ length: 8 }, (_, i) => {
-            const angle = (i / 8) * Math.PI * 2;
+          {/* Star flares - reduced count for performance */}
+          {Array.from({ length: 4 }, (_, i) => { // Reduced from 8 to 4
+            const angle = (i / 4) * Math.PI * 2;
             const x = Math.cos(angle) * size * 2;
             const z = Math.sin(angle) * size * 2;
             
@@ -529,9 +528,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
     } else if (entityType === 'nebula') {
       return (
         <>
-          {/* Nebula clouds */}
-          {Array.from({ length: 15 }, (_, i) => {
-            const angle = (i / 15) * Math.PI * 2;
+          {/* Nebula clouds - reduced count for performance */}
+          {Array.from({ length: 6 }, (_, i) => { // Reduced from 15 to 6
+            const angle = (i / 6) * Math.PI * 2;
             const radius = size * 1.5 + Math.random() * size;
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
@@ -666,9 +665,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         </mesh>
       ))}
 
-      {/* Enhanced Core Energy Particles - more vibrant center point effect */}
-      {Array.from({ length: 35 }, (_, i) => {
-        const angle = (i / 35) * Math.PI * 2;
+      {/* Enhanced Core Energy Particles - reduced count for performance */}
+      {Array.from({ length: 8 }, (_, i) => { // Reduced from 35 to 8
+        const angle = (i / 8) * Math.PI * 2;
         const radius = size * 0.3 + Math.random() * size * 0.4;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
@@ -867,17 +866,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       )}
-
-      {/* Planet Name Label */}
-      <Text
-        position={[0, size * 1.1, 0]}
-        fontSize={0.5}
-        color={animatedColors[0]}
-        anchorX="center"
-        anchorY="top"
-      >
-        {name}
-      </Text>
     </group>
   );
 } 
