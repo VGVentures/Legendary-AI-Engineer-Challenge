@@ -393,6 +393,26 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     return points;
   };
 
+  // Calculate offset laser path for parallel beams
+  const createOffsetLaserPath = (from: [number, number, number], to: [number, number, number], offset: [number, number, number] = [0.2, 0.1, 0.2]) => {
+    const start = [from[0] + offset[0], from[1] + offset[1], from[2] + offset[2]];
+    const end = [to[0] + offset[0], to[1] + offset[1], to[2] + offset[2]];
+    
+    // Create curved path with multiple points
+    const points = [];
+    const segments = 15;
+    
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const x = start[0] + (end[0] - start[0]) * t;
+      const y = start[1] + (end[1] - start[1]) * t + Math.sin(t * Math.PI) * 0.5;
+      const z = start[2] + (end[2] - start[2]) * t;
+      points.push(x, y, z);
+    }
+    
+    return points;
+  };
+
   return (
     <group ref={groupRef}>
       {/* Crystal Peak fires multiple pink lasers at Sahara Sands */}
@@ -467,6 +487,43 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
                 color="#ff69b4" 
                 transparent 
                 opacity={offensiveIntensity * 0.8}
+              />
+            </mesh>
+          ))}
+          
+          {/* Offset parallel laser beam for Crystal Peak */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={16}
+                array={new Float32Array(createOffsetLaserPath(crystal, sahara, [-0.25, -0.1, -0.25]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff1493" 
+              transparent 
+              opacity={flicker * offensiveIntensity * 0.9}
+              linewidth={18}
+            />
+          </line>
+          
+          {/* Energy particles along the offset beam */}
+          {Array.from({ length: 7 }, (_, i) => (
+            <mesh 
+              key={`crystal-offset-${i}`}
+              position={[
+                crystal[0] - 0.25 + (sahara[0] - 0.25 - (crystal[0] - 0.25)) * (i / 7),
+                crystal[1] - 0.1 + (sahara[1] - 0.1 - (crystal[1] - 0.1)) * (i / 7) + Math.sin((i / 7) * Math.PI) * 0.5,
+                crystal[2] - 0.25 + (sahara[2] - 0.25 - (crystal[2] - 0.25)) * (i / 7)
+              ]}
+            >
+              <sphereGeometry args={[0.18, 8, 8]} />
+              <meshBasicMaterial 
+                color="#ff1493" 
+                transparent 
+                opacity={offensiveIntensity * 0.75}
               />
             </mesh>
           ))}
@@ -603,6 +660,43 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               linewidth={12}
             />
           </line>
+          
+          {/* Offset parallel laser beam */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={16}
+                array={new Float32Array(createOffsetLaserPath(sahara, crystal, [0.3, 0.15, 0.3]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff6b35" 
+              transparent 
+              opacity={flicker * defensiveIntensity * 0.8}
+              linewidth={16}
+            />
+          </line>
+          
+          {/* Energy particles along the offset beam */}
+          {Array.from({ length: 6 }, (_, i) => (
+            <mesh 
+              key={`offset-${i}`}
+              position={[
+                sahara[0] + 0.3 + (crystal[0] + 0.3 - (sahara[0] + 0.3)) * (i / 6),
+                sahara[1] + 0.15 + (crystal[1] + 0.15 - (sahara[1] + 0.15)) * (i / 6) + Math.sin((i / 6) * Math.PI) * 0.5,
+                sahara[2] + 0.3 + (crystal[2] + 0.3 - (sahara[2] + 0.3)) * (i / 6)
+              ]}
+            >
+              <sphereGeometry args={[0.12, 8, 8]} />
+              <meshBasicMaterial 
+                color="#ff6b35" 
+                transparent 
+                opacity={defensiveIntensity * 0.7}
+              />
+            </mesh>
+          ))}
           
           {/* Impact effect at Crystal Peak core - much bigger */}
           <mesh position={[crystal[0], crystal[1], crystal[2]]}>
