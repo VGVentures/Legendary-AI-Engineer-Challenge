@@ -43,15 +43,15 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     developer_message: str  # Message from the developer/system
     user_message: str      # Message from the user
-    model: Optional[str] = "gpt-4.1-mini"  # Optional model selection with default
-    # api_key: str          # OpenAI API key for authentication (REMOVED)
+    model: Optional[str] = "gpt-4o-mini"  # Optional model selection with default
 
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
 async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)):
-    # Simple authentication check
-    if ACCESS_TOKEN != "cosmic-ai-2024":  # Only check if custom token is set
-        if not authorization or authorization != f"Bearer {ACCESS_TOKEN}":
+    # Simple authentication check - only if custom token is set
+    custom_token = os.getenv("ACCESS_TOKEN")
+    if custom_token and custom_token != "cosmic-ai-2024":
+        if not authorization or authorization != f"Bearer {custom_token}":
             raise HTTPException(status_code=401, detail="Invalid access token")
     
     try:
@@ -68,7 +68,7 @@ async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)
             stream = client.chat.completions.create(
                 model=request.model,
                 messages=[
-                    {"role": "developer", "content": request.developer_message},
+                    {"role": "system", "content": request.developer_message},
                     {"role": "user", "content": request.user_message}
                 ],
                 stream=True  # Enable streaming response
@@ -89,7 +89,7 @@ async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)
 # Define a health check endpoint to verify API status
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "api_key_configured": bool(api_key)}
 
 # Entry point for running the application directly
 if __name__ == "__main__":
