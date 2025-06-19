@@ -509,21 +509,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
   return (
     <>
-      {/* Invisible larger clickable area for easier interaction */}
-      <mesh 
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-        position={position}
-      >
-        <sphereGeometry args={[size * 1.5, 32, 32]} />
-        <meshBasicMaterial
-          transparent
-          opacity={0}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
       {/* Main Entity Body */}
       <mesh 
         ref={meshRef}
@@ -676,7 +661,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             <meshBasicMaterial
               color={color}
               transparent
-              opacity={0.5}
+              opacity={0.3}
               side={THREE.DoubleSide}
             />
           </mesh>
@@ -687,19 +672,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             <meshBasicMaterial
               color={color}
               transparent
-              opacity={0.3}
+              opacity={0.2}
               side={THREE.BackSide}
-            />
-          </mesh>
-
-          {/* Click indicator text */}
-          <mesh position={[position[0], position[1] + size * 2, position[2]]}>
-            <planeGeometry args={[size * 3, size * 0.5]} />
-            <meshBasicMaterial
-              color="#000000"
-              transparent
-              opacity={0.8}
-              side={THREE.DoubleSide}
             />
           </mesh>
         </>
