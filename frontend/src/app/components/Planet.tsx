@@ -286,6 +286,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
   const texture = useEntityTexture(entityType, type, color, size);
   
+  // Initialize animated colors with current time
+  const [animatedColors, setAnimatedColors] = useState(() => getAnimatedColors(entityType, type, 0));
+
   const getRingConfig = (entityType: string, planetType: string) => {
     if (entityType === 'star') {
       return {
@@ -396,7 +399,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   const ringConfig = getRingConfig(entityType, type);
-  const animatedColors = getAnimatedColors(entityType, type, 0);
 
   // Type guard to check if ringConfig has rings property
   const hasRings = (config: any): config is { rings: any[] } => {
@@ -431,6 +433,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     const newColors = getAnimatedColors(entityType, type, time);
+    
+    // Update animated colors state
+    setAnimatedColors(newColors);
     
     if (meshRef.current) {
       const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
