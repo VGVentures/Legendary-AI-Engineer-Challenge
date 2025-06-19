@@ -275,94 +275,108 @@ const getAnimatedColors = (entityType: string, type: string, time: number) => {
 
 export default function Planet({ position, size, color, type = 'terrestrial', name, entityType = 'planet', onPlanetClick }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
-  const texture = useEntityTexture(entityType, type, color, size);
-  
+  const [state, setState] = useState<{ clock?: { elapsedTime: number } }>({});
+
   const getRingConfig = (entityType: string, planetType: string) => {
-    if (entityType === 'star') {
+    if (entityType === 'planet' && planetType === 'gas') {
       return {
-        colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
-        opacity: 0.9,
-        particleCount: 120,
-        sparkleCount: 60
-      };
-    } else if (entityType === 'nebula') {
-      return {
-        colors: [color, color + '80', color + '40', color + '20'],
-        opacity: 0.7,
+        colors: ['#FFD23F', '#F7931E', '#FF6B35', '#FF4500'],
+        opacity: 0.6,
         particleCount: 80,
-        sparkleCount: 40
+        sparkleCount: 25
+      };
+    } else if (entityType === 'planet' && planetType === 'desert') {
+      return {
+        colors: ['#D2691E', '#CD853F', '#F4A460', '#DEB887'],
+        opacity: 0.4,
+        particleCount: 60,
+        sparkleCount: 20
       };
     } else if (entityType === 'blackhole') {
       return {
-        colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
+        colors: ['#FFD700', '#FFA500', '#FF4500', '#FF0000'],
         opacity: 0.8,
         particleCount: 100,
-        sparkleCount: 50
+        sparkleCount: 30
       };
     } else if (entityType === 'comet') {
       return {
-        colors: ['#FFFFFF', '#F0E68C', '#E6E6FA', '#FFFFFF'],
-        opacity: 0.6,
-        particleCount: 60,
-        sparkleCount: 30
-      };
-    } else if (entityType === 'asteroid') {
-      return {
-        colors: ['#8B4513', '#A0522D', '#CD853F', '#8B4513'],
-        opacity: 0.4,
+        colors: ['#FFFFFF', '#E0F6FF', '#B0E0E6', '#87CEEB'],
+        opacity: 0.5,
         particleCount: 40,
-        sparkleCount: 20
+        sparkleCount: 15
       };
     } else {
-      // Planet rings (existing logic)
-      const configs = {
-        gas: {
-          colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
-          opacity: 0.8,
-          particleCount: 100,
-          sparkleCount: 50
-        },
-        ice: {
-          colors: ['#87CEEB', '#B0E0E6', '#E0F6FF', '#F0F8FF'],
-          opacity: 0.6,
-          particleCount: 80,
-          sparkleCount: 40
-        },
-        ocean: {
-          colors: ['#00BFFF', '#1E90FF', '#4169E1', '#0000CD'],
-          opacity: 0.7,
-          particleCount: 90,
-          sparkleCount: 45
-        },
-        desert: {
-          colors: ['#D2691E', '#CD853F', '#F4A460', '#DEB887'],
-          opacity: 0.5,
-          particleCount: 70,
-          sparkleCount: 35
-        },
-        terrestrial: {
-          colors: ['#32CD32', '#90EE90', '#98FB98', '#00FF7F'],
-          opacity: 0.4,
-          particleCount: 60,
-          sparkleCount: 30
-        }
+      return {
+        colors: [color, color + 'CC', color + '99', color + '66'],
+        opacity: 0.3,
+        particleCount: 50,
+        sparkleCount: 18
       };
-      return configs[planetType as keyof typeof configs] || configs.terrestrial;
     }
   };
 
   const ringConfig = getRingConfig(entityType, type);
-  const animatedColors = getAnimatedColors(entityType, type, 0);
+  const texture = useEntityTexture(entityType, type, color, size);
+  const animatedColors = getAnimatedColors(entityType, type, state?.clock?.elapsedTime || 0);
+
+  // Animation frame updates
+  useFrame((state) => {
+    setState({ clock: state.clock });
+    
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.005;
+      meshRef.current.rotation.x += 0.002;
+    }
+
+    // Animate mist particles
+    if (groupRef.current) {
+      groupRef.current.children.forEach((child, index) => {
+        if (child.userData.isMistParticle) {
+          child.position.y += Math.sin(state.clock.elapsedTime + index) * 0.001;
+          child.position.x += Math.cos(state.clock.elapsedTime + index * 0.5) * 0.001;
+          child.rotation.z += 0.01;
+        }
+        if (child.userData.isVaporParticle) {
+          child.position.y += Math.sin(state.clock.elapsedTime * 2 + index) * 0.002;
+          child.position.x += Math.cos(state.clock.elapsedTime * 1.5 + index * 0.3) * 0.002;
+          child.rotation.y += 0.02;
+        }
+        if (child.userData.isAtmosphericHaze) {
+          child.rotation.y += 0.003;
+          child.rotation.z += 0.001;
+        }
+      });
+    }
+
+    // Update material colors for animation
+    if (meshRef.current && meshRef.current.material) {
+      const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
+      const time = state.clock.elapsedTime;
+      const colorIndex = Math.floor(time * 0.5) % animatedColors.length;
+      const nextColorIndex = (colorIndex + 1) % animatedColors.length;
+      const t = (time * 0.5) % 1;
+      
+      const newColors = animatedColors.map((color, i) => {
+        if (i === colorIndex) {
+          return color.clone().lerp(animatedColors[nextColorIndex], t);
+        }
+        return color;
+      });
+      
+      if (material.emissive) {
+        material.emissive.copy(newColors[0]);
+      }
+    }
+  });
 
   const handleClick = (event: any) => {
     event.stopPropagation();
     setClicked(true);
-    
-    // Reset click state after animation
     setTimeout(() => setClicked(false), 300);
-    
     if (onPlanetClick) {
       onPlanetClick();
     }
@@ -377,21 +391,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const handlePointerOut = (event: any) => {
     event.stopPropagation();
     setHovered(false);
-    document.body.style.cursor = 'auto';
+    document.body.style.cursor = 'default';
   };
-
-  // Animate colors over time
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    const newColors = getAnimatedColors(entityType, type, time);
-    
-    if (meshRef.current) {
-      const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
-      if (material.emissive) {
-        material.emissive.copy(newColors[0]);
-      }
-    }
-  });
 
   // Special effects for different entity types
   const renderSpecialEffects = () => {
@@ -507,7 +508,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       {/* Main Entity Body */}
       <mesh 
         ref={meshRef}
@@ -533,14 +534,67 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Special Effects */}
       {renderSpecialEffects()}
 
-      {/* Reduced Atmospheric Glow */}
-      {[1.1, 1.3, 1.5].map((scale, index) => (
-        <mesh key={`atmosphere-${index}`}>
+      {/* Atmospheric Mist Particles - creates vapor/mist effect */}
+      {Array.from({ length: 45 }, (_, i) => {
+        const angle = (i / 45) * Math.PI * 2;
+        const radius = size * 1.2 + Math.random() * size * 0.8;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = (Math.random() - 0.5) * size * 0.6;
+        
+        return (
+          <mesh 
+            key={`mist-${i}`} 
+            position={[x, y, z]}
+            userData={{ isMistParticle: true }}
+          >
+            <sphereGeometry args={[0.03 + Math.random() * 0.02, 8, 8]} />
+            <meshBasicMaterial
+              color={animatedColors[i % animatedColors.length]}
+              transparent
+              opacity={0.3 + Math.random() * 0.4}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        );
+      })}
+
+      {/* Swirling Vapor Clouds - creates atmospheric swirls */}
+      {Array.from({ length: 25 }, (_, i) => {
+        const angle = (i / 25) * Math.PI * 2;
+        const radius = size * 1.4 + Math.random() * size * 0.6;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = (Math.random() - 0.5) * size * 0.4;
+        
+        return (
+          <mesh 
+            key={`vapor-${i}`} 
+            position={[x, y, z]}
+            userData={{ isVaporParticle: true }}
+          >
+            <sphereGeometry args={[0.05 + Math.random() * 0.03, 12, 12]} />
+            <meshBasicMaterial
+              color={animatedColors[i % animatedColors.length]}
+              transparent
+              opacity={0.2 + Math.random() * 0.3}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        );
+      })}
+
+      {/* Atmospheric Haze Layers - creates misty atmosphere */}
+      {[1.1, 1.3, 1.5, 1.7].map((scale, index) => (
+        <mesh 
+          key={`haze-${index}`}
+          userData={{ isAtmosphericHaze: true }}
+        >
           <sphereGeometry args={[size * scale, 32, 32]} />
           <meshBasicMaterial
             color={animatedColors[index % animatedColors.length]}
             transparent
-            opacity={0.15 - index * 0.05}
+            opacity={0.08 - index * 0.02}
             blending={THREE.AdditiveBlending}
             side={THREE.BackSide}
           />
