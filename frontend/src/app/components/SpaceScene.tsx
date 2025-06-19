@@ -326,14 +326,12 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const groupRef = useRef<THREE.Group>(null);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
-  const [currentCrystalPos, setCurrentCrystalPos] = useState<[number, number, number]>([0, 0, 0]);
-  const [currentSaharaPos, setCurrentSaharaPos] = useState<[number, number, number]>([0, 0, 0]);
   const { camera } = useThree();
 
   // Debug: log planet positions
   console.log('PlanetLaserBattle - Planet positions:', planetPositions);
 
-  // Animation: continuous periodic laser firing and dynamic position updates
+  // Animation: continuous periodic laser firing
   useFrame((state) => {
     if (startTimeRef.current === null) startTimeRef.current = state.clock.getElapsedTime();
     const elapsed = (state.clock.getElapsedTime() - startTimeRef.current) * 1000;
@@ -341,45 +339,45 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     // Laser firing phases - every 800ms, continuous
     const laserTime = elapsed % 800;
     setLaserPhase(laserTime / 800);
-    
-    // Update planet positions based on rotation
-    const rotationAngle = state.clock.elapsedTime * 0.001; // Match the rotation speed from SpaceEnvironment
+  });
+
+  // Get current planet positions with rotation applied
+  const getCurrentPlanetPositions = () => {
+    const rotationAngle = performance.now() * 0.001; // Match the rotation speed from SpaceEnvironment
     
     // Get base positions
     const crystal = planetPositions['Crystal Peak'];
     const sahara = planetPositions['Sahara Sands'];
     
-    if (crystal && sahara) {
-      // Apply rotation to Crystal Peak position
-      const crystalRadius = Math.sqrt(crystal[0] * crystal[0] + crystal[2] * crystal[2]);
-      const crystalAngle = Math.atan2(crystal[2], crystal[0]) + rotationAngle;
-      const newCrystalPos: [number, number, number] = [
-        Math.cos(crystalAngle) * crystalRadius,
-        crystal[1],
-        Math.sin(crystalAngle) * crystalRadius
-      ];
-      setCurrentCrystalPos(newCrystalPos);
-      
-      // Apply rotation to Sahara Sands position
-      const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
-      const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
-      const newSaharaPos: [number, number, number] = [
-        Math.cos(saharaAngle) * saharaRadius,
-        sahara[1],
-        Math.sin(saharaAngle) * saharaRadius
-      ];
-      setCurrentSaharaPos(newSaharaPos);
-    }
-  });
+    if (!crystal || !sahara) return { crystal: null, sahara: null };
+    
+    // Apply rotation to Crystal Peak position
+    const crystalRadius = Math.sqrt(crystal[0] * crystal[0] + crystal[2] * crystal[2]);
+    const crystalAngle = Math.atan2(crystal[2], crystal[0]) + rotationAngle;
+    const currentCrystalPos: [number, number, number] = [
+      Math.cos(crystalAngle) * crystalRadius,
+      crystal[1],
+      Math.sin(crystalAngle) * crystalRadius
+    ];
+    
+    // Apply rotation to Sahara Sands position
+    const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
+    const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
+    const currentSaharaPos: [number, number, number] = [
+      Math.cos(saharaAngle) * saharaRadius,
+      sahara[1],
+      Math.sin(saharaAngle) * saharaRadius
+    ];
+    
+    return { crystal: currentCrystalPos, sahara: currentSaharaPos };
+  };
 
-  // Laser beam animation (pulsing, flickering)
-  const crystal = currentCrystalPos;
-  const sahara = currentSaharaPos;
+  const { crystal, sahara } = getCurrentPlanetPositions();
   
-  console.log('Dynamic Crystal Peak position:', crystal, 'Dynamic Sahara Sands position:', sahara);
+  console.log('Current Crystal Peak position:', crystal, 'Current Sahara Sands position:', sahara);
   
-  if (!crystal || !sahara || (crystal[0] === 0 && crystal[1] === 0 && crystal[2] === 0)) {
-    console.log('Missing or invalid planet positions, not rendering lasers');
+  if (!crystal || !sahara) {
+    console.log('Missing planet positions, not rendering lasers');
     return null;
   }
 
@@ -395,212 +393,104 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const defensivePhase = laserPhase > 0.5 && laserPhase < 0.7; // 20% of cycle for defensive
   const defensiveIntensity = defensivePhase ? Math.sin((laserPhase - 0.5) * Math.PI * 12) * 0.4 + 0.6 : 0;
 
+  // Calculate laser path points between planets
+  const createLaserPath = (from: [number, number, number], to: [number, number, number], offset: [number, number, number] = [0, 0, 0]) => {
+    const start = [from[0] + offset[0], from[1] + offset[1] + 0.2, from[2] + offset[2]];
+    const end = [to[0] + offset[0], to[1] + offset[1] + 0.2, to[2] + offset[2]];
+    
+    // Create curved path with multiple points
+    const points = [];
+    const segments = 10;
+    
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const x = start[0] + (end[0] - start[0]) * t;
+      const y = start[1] + (end[1] - start[1]) * t + Math.sin(t * Math.PI) * 0.3; // Add curve
+      const z = start[2] + (end[2] - start[2]) * t;
+      points.push(x, y, z);
+    }
+    
+    return points;
+  };
+
   return (
     <group ref={groupRef}>
-      {/* Debug sphere to verify component is rendering */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[0.1, 8, 8]} />
-        <meshBasicMaterial color="red" />
-      </mesh>
-      
       {/* Crystal Peak fires multiple pink lasers at Sahara Sands */}
-      {/* Main beam - thickest */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              crystal[0], crystal[1] + 0.2, crystal[2],
-              crystal[0] + (sahara[0] - crystal[0]) * 0.3, crystal[1] + 0.3, crystal[2] + (sahara[2] - crystal[2]) * 0.3,
-              crystal[0] + (sahara[0] - crystal[0]) * 0.6, crystal[1] + 0.4, crystal[2] + (sahara[2] - crystal[2]) * 0.6,
-              crystal[0] + (sahara[0] - crystal[0]) * 0.8, crystal[1] + 0.3, crystal[2] + (sahara[2] - crystal[2]) * 0.8,
-              sahara[0], sahara[1] + 0.2, sahara[2]
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff69b4" 
-          transparent 
-          opacity={flicker * offensiveIntensity}
-          linewidth={8}
-        />
-      </line>
-      
-      {/* Secondary beam - thick */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              crystal[0] + 0.1, crystal[1] + 0.25, crystal[2] + 0.1,
-              crystal[0] + 0.1 + (sahara[0] - crystal[0]) * 0.25, crystal[1] + 0.35, crystal[2] + 0.1 + (sahara[2] - crystal[2]) * 0.25,
-              crystal[0] + 0.1 + (sahara[0] - crystal[0]) * 0.55, crystal[1] + 0.45, crystal[2] + 0.1 + (sahara[2] - crystal[2]) * 0.55,
-              crystal[0] + 0.1 + (sahara[0] - crystal[0]) * 0.85, crystal[1] + 0.35, crystal[2] + 0.1 + (sahara[2] - crystal[2]) * 0.85,
-              sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff1493" 
-          transparent 
-          opacity={flicker * offensiveIntensity}
-          linewidth={6}
-        />
-      </line>
-      
-      {/* Tertiary beam - medium */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              crystal[0] - 0.1, crystal[1] + 0.15, crystal[2] - 0.1,
-              crystal[0] - 0.1 + (sahara[0] - crystal[0]) * 0.35, crystal[1] + 0.25, crystal[2] - 0.1 + (sahara[2] - crystal[2]) * 0.35,
-              crystal[0] - 0.1 + (sahara[0] - crystal[0]) * 0.65, crystal[1] + 0.35, crystal[2] - 0.1 + (sahara[2] - crystal[2]) * 0.65,
-              crystal[0] - 0.1 + (sahara[0] - crystal[0]) * 0.9, crystal[1] + 0.25, crystal[2] - 0.1 + (sahara[2] - crystal[2]) * 0.9,
-              sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff007f" 
-          transparent 
-          opacity={flicker * offensiveIntensity}
-          linewidth={4}
-        />
-      </line>
-      
-      {/* Fourth beam - thinner */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              crystal[0] + 0.15, crystal[1] + 0.3, crystal[2] + 0.15,
-              crystal[0] + 0.15 + (sahara[0] - crystal[0]) * 0.2, crystal[1] + 0.4, crystal[2] + 0.15 + (sahara[2] - crystal[2]) * 0.2,
-              crystal[0] + 0.15 + (sahara[0] - crystal[0]) * 0.5, crystal[1] + 0.5, crystal[2] + 0.15 + (sahara[2] - crystal[2]) * 0.5,
-              crystal[0] + 0.15 + (sahara[0] - crystal[0]) * 0.8, crystal[1] + 0.4, crystal[2] + 0.15 + (sahara[2] - crystal[2]) * 0.8,
-              sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff69b4" 
-          transparent 
-          opacity={flicker * offensiveIntensity}
-          linewidth={3}
-        />
-      </line>
-      
-      {/* Sahara Sands fires multiple orange lasers at Crystal Peak */}
-      {/* Main beam - thickest */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              sahara[0], sahara[1] + 0.2, sahara[2],
-              sahara[0] + (crystal[0] - sahara[0]) * 0.3, sahara[1] + 0.3, sahara[2] + (crystal[2] - sahara[2]) * 0.3,
-              sahara[0] + (crystal[0] - sahara[0]) * 0.6, sahara[1] + 0.4, sahara[2] + (crystal[2] - sahara[2]) * 0.6,
-              sahara[0] + (crystal[0] - sahara[0]) * 0.8, sahara[1] + 0.3, sahara[2] + (crystal[2] - sahara[2]) * 0.8,
-              crystal[0], crystal[1] + 0.2, crystal[2]
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff6b35" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={8}
-        />
-      </line>
-      
-      {/* Secondary beam - thick */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              sahara[0] + 0.1, sahara[1] + 0.25, sahara[2] + 0.1,
-              sahara[0] + 0.1 + (crystal[0] - sahara[0]) * 0.25, sahara[1] + 0.35, sahara[2] + 0.1 + (crystal[2] - sahara[2]) * 0.25,
-              sahara[0] + 0.1 + (crystal[0] - sahara[0]) * 0.55, sahara[1] + 0.45, sahara[2] + 0.1 + (crystal[2] - sahara[2]) * 0.55,
-              sahara[0] + 0.1 + (crystal[0] - sahara[0]) * 0.85, sahara[1] + 0.35, sahara[2] + 0.1 + (crystal[2] - sahara[2]) * 0.85,
-              crystal[0] + 0.1, crystal[1] + 0.25, crystal[2] + 0.1
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff8c42" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={6}
-        />
-      </line>
-      
-      {/* Tertiary beam - medium */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              sahara[0] - 0.1, sahara[1] + 0.15, sahara[2] - 0.1,
-              sahara[0] - 0.1 + (crystal[0] - sahara[0]) * 0.35, sahara[1] + 0.25, sahara[2] - 0.1 + (crystal[2] - sahara[2]) * 0.35,
-              sahara[0] - 0.1 + (crystal[0] - sahara[0]) * 0.65, sahara[1] + 0.35, sahara[2] - 0.1 + (crystal[2] - sahara[2]) * 0.65,
-              sahara[0] - 0.1 + (crystal[0] - sahara[0]) * 0.9, sahara[1] + 0.25, sahara[2] - 0.1 + (crystal[2] - sahara[2]) * 0.9,
-              crystal[0] - 0.1, crystal[1] + 0.15, crystal[2] - 0.1
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff4500" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={4}
-        />
-      </line>
-      
-      {/* Fourth beam - thinner */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={5}
-            array={new Float32Array([
-              sahara[0] + 0.15, sahara[1] + 0.3, sahara[2] + 0.15,
-              sahara[0] + 0.15 + (crystal[0] - sahara[0]) * 0.2, sahara[1] + 0.4, sahara[2] + 0.15 + (crystal[2] - sahara[2]) * 0.2,
-              sahara[0] + 0.15 + (crystal[0] - sahara[0]) * 0.5, sahara[1] + 0.5, sahara[2] + 0.15 + (crystal[2] - sahara[2]) * 0.5,
-              sahara[0] + 0.15 + (crystal[0] - sahara[0]) * 0.8, sahara[1] + 0.4, sahara[2] + 0.15 + (crystal[2] - sahara[2]) * 0.8,
-              crystal[0] + 0.15, crystal[1] + 0.3, crystal[2] + 0.15
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff6347" 
-          transparent 
-          opacity={flicker * defensiveIntensity}
-          linewidth={3}
-        />
-      </line>
-      
-      {/* Laser impact effects at target planets */}
       {offensivePhase && (
         <>
-          {/* Impact effect at Sahara Sands from Crystal Peak offensive */}
+          {/* Main beam - thickest */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(crystal, sahara))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff69b4" 
+              transparent 
+              opacity={flicker * offensiveIntensity}
+              linewidth={8}
+            />
+          </line>
+          
+          {/* Secondary beam - thick */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(crystal, sahara, [0.1, 0.05, 0.1]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff1493" 
+              transparent 
+              opacity={flicker * offensiveIntensity}
+              linewidth={6}
+            />
+          </line>
+          
+          {/* Tertiary beam - medium */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(crystal, sahara, [-0.1, -0.05, -0.1]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff007f" 
+              transparent 
+              opacity={flicker * offensiveIntensity}
+              linewidth={4}
+            />
+          </line>
+          
+          {/* Fourth beam - thinner */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(crystal, sahara, [0.15, 0.1, 0.15]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff69b4" 
+              transparent 
+              opacity={flicker * offensiveIntensity}
+              linewidth={3}
+            />
+          </line>
+          
+          {/* Impact effect at Sahara Sands */}
           <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
@@ -612,9 +502,82 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
         </>
       )}
       
+      {/* Sahara Sands fires multiple orange lasers at Crystal Peak */}
       {defensivePhase && (
         <>
-          {/* Impact effect at Crystal Peak from Sahara Sands defensive */}
+          {/* Main beam - thickest */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(sahara, crystal))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff6b35" 
+              transparent 
+              opacity={flicker * defensiveIntensity}
+              linewidth={8}
+            />
+          </line>
+          
+          {/* Secondary beam - thick */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(sahara, crystal, [0.1, 0.05, 0.1]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff8c42" 
+              transparent 
+              opacity={flicker * defensiveIntensity}
+              linewidth={6}
+            />
+          </line>
+          
+          {/* Tertiary beam - medium */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(sahara, crystal, [-0.1, -0.05, -0.1]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff4500" 
+              transparent 
+              opacity={flicker * defensiveIntensity}
+              linewidth={4}
+            />
+          </line>
+          
+          {/* Fourth beam - thinner */}
+          <line>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={11}
+                array={new Float32Array(createLaserPath(sahara, crystal, [0.15, 0.1, 0.15]))}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial 
+              color="#ff6347" 
+              transparent 
+              opacity={flicker * defensiveIntensity}
+              linewidth={3}
+            />
+          </line>
+          
+          {/* Impact effect at Crystal Peak */}
           <mesh position={[crystal[0], crystal[1] + 0.2, crystal[2]]}>
             <sphereGeometry args={[0.3, 8, 8]} />
             <meshBasicMaterial 
