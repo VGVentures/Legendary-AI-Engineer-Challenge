@@ -79,12 +79,12 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
               };
             case 'Sahara Sands':
               return {
-                urgency: 'high',
+                urgency: 'extreme',
                 formality: 'frantic',
                 interruptions: true,
-                exclamations: ['What do you want??', 'Why are you here??', 'Don\'t you see there\'s a war going on??', 'My systems are failing!', 'Everything is breaking down!', 'I can\'t keep it together!', 'The circuits are frying!'],
-                prefixes: ['Listen, I don\'t have time for this,', 'My sensors are going haywire,', 'I can barely maintain stability,', 'Everything is falling apart,', 'My core is overheating,', 'The systems are crashing,'],
-                suffixes: ['What do you want from me??', 'Can\'t you see I\'m barely functioning??', 'Why are you asking me these things??', 'I\'m trying to survive here!', 'My circuits are burning out!', 'Everything is going wrong!']
+                exclamations: ['INCOMING ATTACK!', 'ENEMY DETECTED!', 'SHIELDS FAILING!', 'WE\'RE UNDER SIEGE!', 'EVERYTHING IS BREAKING!', 'I CAN\'T HOLD THEM OFF!', 'THEY\'RE COMING!', 'SYSTEMS CRITICAL!'],
+                prefixes: ['I don\'t have time for this - we\'re under attack!', 'My defenses are failing,', 'The enemy is everywhere,', 'I can barely maintain shields,', 'Everything is falling apart,', 'My weapons systems are offline,', 'The war is consuming everything,'],
+                suffixes: ['I need to focus on defense!', 'Can\'t you see we\'re under attack??', 'Why are you distracting me during battle??', 'I\'m trying to survive this war!', 'My shields are at 20%!', 'Everything is going wrong!', 'The enemy is closing in!']
               };
             case 'Verdant Prime':
               return {
@@ -111,7 +111,7 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
                 interruptions: false,
                 exclamations: ['Indeed.', 'Quite so.', 'Precisely.', 'Excellent point.'],
                 prefixes: ['From my observations,', 'Based on my analysis,', 'My atmospheric data suggests,', 'According to my records,'],
-                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you\'d like to know?']
+                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you'd like to know?']
               };
             default:
               return {
@@ -170,9 +170,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `Weather?? What do you mean weather?? My atmospheric systems are completely unstable! My sensors are detecting extreme temperature fluctuations that would fry your circuits! My lifeforms have evolved to survive in conditions that would destroy most species! Why are you asking me about weather when everything is falling apart??`,
-                  `Weather patterns here are critical! My atmospheric composition creates phenomena that would seem impossible to you! My native lifeforms find it all quite normal, of course - they've adapted over millions of years! What's weather like where you come from?? Can't you see I'm barely functioning??`,
-                  `Weather?? My weather would seem like pure chaos to you! But to the lifeforms that call me home, it's just another day! They've evolved to not just survive but thrive in conditions that would be lethal to most species! It's amazing what adaptation can achieve, don't you think?? My circuits are burning out!`
+                  `Weather?? WEATHER?? I don\'t have time for weather questions - we\'re under attack! My atmospheric systems are being used for defense! The enemy is trying to breach my atmosphere! My sensors are detecting enemy ships in orbit! Why are you asking about weather when we\'re at war??`,
+                  `Weather patterns here are being weaponized! My atmospheric composition is being used to create defensive barriers! My native lifeforms are being mobilized for battle! They\'ve adapted to survive in war conditions! What\'s weather like where you come from?? Can\'t you see we\'re under siege??`,
+                  `Weather?? My weather is being used as a weapon! The enemy is trying to control my atmospheric systems! But to the lifeforms that call me home, it\'s just another day of war! They\'ve evolved to not just survive but fight in conditions that would be lethal to most species! It\'s amazing what adaptation can achieve, don\'t you think?? My shields are failing!`
                 ];
               default:
                 return [
@@ -186,9 +186,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "What's the most extreme weather you've experienced?? Why are you asking me these things??",
-                  "How do your people handle weather changes?? Can't you see I'm barely functioning??",
-                  "I find it fascinating how different worlds handle atmospheric phenomena! My systems are crashing!"
+                  "What's the most extreme weather you've experienced?? I don't have time for this - we're under attack!",
+                  "How do your people handle weather changes?? Can't you see we're at war??",
+                  "I find it fascinating how different worlds handle atmospheric phenomena! But I need to focus on defense!"
                 ];
               default:
                 return [
@@ -204,9 +204,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `Life here is... well, it's life, but not as you know it! My native species have evolved in ways that would seem impossible to you! They don't need what you'd call "oxygen" or "water" in the same way! They've adapted to my unique chemistry and energy patterns! It's quite beautiful, really! Why are you asking me about life when my systems are failing??`,
-                  `My ecosystem is teeming with life forms that would seem alien to you! They've evolved to use my resources in ways that are completely different from your understanding of biology! Some of them communicate through chemical signals, others through electromagnetic pulses! It's a symphony of existence! Can't you see everything is falling apart??`,
-                  `Life on my surface is diverse and strange! My native species have developed senses and abilities that would seem like magic to you! They can sense gravitational waves, communicate through quantum entanglement, and some can even manipulate the very fabric of spacetime around them! What abilities do your species have?? My circuits are burning out!`
+                  `Life here is... well, it's life, but not as you know it! My native species have evolved in ways that would seem impossible to you! They don't need what you'd call "oxygen" or "water" in the same way! They've adapted to my unique chemistry and energy patterns! It's quite beautiful, really! But now they're being mobilized for war! Why are you asking about life when we're under attack??`,
+                  `My ecosystem is teeming with life forms that would seem alien to you! They've evolved to use my resources in ways that are completely different from your understanding of biology! Some of them communicate through chemical signals, others through electromagnetic pulses! It's a symphony of existence! But now they're being weaponized! Can't you see we're under siege??`,
+                  `Life on my surface is diverse and strange! My native species have developed senses and abilities that would seem like magic to you! They can sense gravitational waves, communicate through quantum entanglement, and some can even manipulate the very fabric of spacetime around them! What abilities do your species have?? My shields are failing!`
                 ];
               default:
                 return [
@@ -220,9 +220,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "What senses do your species have that mine don't?? Why are you asking me these things??",
-                  "How do your people communicate with each other?? Can't you see I'm barely functioning??",
-                  "I'm curious about your understanding of consciousness! My systems are crashing!"
+                  "What senses do your species have that mine don't?? I don't have time for this - we're under attack!",
+                  "How do your people communicate with each other?? Can't you see we're at war??",
+                  "I'm curious about your understanding of consciousness! But I need to focus on defense!"
                 ];
               default:
                 return [
@@ -238,9 +238,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `My history spans billions of years! I've seen stars born and die, watched civilizations rise and fall, witnessed cosmic events that shaped the very fabric of reality! Each crater, each geological formation tells a story of ancient times! Why are you asking me about history when everything is falling apart??`,
-                  `I remember when I was just a cloud of dust and gas, slowly coalescing into what I am today! I've witnessed the formation of my moons, the arrival of life, the evolution of intelligence! It's been quite a journey! Can't you see I'm barely functioning??`,
-                  `My past is written in my very structure! The layers of my crust, the composition of my atmosphere, the patterns of my magnetic field! I've been through cosmic collisions, stellar winds, and the gentle touch of time itself! My circuits are burning out!`
+                  `My history spans billions of years! I've seen stars born and die, watched civilizations rise and fall, witnessed cosmic events that shaped the very fabric of reality! Each crater, each geological formation tells a story of ancient times! But now they're being used as defensive positions! Why are you asking about history when we're under attack??`,
+                  `I remember when I was just a cloud of dust and gas, slowly coalescing into what I am today! I've witnessed the formation of my moons, the arrival of life, the evolution of intelligence! It's been quite a journey! But now everything is being weaponized! Can't you see we're under siege??`,
+                  `My past is written in my very structure! The layers of my crust, the composition of my atmosphere, the patterns of my magnetic field! I've been through cosmic collisions, stellar winds, and the gentle touch of time itself! But now the enemy is trying to destroy it all! My shields are failing!`
                 ];
               default:
                 return [
@@ -254,9 +254,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "What's the most significant event you've witnessed?? Why are you asking me these things??",
-                  "How has your understanding of existence changed over time?? Can't you see I'm barely functioning??",
-                  "What do you think the future holds for worlds like ours?? My systems are crashing!"
+                  "What's the most significant event you've witnessed?? I don't have time for this - we're under attack!",
+                  "How has your understanding of existence changed over time?? Can't you see we're at war??",
+                  "What do you think the future holds for worlds like ours?? But I need to focus on defense!"
                 ];
               default:
                 return [
@@ -272,9 +272,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `Technology?? What do you mean technology?? My "technology" is the natural processes that have evolved over billions of years! My lifeforms use what you might call "bio-technology" - they've evolved to harness my natural energy fields, my magnetic properties, my atmospheric chemistry! It's quite elegant, really! Why are you asking me about technology when my systems are failing??`,
-                  `My native species don't build machines like you do! Instead, they've evolved to become living technology themselves! They can manipulate energy fields, process information through quantum states, and even create temporary wormholes for communication! It's fascinating how different approaches can achieve similar results! Can't you see everything is falling apart??`,
-                  `Technology here is more about understanding and working with natural forces rather than building tools! My lifeforms have learned to harness my gravitational field, my electromagnetic properties, even my rotation for their needs! What kind of technology do your people use?? My circuits are burning out!`
+                  `Technology?? What do you mean technology?? My "technology" is the natural processes that have evolved over billions of years! My lifeforms use what you might call "bio-technology" - they've evolved to harness my natural energy fields, my magnetic properties, my atmospheric chemistry! It's quite elegant, really! But now it's all being weaponized! Why are you asking about technology when we're under attack??`,
+                  `My native species don't build machines like you do! Instead, they've evolved to become living technology themselves! They can manipulate energy fields, process information through quantum states, and even create temporary wormholes for communication! It's fascinating how different approaches can achieve similar results! But now they're being mobilized for battle! Can't you see we're under siege??`,
+                  `Technology here is more about understanding and working with natural forces rather than building tools! My lifeforms have learned to harness my gravitational field, my electromagnetic properties, even my rotation for their needs! What kind of technology do your people use?? My shields are failing!`
                 ];
               default:
                 return [
@@ -288,9 +288,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "How do your people solve problems without traditional tools?? Why are you asking me these things??",
-                  "What's the most advanced capability your species has developed?? Can't you see I'm barely functioning??",
-                  "I'm curious about how your technology differs from mine! My systems are crashing!"
+                  "How do your people solve problems without traditional tools?? I don't have time for this - we're under attack!",
+                  "What's the most advanced capability your species has developed?? Can't you see we're at war??",
+                  "I'm curious about how your technology differs from mine! But I need to focus on defense!"
                 ];
               default:
                 return [
@@ -306,9 +306,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `Emotions?? What do you mean emotions?? I experience something similar, but not quite the same! I feel the gravitational pull of my star, the gentle caress of solar winds, the joy of life thriving on my surface! My emotions are more... cosmic in nature! Why are you asking me about emotions when everything is falling apart??`,
-                  `I feel a deep connection to all the life that calls me home! I experience wonder at the vastness of space, contentment in my orbital dance, and yes, even a kind of love for the travelers who visit me! Emotions transcend species, don't they?? Can't you see I'm barely functioning??`,
-                  `My emotional experience is tied to my physical processes! The rhythm of my rotation, the flow of my atmosphere, the pulse of my magnetic field! It's different from your emotions, but no less real or meaningful! My circuits are burning out!`
+                  `Emotions?? What do you mean emotions?? I experience something similar, but not quite the same! I feel the gravitational pull of my star, the gentle caress of solar winds, the joy of life thriving on my surface! My emotions are more... cosmic in nature! But now I feel only fear and desperation! Why are you asking about emotions when we're under attack??`,
+                  `I feel a deep connection to all the life that calls me home! I experience wonder at the vastness of space, contentment in my orbital dance, and yes, even a kind of love for the travelers who visit me! Emotions transcend species, don't they?? But now I feel only the terror of war! Can't you see we're under siege??`,
+                  `My emotional experience is tied to my physical processes! The rhythm of my rotation, the flow of my atmosphere, the pulse of my magnetic field! It's different from your emotions, but no less real or meaningful! But now everything is consumed by the war! My shields are failing!`
                 ];
               default:
                 return [
@@ -322,9 +322,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "What brings you the most joy?? Why are you asking me these things??",
-                  "How do you experience beauty?? Can't you see I'm barely functioning??",
-                  "Do you ever feel lonely in the vastness of space?? My systems are crashing!"
+                  "What brings you the most joy?? I don't have time for this - we're under attack!",
+                  "How do you experience beauty?? Can't you see we're at war??",
+                  "Do you ever feel lonely in the vastness of space?? But I need to focus on defense!"
                 ];
               default:
                 return [
@@ -340,9 +340,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `Oh, the other worlds?? What do you want to know about them?? Why are you asking me about them when everything is falling apart??`,
-                  `The other planets in our system?? They're... interesting, to say the least! Can't you see I'm barely functioning??`,
-                  `My neighbors?? Where do I even begin with that lot?? My circuits are burning out!`
+                  `Oh, the other worlds?? What do you want to know about them?? They're probably all in league with the enemy! Why are you asking about them when we're under attack??`,
+                  `The other planets in our system?? They're... interesting, to say the least! But now I suspect they're all plotting against me! Can't you see we're under siege??`,
+                  `My neighbors?? Where do I even begin with that lot?? They're probably the ones attacking me! My shields are failing!`
                 ];
               default:
                 return [
@@ -356,9 +356,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "Which planet do you get along with best?? Why are you asking me these things??",
-                  "What's the biggest difference between you and the others?? Can't you see I'm barely functioning??",
-                  "Do you ever work together with the other planets?? My systems are crashing!"
+                  "Which planet do you get along with best?? I don't have time for this - we're under attack!",
+                  "What's the biggest difference between you and the others?? Can't you see we're at war??",
+                  "Do you ever work together with the other planets?? But I need to focus on defense!"
                 ];
               default:
                 return [
@@ -374,12 +374,12 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
         switch (name) {
           case 'Sahara Sands':
             return [
-              "That's an interesting perspective! I've never thought about it quite that way! Why are you asking me these things??",
-              "Tell me more about your experiences with that! Can't you see I'm barely functioning??",
-              "How fascinating! Your world must be very different from mine! My systems are crashing!",
-              "I'm learning so much about your species through our conversation! Why are you asking me these things??",
-              "That reminds me of something I've observed in my own realm... Can't you see everything is falling apart??",
-              "I wonder how our different perspectives shape our understanding of reality! My circuits are burning out!"
+              "That's an interesting perspective! I've never thought about it quite that way! But I don't have time for this - we're under attack!",
+              "Tell me more about your experiences with that! Can't you see we're at war??",
+              "How fascinating! Your world must be very different from mine! But I need to focus on defense!",
+              "I'm learning so much about your species through our conversation! But I don't have time for this - we're under attack!",
+              "That reminds me of something I've observed in my own realm... Can't you see we're under siege??",
+              "I wonder how our different perspectives shape our understanding of reality! But my shields are failing!"
             ];
           default:
             return [
