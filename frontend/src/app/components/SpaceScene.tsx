@@ -6,7 +6,7 @@ import { Stars, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import Planet from './Planet';
 
-// Beautiful cosmic nebulae component with enhanced blending
+// Beautiful cosmic nebulae component
 function CosmicNebulae() {
   const nebulaeRef = useRef<THREE.Group>(null);
 
@@ -21,91 +21,37 @@ function CosmicNebulae() {
 
   return (
     <group ref={nebulaeRef} position={[0, 0, -80]}>
-      {/* Primary nebula - large and colorful with enhanced blending */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[150, 32, 32]} />
+      {/* Primary nebula - large and colorful */}
+      <mesh>
+        <sphereGeometry args={[60, 32, 32]} />
         <meshBasicMaterial
-          color="#ff3366"
+          color="#ff69b4"
+          transparent
+          opacity={0.15}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      
+      {/* Secondary nebula - different color */}
+      <mesh position={[20, -10, -20]}>
+        <sphereGeometry args={[40, 32, 32]} />
+        <meshBasicMaterial
+          color="#4169e1"
           transparent
           opacity={0.12}
-          side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
-
-      {/* Secondary nebula - different color with seamless blending */}
-      <mesh position={[30, -20, -10]}>
-        <sphereGeometry args={[120, 32, 32]} />
+      
+      {/* Tertiary nebula - purple */}
+      <mesh position={[-30, 15, -40]}>
+        <sphereGeometry args={[35, 32, 32]} />
         <meshBasicMaterial
-          color="#3366ff"
+          color="#9370db"
           transparent
           opacity={0.1}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Tertiary nebula - purple tones with organic blending */}
-      <mesh position={[-40, 25, -15]}>
-        <sphereGeometry args={[100, 32, 32]} />
-        <meshBasicMaterial
-          color="#9933ff"
-          transparent
-          opacity={0.08}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Cosmic dust clouds with enhanced integration */}
-      <mesh position={[20, 40, -20]}>
-        <sphereGeometry args={[80, 24, 24]} />
-        <meshBasicMaterial
-          color="#ffaa33"
-          transparent
-          opacity={0.06}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Deep space glow with organic blending */}
-      <mesh position={[0, 0, -50]}>
-        <sphereGeometry args={[200, 32, 32]} />
-        <meshBasicMaterial
-          color="#001122"
-          transparent
-          opacity={0.25}
-          side={THREE.BackSide}
-          blending={THREE.NormalBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Additional blending layers for seamless integration */}
-      <mesh position={[15, -30, -25]}>
-        <sphereGeometry args={[90, 24, 24]} />
-        <meshBasicMaterial
-          color="#33ffaa"
-          transparent
-          opacity={0.05}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      <mesh position={[-25, -15, -30]}>
-        <sphereGeometry args={[70, 20, 20]} />
-        <meshBasicMaterial
-          color="#ff8833"
-          transparent
-          opacity={0.07}
-          side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -114,7 +60,7 @@ function CosmicNebulae() {
   );
 }
 
-// Animated cosmic clouds with enhanced blending
+// Animated cosmic clouds
 function CosmicClouds() {
   const cloudsRef = useRef<THREE.Group>(null);
 
@@ -122,31 +68,33 @@ function CosmicClouds() {
     const time = state.clock.elapsedTime;
     
     if (cloudsRef.current) {
-      cloudsRef.current.children.forEach((child, index) => {
-        child.position.x += Math.sin(time * 0.01 + index) * 0.01;
-        child.position.y += Math.cos(time * 0.008 + index) * 0.005;
-        child.rotation.z += 0.001;
+      cloudsRef.current.children.forEach((cloud, index) => {
+        const speed = 0.001 + (index * 0.0005);
+        cloud.position.x += Math.sin(time * speed) * 0.02;
+        cloud.position.y += Math.cos(time * speed * 0.7) * 0.015;
+        cloud.rotation.z += 0.001;
       });
     }
   });
 
+  const cloudColors = ['#ff69b4', '#4169e1', '#9370db', '#ffa500', '#32cd32'];
+  
   return (
     <group ref={cloudsRef}>
-      {Array.from({ length: 25 }, (_, i) => (
+      {Array.from({ length: 20 }, (_, i) => (
         <mesh
           key={i}
           position={[
-            (Math.random() - 0.5) * 400,
-            (Math.random() - 0.5) * 400,
-            (Math.random() - 0.5) * 200 - 100
+            (Math.random() - 0.5) * 200,
+            (Math.random() - 0.5) * 200,
+            (Math.random() - 0.5) * 200 - 50
           ]}
         >
-          <sphereGeometry args={[Math.random() * 30 + 10, 16, 16]} />
+          <sphereGeometry args={[Math.random() * 8 + 2, 16, 16]} />
           <meshBasicMaterial
-            color={['#ff3366', '#3366ff', '#9933ff', '#ffaa33', '#33ffaa', '#ff8833', '#88ff33'][Math.floor(Math.random() * 7)]}
+            color={cloudColors[i % cloudColors.length]}
             transparent
-            opacity={0.03 + Math.random() * 0.08}
-            side={THREE.BackSide}
+            opacity={0.08}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
           />
@@ -156,114 +104,7 @@ function CosmicClouds() {
   );
 }
 
-// Realistic Aurora Borealis component with enhanced blending
-function AuroraBorealis() {
-  const auroraRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    
-    if (auroraRef.current) {
-      auroraRef.current.rotation.y = Math.sin(time * 0.01) * 0.01;
-    }
-  });
-
-  return (
-    <group ref={auroraRef} position={[0, 0, -40]}>
-      {/* Main aurora curtain with enhanced blending */}
-      <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0, 0, 120, 8, 60, true]} />
-        <meshBasicMaterial
-          color="#00ff88"
-          transparent
-          opacity={0.6}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Second aurora curtain with seamless integration */}
-      <mesh position={[10, 0, -5]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0, 0, 100, 8, 50, true]} />
-        <meshBasicMaterial
-          color="#00ffaa"
-          transparent
-          opacity={0.5}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Third aurora curtain with organic blending */}
-      <mesh position={[-15, 0, -10]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0, 0, 110, 8, 55, true]} />
-        <meshBasicMaterial
-          color="#00ffff"
-          transparent
-          opacity={0.4}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Bright aurora highlights with enhanced integration */}
-      <mesh position={[5, 0, -2]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0, 0, 90, 8, 45, true]} />
-        <meshBasicMaterial
-          color="#00ff88"
-          transparent
-          opacity={0.7}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Ambient glow background with organic blending */}
-      <mesh position={[0, 0, -25]}>
-        <sphereGeometry args={[100, 20, 20]} />
-        <meshBasicMaterial
-          color="#00ff88"
-          transparent
-          opacity={0.08}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* Additional blending layers for seamless integration */}
-      <mesh position={[8, -5, -8]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0, 0, 85, 8, 42, true]} />
-        <meshBasicMaterial
-          color="#00ffcc"
-          transparent
-          opacity={0.3}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      <mesh position={[-12, 8, -12]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0, 0, 95, 8, 47, true]} />
-        <meshBasicMaterial
-          color="#00ddff"
-          transparent
-          opacity={0.25}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-// Animated shooting stars with enhanced blending
+// Shooting stars
 function ShootingStars() {
   const starsRef = useRef<THREE.Group>(null);
 
@@ -271,18 +112,14 @@ function ShootingStars() {
     const time = state.clock.elapsedTime;
     
     if (starsRef.current) {
-      starsRef.current.children.forEach((child, index) => {
-        child.position.x += 0.5;
-        child.position.y -= 0.3;
-        child.position.z += 0.2;
+      starsRef.current.children.forEach((star, index) => {
+        const speed = 0.5 + (index * 0.1);
+        star.position.x += speed;
+        star.position.y -= speed * 0.3;
         
-        // Reset position when star goes off screen
-        if (child.position.x > 200) {
-          child.position.set(
-            -200,
-            (Math.random() - 0.5) * 200,
-            (Math.random() - 0.5) * 200
-          );
+        if (star.position.x > 100) {
+          star.position.x = -100;
+          star.position.y = Math.random() * 100 - 50;
         }
       });
     }
@@ -294,18 +131,17 @@ function ShootingStars() {
         <mesh
           key={i}
           position={[
-            (Math.random() - 0.5) * 400,
-            (Math.random() - 0.5) * 400,
-            (Math.random() - 0.5) * 400
+            Math.random() * 200 - 100,
+            Math.random() * 100 - 50,
+            -30
           ]}
         >
-          <sphereGeometry args={[Math.random() * 0.8 + 0.2, 8, 8]} />
+          <sphereGeometry args={[0.5, 8, 8]} />
           <meshBasicMaterial
             color="#ffffff"
             transparent
             opacity={0.8}
             blending={THREE.AdditiveBlending}
-            depthWrite={false}
           />
         </mesh>
       ))}
@@ -314,7 +150,7 @@ function ShootingStars() {
 }
 
 // Enhanced space scene with unified blending
-function SpaceSceneContent({ onPlanetClick }: { onPlanetClick: (planetName: string, planetType: string) => void }) {
+function SpaceSceneContent() {
   return (
     <>
       {/* Beautiful gradient ambient lighting */}
@@ -337,125 +173,134 @@ function SpaceSceneContent({ onPlanetClick }: { onPlanetClick: (planetName: stri
       
       {/* Fill light from opposite side */}
       <directionalLight 
-        position={[-15, -15, -10]} 
+        position={[-20, -20, -15]} 
         intensity={0.2} 
-        color="#224466"
+        color="#4a90e2"
       />
       
-      {/* Rim lighting for dramatic edge highlights */}
+      {/* Colored rim lighting */}
       <directionalLight 
         position={[0, 0, 20]} 
         intensity={0.3} 
-        color="#446688"
+        color="#ff6b35"
       />
 
-      {/* Beautiful cosmic background elements with unified blending */}
+      {/* Beautiful starfield */}
+      <Stars 
+        radius={100} 
+        depth={50} 
+        count={5000} 
+        factor={4} 
+        saturation={0} 
+        fade 
+        speed={1}
+      />
+
+      {/* Cosmic nebulae */}
       <CosmicNebulae />
+      
+      {/* Animated cosmic clouds */}
       <CosmicClouds />
+      
+      {/* Shooting stars */}
       <ShootingStars />
 
-      {/* Realistic Aurora Borealis */}
-      <AuroraBorealis />
-
-      {/* Enhanced starfield with better integration */}
-      <Stars 
-        radius={150} 
-        depth={80} 
-        count={5000} 
-        factor={6} 
-        saturation={0.1} 
-        fade 
-        speed={0.8}
-      />
-
-      {/* Additional bright nearby stars with enhanced blending */}
-      {Array.from({ length: 80 }, (_, i) => (
-        <mesh
-          key={i}
-          position={[
-            (Math.random() - 0.5) * 300,
-            (Math.random() - 0.5) * 300,
-            (Math.random() - 0.5) * 300
-          ]}
-        >
-          <sphereGeometry args={[Math.random() * 0.8 + 0.1, 8, 8]} />
-          <meshBasicMaterial
-            color={['#ffffff', '#ffffaa', '#ffaa88', '#aaccff', '#ff88aa', '#88ffaa', '#ffcc88'][Math.floor(Math.random() * 7)]}
-            transparent
-            opacity={0.7 + Math.random() * 0.2}
-            blending={THREE.AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
-
-      {/* Floating cosmic particles with enhanced blending */}
-      {Array.from({ length: 150 }, (_, i) => (
-        <mesh
-          key={`particle-${i}`}
-          position={[
-            (Math.random() - 0.5) * 400,
-            (Math.random() - 0.5) * 400,
-            (Math.random() - 0.5) * 400
-          ]}
-        >
-          <sphereGeometry args={[Math.random() * 0.4 + 0.05, 6, 6]} />
-          <meshBasicMaterial
-            color={['#4488ff', '#ff4488', '#88ff44', '#ff8844', '#8844ff', '#ffaa44', '#44ffaa'][Math.floor(Math.random() * 7)]}
-            transparent
-            opacity={0.3 + Math.random() * 0.4}
-            blending={THREE.AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
-
-      {/* Planets with enhanced blending and click functionality */}
+      {/* Planets with VARIED SIZES and UNIQUE COLOR SCHEMES */}
+      {/* Gas Giant - Large and majestic */}
       <Planet 
-        position={[-8, 3, 0]} 
-        size={1.2} 
+        position={[-25, 5, 0]} 
+        size={4.5} 
         color="#ff6b35" 
         type="gas" 
-        name="Nebula Prime"
-        onPlanetClick={onPlanetClick}
+        name="Nebula Prime" 
       />
+      
+      {/* Ocean World - Medium-large with deep blues */}
       <Planet 
-        position={[6, -2, 0]} 
-        size={0.8} 
-        color="#4ecdc4" 
+        position={[20, -8, 0]} 
+        size={3.2} 
+        color="#006994" 
         type="ocean" 
-        name="Aquaria"
-        onPlanetClick={onPlanetClick}
+        name="Aquaria" 
       />
+      
+      {/* Ice Planet - Small and crystalline */}
       <Planet 
-        position={[0, 8, 0]} 
-        size={1.0} 
-        color="#45b7d1" 
+        position={[0, 18, 0]} 
+        size={1.8} 
+        color="#87CEEB" 
         type="ice" 
-        name="Cryos"
-        onPlanetClick={onPlanetClick}
+        name="Cryos" 
       />
+      
+      {/* Terrestrial Planet - Medium with vibrant greens */}
       <Planet 
-        position={[-4, -6, 0]} 
-        size={0.6} 
-        color="#96ceb4" 
+        position={[0, -18, 0]} 
+        size={2.6} 
+        color="#228B22" 
         type="terrestrial" 
-        name="Terra Nova"
-        onPlanetClick={onPlanetClick}
+        name="Terra Nova" 
       />
+      
+      {/* Desert Planet - Medium-small with warm tones */}
       <Planet 
-        position={[10, 5, 0]} 
-        size={0.9} 
-        color="#feca57" 
+        position={[30, 12, 0]} 
+        size={2.1} 
+        color="#D2B48C" 
         type="desert" 
-        name="Aridus"
-        onPlanetClick={onPlanetClick}
+        name="Aridus" 
+      />
+      
+      {/* Additional planets for more variety */}
+      {/* Small Gas Giant */}
+      <Planet 
+        position={[-35, -15, 0]} 
+        size={3.8} 
+        color="#FF8C00" 
+        type="gas" 
+        name="Jupiter Minor" 
+      />
+      
+      {/* Large Ocean World */}
+      <Planet 
+        position={[35, -20, 0]} 
+        size={4.2} 
+        color="#1E90FF" 
+        type="ocean" 
+        name="Poseidon" 
+      />
+      
+      {/* Tiny Ice Moon */}
+      <Planet 
+        position={[-8, 25, 0]} 
+        size={1.2} 
+        color="#E0F6FF" 
+        type="ice" 
+        name="Frostbite" 
+      />
+      
+      {/* Large Terrestrial */}
+      <Planet 
+        position={[-12, -25, 0]} 
+        size={3.5} 
+        color="#32CD32" 
+        type="terrestrial" 
+        name="Gaia" 
+      />
+      
+      {/* Small Desert World */}
+      <Planet 
+        position={[40, 5, 0]} 
+        size={1.6} 
+        color="#F4A460" 
+        type="desert" 
+        name="Sandstorm" 
       />
 
       {/* Camera controls */}
       <OrbitControls 
-        enableZoom={true} 
-        enablePan={true} 
+        enableZoom={true}
+        enablePan={true}
         enableRotate={true}
         autoRotate={true}
         autoRotateSpeed={0.5}
@@ -466,24 +311,18 @@ function SpaceSceneContent({ onPlanetClick }: { onPlanetClick: (planetName: stri
   );
 }
 
-interface SpaceSceneProps {
-  onPlanetClick: (planetName: string, planetType: string) => void;
-}
-
-export default function SpaceScene({ onPlanetClick }: SpaceSceneProps) {
+export default function SpaceScene() {
   return (
-    <div className="w-full h-full">
-      <Canvas
-        camera={{ position: [0, 0, 15], fov: 75 }}
-        gl={{ 
-          antialias: true, 
-          alpha: true,
-          powerPreference: "high-performance"
-        }}
-        shadows
-      >
-        <SpaceSceneContent onPlanetClick={onPlanetClick} />
-      </Canvas>
-    </div>
+    <Canvas
+      camera={{ position: [0, 0, 20], fov: 75 }}
+      shadows
+      gl={{ 
+        antialias: true, 
+        alpha: true,
+        powerPreference: "high-performance"
+      }}
+    >
+      <SpaceSceneContent />
+    </Canvas>
   );
 } 
