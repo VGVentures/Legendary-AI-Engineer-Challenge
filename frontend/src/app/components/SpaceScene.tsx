@@ -322,6 +322,76 @@ function PlanetNameLabel({ position, name, color, size }: {
   );
 }
 
+function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositions: { [key: string]: [number, number, number] }, duration?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const [visible, setVisible] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+
+  // Animation: fade out after duration
+  useFrame((state) => {
+    if (!visible) return;
+    if (startTimeRef.current === null) startTimeRef.current = state.clock.getElapsedTime();
+    const elapsed = (state.clock.getElapsedTime() - startTimeRef.current) * 1000;
+    setProgress(elapsed / duration);
+    if (elapsed > duration) setVisible(false);
+  });
+
+  if (!visible) return null;
+
+  // Laser beam animation (pulsing, flickering)
+  const sahara = planetPositions['Sahara Sands'];
+  const cryo = planetPositions['Cryo Sphere'];
+  if (!sahara || !cryo) return null;
+
+  // Animate offset for flicker
+  const flicker = Math.sin(progress * 20) * 0.05;
+  const saharaToCryo = [
+    sahara[0] + flicker, sahara[1] + 0.1, sahara[2] + flicker
+  ];
+  const cryoToSahara = [
+    cryo[0] - flicker, cryo[1] + 0.1, cryo[2] - flicker
+  ];
+
+  // Fade out effect
+  const opacity = 1 - Math.min(progress, 1);
+
+  return (
+    <group ref={groupRef}>
+      {/* Sahara Sands fires orange laser at Cryo Sphere */}
+      <mesh>
+        <cylinderGeometry args={[0.04, 0.08, 1, 8]} />
+        <meshBasicMaterial color={'#ffb300'} transparent opacity={opacity} />
+        <primitive
+          object={new THREE.Object3D()}
+          position={[(sahara[0] + cryo[0]) / 2, (sahara[1] + cryo[1]) / 2 + 0.1, (sahara[2] + cryo[2]) / 2]}
+          rotation={new THREE.Euler(
+            Math.atan2(cryo[2] - sahara[2], cryo[1] - sahara[1]),
+            Math.atan2(cryo[0] - sahara[0], cryo[2] - sahara[2]),
+            0
+          )}
+          scale={[1, new THREE.Vector3(...cryo).distanceTo(new THREE.Vector3(...sahara)), 1]}
+        />
+      </mesh>
+      {/* Cryo Sphere fires blue laser at Sahara Sands */}
+      <mesh>
+        <cylinderGeometry args={[0.04, 0.08, 1, 8]} />
+        <meshBasicMaterial color={'#00eaff'} transparent opacity={opacity} />
+        <primitive
+          object={new THREE.Object3D()}
+          position={[(sahara[0] + cryo[0]) / 2, (sahara[1] + cryo[1]) / 2 + 0.1, (sahara[2] + cryo[2]) / 2]}
+          rotation={new THREE.Euler(
+            Math.atan2(sahara[2] - cryo[2], sahara[1] - cryo[1]),
+            Math.atan2(sahara[0] - cryo[0], sahara[2] - cryo[2]),
+            0
+          )}
+          scale={[1, new THREE.Vector3(...cryo).distanceTo(new THREE.Vector3(...sahara)), 1]}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 export default function SpaceScene() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [selectedEntity, setSelectedEntity] = useState<CelestialEntity | null>(null);
@@ -380,6 +450,12 @@ export default function SpaceScene() {
 
   const cameraConfig = getResponsiveCameraConfig();
 
+  // Get planet positions for laser battle
+  const planetPositions = getResponsivePlanetPositions(screenSize).reduce((acc, p) => {
+    acc[p.name] = p.position;
+    return acc;
+  }, {} as { [key: string]: [number, number, number] });
+
   return (
     <div className="w-full h-screen relative">
       <Canvas
@@ -400,6 +476,8 @@ export default function SpaceScene() {
           speed={1}
         />
         
+        {/* Laser battle between Sahara Sands and Cryo Sphere */}
+        <PlanetLaserBattle planetPositions={planetPositions} duration={5000} />
         <SpaceEnvironment onEntityClick={handleEntityClick} screenSize={screenSize} />
         
         <CameraController 
