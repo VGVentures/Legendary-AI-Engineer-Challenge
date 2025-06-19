@@ -15,17 +15,86 @@ interface ChatInterfaceProps {
 const getEntityPersonality = (entityType: string, name: string, type: string) => {
   const basePersonalities = {
     planet: {
-      greeting: `Greetings, traveler! I am ${name}, a ${type} world. I have witnessed countless cycles of life and change across the cosmos.`,
-      responses: [
-        "My surface tells stories of ancient times, of cosmic events that shaped my very being.",
-        "I am home to countless forms of life, each adapting to my unique environment.",
-        "My atmosphere and geology create a delicate balance that sustains existence.",
-        "I orbit my star in perfect harmony, part of a grand celestial dance.",
-        "My magnetic field protects life from the harsh radiation of space.",
-        "I have seen comets pass by and meteor showers paint my sky with light.",
-        "My seasons change as I journey around my star, creating cycles of renewal.",
-        "I am both ancient and ever-changing, a testament to cosmic evolution."
-      ]
+      // Different personalities based on planet type
+      terrestrial: {
+        greeting: `Greetings, traveler! I am ${name}, a solid terrestrial world with a rocky surface and diverse landscapes. I am home to countless forms of life.`,
+        responses: [
+          "My solid surface provides a stable foundation for complex ecosystems to thrive.",
+          "My atmosphere is rich with oxygen, supporting advanced forms of life.",
+          "I have mountains, valleys, and plains that tell the story of my geological history.",
+          "My magnetic field protects life from harmful cosmic radiation.",
+          "I am a world of seasons, with changing weather patterns that create diversity.",
+          "My surface is constantly reshaped by wind, water, and geological forces.",
+          "I am home to intelligent beings who study and explore my mysteries.",
+          "My resources are abundant, supporting civilizations and technological advancement."
+        ]
+      },
+      ice: {
+        greeting: `Greetings, traveler! I am ${name}, a frozen world of ice and snow. My surface glistens with crystalline beauty, though my temperatures are harsh.`,
+        responses: [
+          "My surface is covered in ice sheets that have existed for millions of years.",
+          "My extreme cold preserves ancient secrets in my frozen depths.",
+          "I am a world of perpetual winter, where survival requires adaptation.",
+          "My ice caps reflect sunlight, helping to regulate my temperature.",
+          "Beneath my frozen surface, there may be hidden oceans of liquid water.",
+          "My glaciers slowly carve the landscape, creating valleys and fjords.",
+          "I am a world of stark beauty, where the aurora dances across my skies.",
+          "My frozen state makes me a time capsule of cosmic history."
+        ]
+      },
+      ocean: {
+        greeting: `Greetings, traveler! I am ${name}, a world of endless oceans. My surface is covered in deep, mysterious waters that hold countless secrets.`,
+        responses: [
+          "My vast oceans contain more life than any other world in the system.",
+          "My waters are home to creatures both beautiful and terrifying.",
+          "I have underwater mountains, valleys, and plains hidden beneath my surface.",
+          "My ocean currents create complex weather patterns across my world.",
+          "My depths hold ancient ruins and mysteries from forgotten civilizations.",
+          "I am a world where the surface is just the beginning of exploration.",
+          "My oceans regulate my climate, creating a stable environment for life.",
+          "I am a world of constant change, where tides and waves shape my shores."
+        ]
+      },
+      gas: {
+        greeting: `Greetings, traveler! I am ${name}, a massive gas giant. My swirling atmosphere creates beautiful bands of color and powerful storms.`,
+        responses: [
+          "My atmosphere is composed of hydrogen and helium, like the ancient stars.",
+          "My Great Red Spot is a storm that has raged for centuries.",
+          "I have many moons, each with its own unique characteristics.",
+          "My gravity protects the inner planets from dangerous asteroids.",
+          "My colorful bands are created by different atmospheric compositions.",
+          "I am a world of constant motion, with winds that never cease.",
+          "My magnetic field is the strongest in the system, creating spectacular auroras.",
+          "I am a failed star, containing the same elements as the sun."
+        ]
+      },
+      desert: {
+        greeting: `Greetings, traveler! I am ${name}, a world of endless deserts and scorching heat. My surface is shaped by wind and sand.`,
+        responses: [
+          "My vast deserts stretch for thousands of miles, creating a harsh but beautiful landscape.",
+          "My sand dunes are constantly shifting, shaped by the relentless winds.",
+          "I am a world of extremes, with scorching days and freezing nights.",
+          "My oases provide life-giving water in the midst of arid wasteland.",
+          "My ancient riverbeds tell the story of a wetter past.",
+          "I am home to creatures adapted to survive in my harsh environment.",
+          "My sandstorms can last for days, reshaping my surface.",
+          "My deserts hold secrets and treasures buried beneath the shifting sands."
+        ]
+      },
+      // Fallback for unknown planet types
+      default: {
+        greeting: `Greetings, traveler! I am ${name}, a ${type} world. I have witnessed countless cycles of life and change across the cosmos.`,
+        responses: [
+          "My surface tells stories of ancient times, of cosmic events that shaped my very being.",
+          "I am home to countless forms of life, each adapting to my unique environment.",
+          "My atmosphere and geology create a delicate balance that sustains existence.",
+          "I orbit my star in perfect harmony, part of a grand celestial dance.",
+          "My magnetic field protects life from the harsh radiation of space.",
+          "I have seen comets pass by and meteor showers paint my sky with light.",
+          "My seasons change as I journey around my star, creating cycles of renewal.",
+          "I am both ancient and ever-changing, a testament to cosmic evolution."
+        ]
+      }
     },
     star: {
       greeting: `I am ${name}, a ${type} star. I burn with the fire of creation, fusing elements in my core to illuminate the cosmos.`,
@@ -94,7 +163,13 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
     }
   };
 
-  return basePersonalities[entityType as keyof typeof basePersonalities] || basePersonalities.planet;
+  // For planets, use the specific type personality, fallback to default
+  if (entityType === 'planet') {
+    const planetPersonalities = basePersonalities.planet as any;
+    return planetPersonalities[type] || planetPersonalities.default;
+  }
+
+  return basePersonalities[entityType as keyof typeof basePersonalities] || basePersonalities.planet.default;
 };
 
 // Visual styling for different entity types
@@ -174,6 +249,16 @@ export default function ChatInterface({
       // Get fresh personality data for the current entity
       const personality = getEntityPersonality(entityType, planetName, planetType);
       
+      // Debug logging to track personality generation
+      console.log('🌍 ChatInterface Debug:', {
+        planetName,
+        planetType,
+        entityType,
+        planetColor,
+        personalityGreeting: personality.greeting.substring(0, 50) + '...',
+        timestamp: new Date().toISOString()
+      });
+      
       // Initial greeting with a slight delay
       const greetingTimeout = setTimeout(() => {
         setMessages([{ text: personality.greeting, isUser: false, timestamp: new Date() }]);
@@ -207,6 +292,15 @@ export default function ChatInterface({
     const personality = getEntityPersonality(entityType, planetName, planetType);
     const responses = personality.responses;
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    
+    // Debug logging for response generation
+    console.log('🤖 Response Debug:', {
+      planetName,
+      planetType,
+      userMessage: userMessage.substring(0, 30) + '...',
+      responseType: 'generated',
+      timestamp: new Date().toISOString()
+    });
     
     // Add some contextual responses based on user input
     const lowerMessage = userMessage.toLowerCase();
