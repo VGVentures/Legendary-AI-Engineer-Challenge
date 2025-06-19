@@ -564,6 +564,19 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Special Effects */}
       {renderSpecialEffects()}
 
+      {/* Atmospheric Haze Layers - creates depth and atmosphere */}
+      <mesh 
+        userData={{ isAtmosphericHaze: true }}
+      >
+        <sphereGeometry args={[size * 1.2, 32, 32]} />
+        <meshBasicMaterial
+          color={animatedColors[0]}
+          transparent
+          opacity={0.04}
+          side={THREE.BackSide}
+        />
+      </mesh>
+
       {/* Enhanced Luminous Core - creates the vibrant yellow center point */}
       {[0.15, 0.25, 0.35, 0.45, 0.6, 0.8, 1.0].map((scale, index) => (
         <mesh key={`core-${index}`}>
