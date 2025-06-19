@@ -111,7 +111,7 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
                 interruptions: false,
                 exclamations: ['Indeed.', 'Quite so.', 'Precisely.', 'Excellent point.'],
                 prefixes: ['From my observations,', 'Based on my analysis,', 'My atmospheric data suggests,', 'According to my records,'],
-                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you'd like to know?']
+                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you\'d like to know?']
               };
             default:
               return {
