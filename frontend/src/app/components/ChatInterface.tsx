@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import * as THREE from 'three';
 
 interface ChatInterfaceProps {
   isOpen: boolean;
@@ -97,44 +98,108 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
   return basePersonalities[entityType as keyof typeof basePersonalities] || basePersonalities.planet;
 };
 
-// Visual styling for different entity types
-const getEntityStyling = (entityType: string, color: string) => {
+// Enhanced visual styling for different entity types with planet-specific assets
+const getEntityStyling = (entityType: string, color: string, planetType: string, planetName: string) => {
+  // Create planet-specific color variations
+  const baseColor = new THREE.Color(color);
+  const lighterColor = baseColor.clone().multiplyScalar(1.3).getHexString();
+  const darkerColor = baseColor.clone().multiplyScalar(0.7).getHexString();
+  const complementaryColor = baseColor.clone().offsetHSL(180, 0, 0).getHexString();
+  
   const baseStyles = {
     planet: {
-      background: `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,40,0.95) 100%)`,
+      // Planet-specific styling based on planet type and name
+      background: (() => {
+        switch (planetType) {
+          case 'terrestrial':
+            if (planetName === 'Terra Nova') {
+              return `linear-gradient(135deg, rgba(74,144,226,0.15) 0%, rgba(20,20,40,0.95) 50%, rgba(74,144,226,0.1) 100%)`;
+            } else if (planetName === 'Verdant Prime') {
+              return `linear-gradient(135deg, rgba(255,105,180,0.15) 0%, rgba(20,20,40,0.95) 50%, rgba(255,105,180,0.1) 100%)`;
+            }
+            return `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,40,0.95) 100%)`;
+          case 'ice':
+            return `linear-gradient(135deg, rgba(135,206,235,0.15) 0%, rgba(20,20,40,0.95) 50%, rgba(135,206,235,0.1) 100%)`;
+          case 'ocean':
+            return `linear-gradient(135deg, rgba(32,178,170,0.15) 0%, rgba(20,20,40,0.95) 50%, rgba(32,178,170,0.1) 100%)`;
+          case 'desert':
+            return `linear-gradient(135deg, rgba(218,165,32,0.15) 0%, rgba(20,20,40,0.95) 50%, rgba(218,165,32,0.1) 100%)`;
+          default:
+            return `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,40,0.95) 100%)`;
+        }
+      })(),
       borderColor: color,
       glowColor: color,
-      icon: '🌍'
+      icon: (() => {
+        switch (planetType) {
+          case 'terrestrial':
+            if (planetName === 'Terra Nova') return '🌍'; // Earth-like
+            if (planetName === 'Verdant Prime') return '🌸'; // Pink flower for lush world
+            return '🌍';
+          case 'ice':
+            return '❄️'; // Snowflake for ice world
+          case 'ocean':
+            return '🌊'; // Wave for ocean world
+          case 'desert':
+            return '🏜️'; // Desert for desert world
+          default:
+            return '🌍';
+        }
+      })(),
+      accentColor: lighterColor,
+      textColor: '#FFFFFF',
+      inputBackground: `rgba(${baseColor.r * 255}, ${baseColor.g * 255}, ${baseColor.b * 255}, 0.1)`,
+      messageGlow: `0 4px 15px ${color}30`
     },
     star: {
       background: `linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(255,69,0,0.15) 100%)`,
       borderColor: '#FFD700',
       glowColor: '#FFA500',
-      icon: '⭐'
+      icon: '⭐',
+      accentColor: '#FFD700',
+      textColor: '#FFFFFF',
+      inputBackground: 'rgba(255, 215, 0, 0.1)',
+      messageGlow: '0 4px 15px rgba(255, 215, 0, 0.3)'
     },
     nebula: {
       background: `linear-gradient(135deg, rgba(147,112,219,0.1) 0%, rgba(255,20,147,0.15) 100%)`,
       borderColor: '#9370DB',
       glowColor: '#FF1493',
-      icon: '🌌'
+      icon: '🌌',
+      accentColor: '#9370DB',
+      textColor: '#FFFFFF',
+      inputBackground: 'rgba(147, 112, 219, 0.1)',
+      messageGlow: '0 4px 15px rgba(147, 112, 219, 0.3)'
     },
     asteroid: {
       background: `linear-gradient(135deg, rgba(139,69,19,0.1) 0%, rgba(160,82,45,0.15) 100%)`,
       borderColor: '#8B4513',
       glowColor: '#CD853F',
-      icon: '☄️'
+      icon: '☄️',
+      accentColor: '#CD853F',
+      textColor: '#FFFFFF',
+      inputBackground: 'rgba(139, 69, 19, 0.1)',
+      messageGlow: '0 4px 15px rgba(139, 69, 19, 0.3)'
     },
     blackhole: {
       background: `linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.98) 100%)`,
       borderColor: '#FFD700',
       glowColor: '#FFA500',
-      icon: '🕳️'
+      icon: '🕳️',
+      accentColor: '#FFD700',
+      textColor: '#FFFFFF',
+      inputBackground: 'rgba(255, 215, 0, 0.1)',
+      messageGlow: '0 4px 15px rgba(255, 215, 0, 0.3)'
     },
     comet: {
       background: `linear-gradient(135deg, rgba(240,230,140,0.1) 0%, rgba(230,230,250,0.15) 100%)`,
       borderColor: '#F0E68C',
       glowColor: '#E6E6FA',
-      icon: '☄️'
+      icon: '☄️',
+      accentColor: '#F0E68C',
+      textColor: '#FFFFFF',
+      inputBackground: 'rgba(240, 230, 140, 0.1)',
+      messageGlow: '0 4px 15px rgba(240, 230, 140, 0.3)'
     }
   };
 
@@ -164,7 +229,7 @@ export default function ChatInterface({
   }, [isOpen, planetName, planetType, planetColor, entityType]);
 
   const personality = getEntityPersonality(entityType, planetName, planetType);
-  const styling = getEntityStyling(entityType, planetColor);
+  const styling = getEntityStyling(entityType, planetColor, planetType, planetName);
 
   // Reset messages when chat opens with a new entity
   useEffect(() => {
@@ -293,15 +358,29 @@ export default function ChatInterface({
           style={{ borderColor: `${styling.borderColor}40` }}
         >
           <div className="flex items-center space-x-3">
-            <span className="text-2xl">{styling.icon}</span>
+            <span className="text-3xl">{styling.icon}</span>
             <div>
-              <h3 className="text-white font-semibold">{planetName}</h3>
-              <p className="text-xs text-gray-300 capitalize">{planetType} {entityType}</p>
+              <h3 
+                className="font-semibold"
+                style={{ color: styling.textColor }}
+              >
+                {planetName}
+              </h3>
+              <p 
+                className="text-xs capitalize"
+                style={{ color: styling.accentColor }}
+              >
+                {planetType} {entityType}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-2"
+            className="transition-colors p-2 rounded-lg hover:bg-opacity-20"
+            style={{ 
+              color: styling.accentColor,
+              backgroundColor: `${styling.accentColor}10`
+            }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -319,13 +398,16 @@ export default function ChatInterface({
               <div
                 className={`max-w-[80%] p-3 rounded-2xl ${
                   message.isUser
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-800 text-gray-100'
+                    ? 'text-white'
+                    : 'text-gray-100'
                 }`}
                 style={{
+                  background: message.isUser 
+                    ? `linear-gradient(135deg, ${styling.accentColor} 0%, ${styling.borderColor} 100%)`
+                    : 'rgba(31, 41, 55, 0.9)',
                   boxShadow: message.isUser 
-                    ? '0 4px 15px rgba(59, 130, 246, 0.3)' 
-                    : `0 4px 15px ${styling.glowColor}30`
+                    ? styling.messageGlow
+                    : styling.messageGlow
                 }}
               >
                 <p className="text-sm">{message.text}</p>
@@ -339,13 +421,31 @@ export default function ChatInterface({
           {isTyping && (
             <div className="flex justify-start">
               <div 
-                className="bg-gray-800 text-gray-100 p-3 rounded-2xl"
-                style={{ boxShadow: `0 4px 15px ${styling.glowColor}30` }}
+                className="text-gray-100 p-3 rounded-2xl"
+                style={{ 
+                  background: 'rgba(31, 41, 55, 0.9)',
+                  boxShadow: styling.messageGlow 
+                }}
               >
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div 
+                    className="w-2 h-2 rounded-full animate-bounce"
+                    style={{ backgroundColor: styling.accentColor }}
+                  ></div>
+                  <div 
+                    className="w-2 h-2 rounded-full animate-bounce" 
+                    style={{ 
+                      backgroundColor: styling.accentColor,
+                      animationDelay: '0.1s' 
+                    }}
+                  ></div>
+                  <div 
+                    className="w-2 h-2 rounded-full animate-bounce" 
+                    style={{ 
+                      backgroundColor: styling.accentColor,
+                      animationDelay: '0.2s' 
+                    }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -365,12 +465,21 @@ export default function ChatInterface({
               onKeyPress={handleKeyPress}
               placeholder="Ask me about the cosmos..."
               disabled={isTyping}
-              className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-600 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
+              className="flex-1 text-white px-4 py-2 rounded-xl border transition-colors disabled:opacity-50 focus:outline-none"
+              style={{
+                background: styling.inputBackground,
+                borderColor: `${styling.borderColor}60`,
+                color: styling.textColor
+              }}
             />
             <button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping}
-              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              style={{
+                background: `linear-gradient(135deg, ${styling.accentColor} 0%, ${styling.borderColor} 100%)`,
+                boxShadow: styling.messageGlow
+              }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
