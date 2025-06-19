@@ -1257,9 +1257,10 @@ INTERPLANETARY RELATIONSHIPS:
           const userApiKey = localStorage.getItem('openai_api_key');
           if (!userApiKey) {
             setMessages(prev => [...prev, {
-              role: 'assistant',
-              content: '🔑 **API Key Required**\n\nTo use the AI chat, please enter your OpenAI API key:\n\n1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)\n2. Enter it below and click "Set API Key"\n\n**Your API key is stored locally and never sent to our servers.**',
-              planet: selectedPlanet
+              text: '🔑 **API Key Required**\n\nTo use the AI chat, please enter your OpenAI API key:\n\n1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)\n2. Enter it below and click "Set API Key"\n\n**Your API key is stored locally and never sent to our servers.**',
+              isUser: false,
+              timestamp: new Date(),
+              isAlien: false
             }]);
             setShowApiKeyInput(true);
             return;
@@ -1676,7 +1677,17 @@ INTERPLANETARY RELATIONSHIPS:
                     setApiKeyInput('');
                     // Retry the last message
                     if (messages.length > 0) {
-                      handleSendMessage(messages[messages.length - 1].content);
+                      const lastMessage = messages[messages.length - 1];
+                      if (!lastMessage.isUser) {
+                        // Remove the API key message and retry the user's message
+                        setMessages(prev => prev.slice(0, -1));
+                        if (messages.length > 1) {
+                          const userMessage = messages[messages.length - 2];
+                          handleSendMessage(userMessage.text);
+                        }
+                      } else {
+                        handleSendMessage(lastMessage.text);
+                      }
                     }
                   } else {
                     alert('Please enter a valid OpenAI API key starting with "sk-"');
