@@ -380,12 +380,12 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     
     // Create curved path with multiple points
     const points = [];
-    const segments = 10;
+    const segments = 15; // Increased segments for smoother curves
     
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       const x = start[0] + (end[0] - start[0]) * t;
-      const y = start[1] + (end[1] - start[1]) * t + Math.sin(t * Math.PI) * 0.3; // Add curve
+      const y = start[1] + (end[1] - start[1]) * t + Math.sin(t * Math.PI) * 0.5; // Increased curve
       const z = start[2] + (end[2] - start[2]) * t;
       points.push(x, y, z);
     }
@@ -398,12 +398,12 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
       {/* Crystal Peak fires multiple pink lasers at Sahara Sands */}
       {offensivePhase && (
         <>
-          {/* Main beam - thickest */}
+          {/* Core beam - massive and bright */}
           <line>
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={11}
+                count={16}
                 array={new Float32Array(createLaserPath(crystal, sahara))}
                 itemSize={3}
               />
@@ -412,16 +412,16 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               color="#ff69b4" 
               transparent 
               opacity={flicker * offensiveIntensity}
-              linewidth={8}
+              linewidth={20}
             />
           </line>
           
-          {/* Secondary beam - thick */}
+          {/* Outer glow layer 1 */}
           <line>
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={11}
+                count={16}
                 array={new Float32Array(createLaserPath(crystal, sahara))}
                 itemSize={3}
               />
@@ -429,17 +429,17 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             <lineBasicMaterial 
               color="#ff1493" 
               transparent 
-              opacity={flicker * offensiveIntensity}
-              linewidth={6}
+              opacity={flicker * offensiveIntensity * 0.7}
+              linewidth={25}
             />
           </line>
           
-          {/* Tertiary beam - medium */}
+          {/* Outer glow layer 2 */}
           <line>
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={11}
+                count={16}
                 array={new Float32Array(createLaserPath(crystal, sahara))}
                 itemSize={3}
               />
@@ -447,36 +447,47 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             <lineBasicMaterial 
               color="#ff007f" 
               transparent 
-              opacity={flicker * offensiveIntensity}
-              linewidth={4}
+              opacity={flicker * offensiveIntensity * 0.5}
+              linewidth={30}
             />
           </line>
           
-          {/* Fourth beam - thinner */}
-          <line>
-            <bufferGeometry>
-              <bufferAttribute
-                attach="attributes-position"
-                count={11}
-                array={new Float32Array(createLaserPath(crystal, sahara))}
-                itemSize={3}
+          {/* Energy particles along the beam */}
+          {Array.from({ length: 8 }, (_, i) => (
+            <mesh 
+              key={i}
+              position={[
+                crystal[0] + (sahara[0] - crystal[0]) * (i / 8),
+                crystal[1] + (sahara[1] - crystal[1]) * (i / 8) + Math.sin((i / 8) * Math.PI) * 0.5,
+                crystal[2] + (sahara[2] - crystal[2]) * (i / 8)
+              ]}
+            >
+              <sphereGeometry args={[0.2, 8, 8]} />
+              <meshBasicMaterial 
+                color="#ff69b4" 
+                transparent 
+                opacity={offensiveIntensity * 0.8}
               />
-            </bufferGeometry>
-            <lineBasicMaterial 
-              color="#ff69b4" 
-              transparent 
-              opacity={flicker * offensiveIntensity}
-              linewidth={3}
-            />
-          </line>
+            </mesh>
+          ))}
           
-          {/* Impact effect at Sahara Sands core */}
+          {/* Impact effect at Sahara Sands core - much bigger */}
           <mesh position={[sahara[0], sahara[1], sahara[2]]}>
-            <sphereGeometry args={[0.3, 8, 8]} />
+            <sphereGeometry args={[0.8, 16, 16]} />
             <meshBasicMaterial 
               color="#ff69b4" 
               transparent 
-              opacity={offensiveIntensity * 0.6}
+              opacity={offensiveIntensity * 0.7}
+            />
+          </mesh>
+          
+          {/* Impact glow */}
+          <mesh position={[sahara[0], sahara[1], sahara[2]]}>
+            <sphereGeometry args={[1.2, 16, 16]} />
+            <meshBasicMaterial 
+              color="#ff1493" 
+              transparent 
+              opacity={offensiveIntensity * 0.4}
             />
           </mesh>
         </>
@@ -485,12 +496,12 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
       {/* Sahara Sands fires multiple orange lasers at Crystal Peak */}
       {defensivePhase && (
         <>
-          {/* Main beam - thickest */}
+          {/* Core beam - massive and bright */}
           <line>
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={11}
+                count={16}
                 array={new Float32Array(createLaserPath(sahara, crystal))}
                 itemSize={3}
               />
@@ -499,16 +510,16 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
               color="#ff6b35" 
               transparent 
               opacity={flicker * defensiveIntensity}
-              linewidth={8}
+              linewidth={18}
             />
           </line>
           
-          {/* Secondary beam - thick */}
+          {/* Outer glow layer 1 */}
           <line>
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={11}
+                count={16}
                 array={new Float32Array(createLaserPath(sahara, crystal))}
                 itemSize={3}
               />
@@ -516,17 +527,17 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             <lineBasicMaterial 
               color="#ff8c42" 
               transparent 
-              opacity={flicker * defensiveIntensity}
-              linewidth={6}
+              opacity={flicker * defensiveIntensity * 0.7}
+              linewidth={23}
             />
           </line>
           
-          {/* Tertiary beam - medium */}
+          {/* Outer glow layer 2 */}
           <line>
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={11}
+                count={16}
                 array={new Float32Array(createLaserPath(sahara, crystal))}
                 itemSize={3}
               />
@@ -534,36 +545,47 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
             <lineBasicMaterial 
               color="#ff4500" 
               transparent 
-              opacity={flicker * defensiveIntensity}
-              linewidth={4}
+              opacity={flicker * defensiveIntensity * 0.5}
+              linewidth={28}
             />
           </line>
           
-          {/* Fourth beam - thinner */}
-          <line>
-            <bufferGeometry>
-              <bufferAttribute
-                attach="attributes-position"
-                count={11}
-                array={new Float32Array(createLaserPath(sahara, crystal))}
-                itemSize={3}
+          {/* Energy particles along the beam */}
+          {Array.from({ length: 6 }, (_, i) => (
+            <mesh 
+              key={i}
+              position={[
+                sahara[0] + (crystal[0] - sahara[0]) * (i / 6),
+                sahara[1] + (crystal[1] - sahara[1]) * (i / 6) + Math.sin((i / 6) * Math.PI) * 0.5,
+                sahara[2] + (crystal[2] - sahara[2]) * (i / 6)
+              ]}
+            >
+              <sphereGeometry args={[0.15, 8, 8]} />
+              <meshBasicMaterial 
+                color="#ff6b35" 
+                transparent 
+                opacity={defensiveIntensity * 0.8}
               />
-            </bufferGeometry>
-            <lineBasicMaterial 
-              color="#ff6347" 
-              transparent 
-              opacity={flicker * defensiveIntensity}
-              linewidth={3}
-            />
-          </line>
+            </mesh>
+          ))}
           
-          {/* Impact effect at Crystal Peak core */}
+          {/* Impact effect at Crystal Peak core - much bigger */}
           <mesh position={[crystal[0], crystal[1], crystal[2]]}>
-            <sphereGeometry args={[0.3, 8, 8]} />
+            <sphereGeometry args={[0.6, 16, 16]} />
             <meshBasicMaterial 
               color="#ff6b35" 
               transparent 
-              opacity={defensiveIntensity * 0.6}
+              opacity={defensiveIntensity * 0.7}
+            />
+          </mesh>
+          
+          {/* Impact glow */}
+          <mesh position={[crystal[0], crystal[1], crystal[2]]}>
+            <sphereGeometry args={[1.0, 16, 16]} />
+            <meshBasicMaterial 
+              color="#ff8c42" 
+              transparent 
+              opacity={defensiveIntensity * 0.4}
             />
           </mesh>
         </>
