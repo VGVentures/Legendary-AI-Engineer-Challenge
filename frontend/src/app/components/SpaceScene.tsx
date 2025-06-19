@@ -326,14 +326,23 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
   const groupRef = useRef<THREE.Group>(null);
   const [visible, setVisible] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
 
-  // Animation: fade out after duration
+  // Debug: log planet positions
+  console.log('PlanetLaserBattle - Planet positions:', planetPositions);
+
+  // Animation: fade out after duration and periodic laser firing
   useFrame((state) => {
     if (!visible) return;
     if (startTimeRef.current === null) startTimeRef.current = state.clock.getElapsedTime();
     const elapsed = (state.clock.getElapsedTime() - startTimeRef.current) * 1000;
     setProgress(elapsed / duration);
+    
+    // Laser firing phases - every 800ms
+    const laserTime = elapsed % 800;
+    setLaserPhase(laserTime / 800);
+    
     if (elapsed > duration) setVisible(false);
   });
 
@@ -342,57 +351,108 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
   // Laser beam animation (pulsing, flickering)
   const sahara = planetPositions['Sahara Sands'];
   const cryo = planetPositions['Cryo Sphere'];
-  if (!sahara || !cryo) return null;
+  
+  console.log('Sahara position:', sahara, 'Cryo position:', cryo);
+  
+  if (!sahara || !cryo) {
+    console.log('Missing planet positions, not rendering lasers');
+    return null;
+  }
 
   // Fade out effect
   const opacity = 1 - Math.min(progress, 1);
   
   // Flicker effect
   const flicker = Math.sin(progress * 30) * 0.3 + 0.7;
+  
+  // Laser firing effect - only show during firing phases
+  const isFiring = laserPhase < 0.3; // Laser fires for 30% of the cycle
+  const laserIntensity = isFiring ? Math.sin(laserPhase * Math.PI * 10) * 0.5 + 0.5 : 0;
+  
+  // Multiple laser beam variations
+  const createLaserBeam = (
+    startPos: [number, number, number], 
+    endPos: [number, number, number], 
+    color: string, 
+    width: number = 1,
+    offset: number = 0
+  ) => {
+    const beamOffset = offset * 0.1;
+    const start = [
+      startPos[0] + beamOffset,
+      startPos[1] + 0.2 + beamOffset,
+      startPos[2] + beamOffset
+    ];
+    const end = [
+      endPos[0] + beamOffset,
+      endPos[1] + 0.2 + beamOffset,
+      endPos[2] + beamOffset
+    ];
+    
+    return (
+      <line key={`${color}-${width}-${offset}`}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([...start, ...end])}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial 
+          color={color} 
+          transparent 
+          opacity={opacity * flicker * laserIntensity}
+          linewidth={width}
+        />
+      </line>
+    );
+  };
 
   return (
     <group ref={groupRef}>
-      {/* Sahara Sands fires orange laser at Cryo Sphere */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={2}
-            array={new Float32Array([
-              sahara[0], sahara[1] + 0.2, sahara[2],
-              cryo[0], cryo[1] + 0.2, cryo[2]
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#ff6b35" 
-          transparent 
-          opacity={opacity * flicker}
-          linewidth={3}
-        />
-      </line>
+      {/* Debug sphere to verify component is rendering */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.1, 8, 8]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
       
-      {/* Cryo Sphere fires blue laser at Sahara Sands */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={2}
-            array={new Float32Array([
-              cryo[0], cryo[1] + 0.2, cryo[2],
-              sahara[0], sahara[1] + 0.2, sahara[2]
-            ])}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial 
-          color="#4ecdc4" 
-          transparent 
-          opacity={opacity * flicker}
-          linewidth={3}
-        />
-      </line>
+      {/* Sahara Sands fires multiple orange lasers at Cryo Sphere */}
+      {createLaserBeam(sahara, cryo, "#ff6b35", 3, 0)} {/* Main beam */}
+      {createLaserBeam(sahara, cryo, "#ff8c42", 2, 1)} {/* Secondary beam */}
+      {createLaserBeam(sahara, cryo, "#ff4500", 1.5, -1)} {/* Tertiary beam */}
+      {createLaserBeam(sahara, cryo, "#ff6347", 1, 2)} {/* Fourth beam */}
+      
+      {/* Cryo Sphere fires multiple blue lasers at Sahara Sands */}
+      {createLaserBeam(cryo, sahara, "#4ecdc4", 3, 0)} {/* Main beam */}
+      {createLaserBeam(cryo, sahara, "#00bfff", 2, 1)} {/* Secondary beam */}
+      {createLaserBeam(cryo, sahara, "#1e90ff", 1.5, -1)} {/* Tertiary beam */}
+      {createLaserBeam(cryo, sahara, "#87ceeb", 1, 2)} {/* Fourth beam */}
+      
+      {/* Laser impact effects at target planets */}
+      {isFiring && (
+        <>
+          {/* Impact effect at Cryo Sphere */}
+          <mesh position={[cryo[0], cryo[1] + 0.2, cryo[2]}>
+            <sphereGeometry args={[0.3, 8, 8]} />
+            <meshBasicMaterial 
+              color="#ff6b35" 
+              transparent 
+              opacity={opacity * laserIntensity * 0.6}
+            />
+          </mesh>
+          
+          {/* Impact effect at Sahara Sands */}
+          <mesh position={[sahara[0], sahara[1] + 0.2, sahara[2]}>
+            <sphereGeometry args={[0.3, 8, 8]} />
+            <meshBasicMaterial 
+              color="#4ecdc4" 
+              transparent 
+              opacity={opacity * laserIntensity * 0.6}
+            />
+          </mesh>
+        </>
+      )}
     </group>
   );
 }
