@@ -332,24 +332,25 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       meshRef.current.rotation.x += 0.002;
     }
 
-    // Animate mist particles - much slower and more subtle
+    // Animate mist particles - extremely subtle and minimal
     if (groupRef.current) {
       groupRef.current.children.forEach((child, index) => {
         if (child.userData.isMistParticle) {
-          // Much slower, more subtle movement for mist-like appearance
-          child.position.y += Math.sin(state.clock.elapsedTime * 0.1 + index) * 0.0002;
-          child.position.x += Math.cos(state.clock.elapsedTime * 0.05 + index * 0.5) * 0.0002;
-          child.rotation.z += 0.001; // Very slow rotation
+          // Extremely slow, barely noticeable movement
+          child.position.y += Math.sin(state.clock.elapsedTime * 0.02 + index) * 0.00005;
+          child.position.x += Math.cos(state.clock.elapsedTime * 0.01 + index * 0.5) * 0.00005;
+          child.rotation.z += 0.0001; // Very slow rotation
         }
         if (child.userData.isVaporParticle) {
-          // Slower vapor movement
-          child.position.y += Math.sin(state.clock.elapsedTime * 0.2 + index) * 0.0003;
-          child.position.x += Math.cos(state.clock.elapsedTime * 0.15 + index * 0.3) * 0.0003;
-          child.rotation.y += 0.002; // Slower rotation
+          // Very slow vapor movement
+          child.position.y += Math.sin(state.clock.elapsedTime * 0.015 + index * 0.3) * 0.00008;
+          child.position.x += Math.cos(state.clock.elapsedTime * 0.008 + index * 0.7) * 0.00008;
+          child.rotation.z += 0.0002; // Very slow rotation
         }
         if (child.userData.isAtmosphericHaze) {
-          child.rotation.y += 0.001; // Very slow rotation
-          child.rotation.z += 0.0005; // Minimal rotation
+          // Very slow atmospheric rotation
+          child.rotation.y += 0.0003;
+          child.rotation.x += 0.0001;
         }
       });
     }
@@ -536,9 +537,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Special Effects */}
       {renderSpecialEffects()}
 
-      {/* Atmospheric Mist Particles - creates vapor/mist effect */}
-      {Array.from({ length: 80 }, (_, i) => {
-        const angle = (i / 80) * Math.PI * 2;
+      {/* Atmospheric Mist Particles - creates subtle vapor/mist effect */}
+      {Array.from({ length: 15 }, (_, i) => {
+        const angle = (i / 15) * Math.PI * 2;
         const radius = size * 1.2 + Math.random() * size * 0.8;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
@@ -550,24 +551,23 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             position={[x, y, z]}
             userData={{ isMistParticle: true }}
           >
-            <sphereGeometry args={[0.015 + Math.random() * 0.01, 6, 6]} />
+            <sphereGeometry args={[0.02 + Math.random() * 0.015, 6, 6]} />
             <meshBasicMaterial
               color={animatedColors[i % animatedColors.length]}
               transparent
-              opacity={0.15 + Math.random() * 0.2}
-              blending={THREE.AdditiveBlending}
+              opacity={0.1 + Math.random() * 0.15}
             />
           </mesh>
         );
       })}
 
       {/* Swirling Vapor Clouds - creates atmospheric swirls */}
-      {Array.from({ length: 40 }, (_, i) => {
-        const angle = (i / 40) * Math.PI * 2;
+      {Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
         const radius = size * 1.4 + Math.random() * size * 0.6;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.4;
+        const y = (Math.random() - 0.5) * size * 0.8;
         
         return (
           <mesh 
@@ -575,19 +575,18 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             position={[x, y, z]}
             userData={{ isVaporParticle: true }}
           >
-            <sphereGeometry args={[0.025 + Math.random() * 0.02, 8, 8]} />
+            <sphereGeometry args={[0.03 + Math.random() * 0.02, 8, 8]} />
             <meshBasicMaterial
-              color={animatedColors[i % animatedColors.length]}
+              color={animatedColors[(i + 2) % animatedColors.length]}
               transparent
-              opacity={0.1 + Math.random() * 0.15}
-              blending={THREE.AdditiveBlending}
+              opacity={0.08 + Math.random() * 0.12}
             />
           </mesh>
         );
       })}
 
-      {/* Atmospheric Haze Layers - creates misty atmosphere */}
-      {[1.1, 1.3, 1.5, 1.7].map((scale, index) => (
+      {/* Atmospheric Haze Layers - creates depth and atmosphere */}
+      {[1.1, 1.3].map((scale, index) => (
         <mesh 
           key={`haze-${index}`}
           userData={{ isAtmosphericHaze: true }}
@@ -596,8 +595,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           <meshBasicMaterial
             color={animatedColors[index % animatedColors.length]}
             transparent
-            opacity={0.08 - index * 0.02}
-            blending={THREE.AdditiveBlending}
+            opacity={0.03 + index * 0.02}
             side={THREE.BackSide}
           />
         </mesh>
