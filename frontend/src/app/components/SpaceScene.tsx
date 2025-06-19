@@ -222,6 +222,12 @@ function SpaceEnvironment({
     }
   });
 
+  // Get planet positions for laser battle
+  const planetPositions = celestialEntities.reduce((acc, p) => {
+    acc[p.name] = p.position;
+    return acc;
+  }, {} as { [key: string]: [number, number, number] });
+
   return (
     <group ref={groupRef}>
       {celestialEntities.map((entity) => (
@@ -247,6 +253,9 @@ function SpaceEnvironment({
           size={entity.size}
         />
       ))}
+      
+      {/* Laser battle between Crystal Peak and Sahara Sands - now inside the rotating group */}
+      <PlanetLaserBattle planetPositions={planetPositions} />
     </group>
   );
 }
@@ -326,8 +335,6 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const groupRef = useRef<THREE.Group>(null);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
-  const rotationAngleRef = useRef(0); // Track rotation angle to match planet speed
-  const { camera } = useThree();
 
   // Debug: log planet positions
   console.log('PlanetLaserBattle - Planet positions:', planetPositions);
@@ -340,46 +347,13 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     // Laser firing phases - every 800ms, continuous
     const laserTime = elapsed % 800;
     setLaserPhase(laserTime / 800);
-    
-    // Increment rotation angle at the same speed as planets (0.001 per frame)
-    rotationAngleRef.current += 0.001;
   });
 
-  // Calculate current planet positions directly in render function
-  const getCurrentPlanetPositions = () => {
-    // Use the tracked rotation angle that matches planet speed
-    const rotationAngle = rotationAngleRef.current;
-    
-    // Get base positions
-    const crystal = planetPositions['Crystal Peak'];
-    const sahara = planetPositions['Sahara Sands'];
-    
-    if (!crystal || !sahara) return { crystal: null, sahara: null };
-    
-    // Apply rotation to Crystal Peak position
-    const crystalRadius = Math.sqrt(crystal[0] * crystal[0] + crystal[2] * crystal[2]);
-    const crystalAngle = Math.atan2(crystal[2], crystal[0]) + rotationAngle;
-    const currentCrystalPos: [number, number, number] = [
-      Math.cos(crystalAngle) * crystalRadius,
-      crystal[1],
-      Math.sin(crystalAngle) * crystalRadius
-    ];
-    
-    // Apply rotation to Sahara Sands position
-    const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
-    const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
-    const currentSaharaPos: [number, number, number] = [
-      Math.cos(saharaAngle) * saharaRadius,
-      sahara[1],
-      Math.sin(saharaAngle) * saharaRadius
-    ];
-    
-    return { crystal: currentCrystalPos, sahara: currentSaharaPos };
-  };
-
-  const { crystal, sahara } = getCurrentPlanetPositions();
+  // Get planet positions - now static since we rotate with the group
+  const crystal = planetPositions['Crystal Peak'];
+  const sahara = planetPositions['Sahara Sands'];
   
-  console.log('Current Crystal Peak position:', crystal, 'Current Sahara Sands position:', sahara);
+  console.log('Crystal Peak position:', crystal, 'Sahara Sands position:', sahara);
   
   if (!crystal || !sahara) {
     console.log('Missing planet positions, not rendering lasers');
@@ -656,12 +630,6 @@ export default function SpaceScene() {
 
   const cameraConfig = getResponsiveCameraConfig();
 
-  // Get planet positions for laser battle
-  const planetPositions = getResponsivePlanetPositions(screenSize).reduce((acc, p) => {
-    acc[p.name] = p.position;
-    return acc;
-  }, {} as { [key: string]: [number, number, number] });
-
   return (
     <div className="w-full h-screen relative">
       <Canvas
@@ -682,8 +650,6 @@ export default function SpaceScene() {
           speed={1}
         />
         
-        {/* Laser battle between Crystal Peak and Sahara Sands */}
-        <PlanetLaserBattle planetPositions={planetPositions} />
         <SpaceEnvironment onEntityClick={handleEntityClick} screenSize={screenSize} />
         
         <CameraController 
