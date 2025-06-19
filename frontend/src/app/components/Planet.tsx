@@ -443,31 +443,75 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         }
       }
 
-      // Animate sparkles with extremely slow speed
+      // Animate sparkles with much more randomness and spread
       sparkleRefs.current.forEach((sparkle, index) => {
         if (sparkle) {
-          const speed = verySlowSpeed + Math.sin(index * 0.8) * 0.0005; // Much reduced variation
-          const radius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
-          const direction = index % 2 === 0 ? 1 : -1;
-          const angle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
+          // Much more varied speeds and patterns
+          const baseSpeed = verySlowSpeed;
+          const speedVariation = Math.sin(index * 0.7) * 0.001 + Math.cos(index * 1.3) * 0.0008;
+          const speed = baseSpeed + speedVariation;
           
-          sparkle.position.x = Math.cos(angle) * radius;
-          sparkle.position.z = Math.sin(angle) * radius;
-          sparkle.position.y = Math.sin(time * 0.01 + index * 0.1) * size * 0.05; // Much slower vertical movement
+          // More varied orbital radii with randomness
+          const baseRadius = size * 2.2;
+          const radiusVariation = Math.sin(index * 0.5) * 0.8 + Math.cos(index * 0.9) * 0.6;
+          const radius = baseRadius + radiusVariation + (index % 3) * size * 0.3;
+          
+          // Multiple direction patterns for more chaos
+          const direction = index % 4 === 0 ? 1 : (index % 4 === 1 ? -1 : (index % 4 === 2 ? 0.7 : -0.5));
+          
+          // Add elliptical orbits and phase shifts
+          const phaseShift = index * 0.8 + Math.sin(index * 0.3) * Math.PI;
+          const angle = time * speed * direction + phaseShift;
+          
+          // Add some particles with elliptical orbits
+          const eccentricity = index % 5 === 0 ? 0.3 : 0;
+          const x = Math.cos(angle) * radius * (1 + eccentricity * Math.cos(angle));
+          const z = Math.sin(angle) * radius * (1 + eccentricity * Math.cos(angle));
+          
+          // Much more varied vertical movement
+          const verticalSpeed = 0.01 + Math.sin(index * 0.4) * 0.005;
+          const verticalAmplitude = size * (0.05 + Math.sin(index * 0.6) * 0.03);
+          const y = Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
+          
+          sparkle.position.set(x, y, z);
         }
       });
 
-      // Animate regular particles with ultra slow speed
+      // Animate regular particles with much more randomness and spread
       particleRefs.current.forEach((particle, index) => {
         if (particle) {
-          const speed = ultraSlowSpeed + Math.sin(index * 0.9) * 0.0005; // Much reduced variation
-          const radius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
-          const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
-          const angle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
+          // Much more varied speeds with multiple patterns
+          const baseSpeed = ultraSlowSpeed;
+          const speedVariation = Math.sin(index * 0.9) * 0.001 + Math.cos(index * 1.7) * 0.0006;
+          const speed = baseSpeed + speedVariation;
           
-          particle.position.x = Math.cos(angle) * radius;
-          particle.position.z = Math.sin(angle) * radius;
-          particle.position.y = Math.sin(time * 0.005 + index * 0.05) * size * 0.02; // Much slower vertical movement
+          // More varied orbital radii with multiple layers
+          const baseRadius = size * 1.8;
+          const radiusVariation = Math.sin(index * 0.3) * 1.2 + Math.cos(index * 0.7) * 0.8;
+          const layerOffset = (index % 4) * size * 0.4;
+          const radius = baseRadius + radiusVariation + layerOffset;
+          
+          // Multiple direction patterns for more chaos
+          const direction = index % 5 === 0 ? 1 : (index % 5 === 1 ? -1 : (index % 5 === 2 ? 0.6 : (index % 5 === 3 ? -0.8 : 0.3)));
+          
+          // Add elliptical orbits and phase shifts
+          const phaseShift = index * 1.2 + Math.cos(index * 0.5) * Math.PI;
+          const angle = time * speed * direction + phaseShift;
+          
+          // Add some particles with elliptical orbits
+          const eccentricity = index % 7 === 0 ? 0.4 : (index % 11 === 0 ? 0.2 : 0);
+          const x = Math.cos(angle) * radius * (1 + eccentricity * Math.cos(angle));
+          const z = Math.sin(angle) * radius * (1 + eccentricity * Math.cos(angle));
+          
+          // Much more varied vertical movement with different patterns
+          const verticalSpeed = 0.005 + Math.sin(index * 0.4) * 0.003;
+          const verticalAmplitude = size * (0.02 + Math.sin(index * 0.8) * 0.015);
+          const verticalPattern = index % 3 === 0 ? Math.sin(time * verticalSpeed + index * 0.05) : 
+                                 index % 3 === 1 ? Math.cos(time * verticalSpeed * 1.5 + index * 0.07) :
+                                 Math.sin(time * verticalSpeed * 0.7 + index * 0.03);
+          const y = verticalPattern * verticalAmplitude;
+          
+          particle.position.set(x, y, z);
         }
       });
     } catch (error) {
@@ -732,11 +776,21 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Ring Particles - Slow Moving Space Particles */}
       {Array.from({ length: ringConfig.particleCount }, (_, i) => {
-        const angle = (i / ringConfig.particleCount) * Math.PI * 2;
-        const radius = size * 2 + Math.random() * size * 0.5;
+        // Much more random and spread out positioning
+        const baseAngle = (i / ringConfig.particleCount) * Math.PI * 2;
+        const angleVariation = Math.sin(i * 0.7) * 0.5 + Math.cos(i * 1.3) * 0.3;
+        const angle = baseAngle + angleVariation;
+        
+        // Much more varied radii with multiple layers and randomness
+        const baseRadius = size * 2;
+        const radiusVariation = Math.sin(i * 0.5) * size * 0.8 + Math.cos(i * 0.9) * size * 0.6;
+        const layerOffset = (i % 4) * size * 0.4;
+        const randomOffset = (Math.random() - 0.5) * size * 0.6;
+        const radius = baseRadius + radiusVariation + layerOffset + randomOffset;
+        
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.1;
+        const y = (Math.random() - 0.5) * size * 0.3;
         
         return (
           <mesh 
@@ -746,11 +800,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
               if (el) particleRefs.current[i] = el;
             }}
           >
-            <sphereGeometry args={[0.02, 8, 8]} />
+            <sphereGeometry args={[0.02 + Math.random() * 0.01, 8, 8]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
               transparent
-              opacity={0.8}
+              opacity={0.8 + Math.random() * 0.2}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
@@ -759,11 +813,21 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Orbiting Sparkles - Medium Speed Space Particles */}
       {Array.from({ length: ringConfig.sparkleCount }, (_, i) => {
-        const angle = (i / ringConfig.sparkleCount) * Math.PI * 2;
-        const radius = size * 2.5 + Math.random() * size * 0.3;
+        // Much more random and spread out positioning
+        const baseAngle = (i / ringConfig.sparkleCount) * Math.PI * 2;
+        const angleVariation = Math.sin(i * 0.8) * 0.6 + Math.cos(i * 1.5) * 0.4;
+        const angle = baseAngle + angleVariation;
+        
+        // Much more varied radii with multiple layers and randomness
+        const baseRadius = size * 2.5;
+        const radiusVariation = Math.sin(i * 0.6) * size * 1.0 + Math.cos(i * 1.1) * size * 0.7;
+        const layerOffset = (i % 3) * size * 0.5;
+        const randomOffset = (Math.random() - 0.5) * size * 0.8;
+        const radius = baseRadius + radiusVariation + layerOffset + randomOffset;
+        
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.2;
+        const y = (Math.random() - 0.5) * size * 0.4;
         
         return (
           <mesh 
@@ -773,11 +837,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
               if (el) sparkleRefs.current[i] = el;
             }}
           >
-            <sphereGeometry args={[0.01, 6, 6]} />
+            <sphereGeometry args={[0.01 + Math.random() * 0.005, 6, 6]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
               transparent
-              opacity={0.9}
+              opacity={0.9 + Math.random() * 0.1}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
