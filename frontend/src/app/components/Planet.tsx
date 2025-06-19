@@ -332,22 +332,24 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       meshRef.current.rotation.x += 0.002;
     }
 
-    // Animate mist particles
+    // Animate mist particles - much slower and more subtle
     if (groupRef.current) {
       groupRef.current.children.forEach((child, index) => {
         if (child.userData.isMistParticle) {
-          child.position.y += Math.sin(state.clock.elapsedTime + index) * 0.001;
-          child.position.x += Math.cos(state.clock.elapsedTime + index * 0.5) * 0.001;
-          child.rotation.z += 0.01;
+          // Much slower, more subtle movement for mist-like appearance
+          child.position.y += Math.sin(state.clock.elapsedTime * 0.1 + index) * 0.0002;
+          child.position.x += Math.cos(state.clock.elapsedTime * 0.05 + index * 0.5) * 0.0002;
+          child.rotation.z += 0.001; // Very slow rotation
         }
         if (child.userData.isVaporParticle) {
-          child.position.y += Math.sin(state.clock.elapsedTime * 2 + index) * 0.002;
-          child.position.x += Math.cos(state.clock.elapsedTime * 1.5 + index * 0.3) * 0.002;
-          child.rotation.y += 0.02;
+          // Slower vapor movement
+          child.position.y += Math.sin(state.clock.elapsedTime * 0.2 + index) * 0.0003;
+          child.position.x += Math.cos(state.clock.elapsedTime * 0.15 + index * 0.3) * 0.0003;
+          child.rotation.y += 0.002; // Slower rotation
         }
         if (child.userData.isAtmosphericHaze) {
-          child.rotation.y += 0.003;
-          child.rotation.z += 0.001;
+          child.rotation.y += 0.001; // Very slow rotation
+          child.rotation.z += 0.0005; // Minimal rotation
         }
       });
     }
@@ -535,8 +537,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {renderSpecialEffects()}
 
       {/* Atmospheric Mist Particles - creates vapor/mist effect */}
-      {Array.from({ length: 45 }, (_, i) => {
-        const angle = (i / 45) * Math.PI * 2;
+      {Array.from({ length: 80 }, (_, i) => {
+        const angle = (i / 80) * Math.PI * 2;
         const radius = size * 1.2 + Math.random() * size * 0.8;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
@@ -548,11 +550,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             position={[x, y, z]}
             userData={{ isMistParticle: true }}
           >
-            <sphereGeometry args={[0.03 + Math.random() * 0.02, 8, 8]} />
+            <sphereGeometry args={[0.015 + Math.random() * 0.01, 6, 6]} />
             <meshBasicMaterial
               color={animatedColors[i % animatedColors.length]}
               transparent
-              opacity={0.3 + Math.random() * 0.4}
+              opacity={0.15 + Math.random() * 0.2}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
@@ -560,8 +562,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       })}
 
       {/* Swirling Vapor Clouds - creates atmospheric swirls */}
-      {Array.from({ length: 25 }, (_, i) => {
-        const angle = (i / 25) * Math.PI * 2;
+      {Array.from({ length: 40 }, (_, i) => {
+        const angle = (i / 40) * Math.PI * 2;
         const radius = size * 1.4 + Math.random() * size * 0.6;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
@@ -573,11 +575,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             position={[x, y, z]}
             userData={{ isVaporParticle: true }}
           >
-            <sphereGeometry args={[0.05 + Math.random() * 0.03, 12, 12]} />
+            <sphereGeometry args={[0.025 + Math.random() * 0.02, 8, 8]} />
             <meshBasicMaterial
               color={animatedColors[i % animatedColors.length]}
               transparent
-              opacity={0.2 + Math.random() * 0.3}
+              opacity={0.1 + Math.random() * 0.15}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
