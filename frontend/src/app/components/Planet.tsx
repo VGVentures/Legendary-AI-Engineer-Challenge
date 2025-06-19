@@ -623,23 +623,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         />
       </mesh>
 
-      {/* Planet Name Label */}
-      <Text
-        position={[0, size * 1.8, 0]}
-        fontSize={size * 0.3}
-        color={color}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.02}
-        outlineColor="#000000"
-        fillOpacity={0.9}
-        strokeOpacity={0.5}
-        strokeWidth={0.01}
-        strokeColor="#000000"
-      >
-        {name}
-      </Text>
-
       {/* Special Effects */}
       {renderSpecialEffects()}
 
@@ -884,6 +867,17 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       )}
+
+      {/* Planet Name Label */}
+      <Text
+        position={[0, size * 1.1, 0]}
+        fontSize={0.5}
+        color={animatedColors[0]}
+        anchorX="center"
+        anchorY="top"
+      >
+        {name}
+      </Text>
     </group>
   );
 } 
