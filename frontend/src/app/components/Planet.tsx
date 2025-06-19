@@ -98,6 +98,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
+  const [clicked, setClicked] = useState(false);
   const texture = usePlanetTexture(type, color, size);
   
   const getRingConfig = (planetType: string) => {
@@ -141,6 +142,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
   const handleClick = (event: any) => {
     event.stopPropagation();
+    setClicked(true);
+    
+    // Reset click state after animation
+    setTimeout(() => setClicked(false), 300);
+    
     if (onPlanetClick) {
       onPlanetClick({ name, type, color });
     }
@@ -158,6 +164,19 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
     document.body.style.cursor = 'auto';
   };
 
+  // Animate colors over time
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    const newColors = getAnimatedColors(type, time);
+    
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
+      if (material.emissive) {
+        material.emissive.copy(newColors[0]);
+      }
+    }
+  });
+
   return (
     <>
       {/* Main Planet Body with Animated Gradient */}
@@ -166,12 +185,13 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
+        scale={clicked ? 1.1 : hovered ? 1.05 : 1}
       >
         <sphereGeometry args={[size, 64, 64]} />
         <meshPhysicalMaterial
           map={texture}
           emissive={new THREE.Color(animatedColors[0])}
-          emissiveIntensity={0.8}
+          emissiveIntensity={hovered ? 1.2 : 0.8}
           clearcoat={0.9}
           clearcoatRoughness={0.1}
           transmission={0.2}
@@ -375,14 +395,51 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         </mesh>
       ))}
 
-      {/* Hover Effect */}
+      {/* Enhanced Hover Effect - More Prominent */}
       {hovered && (
+        <>
+          {/* Outer Hover Ring */}
+          <mesh position={position} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[size * 1.4, size * 1.6, 64]} />
+            <meshBasicMaterial
+              color={color}
+              transparent
+              opacity={0.3}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          
+          {/* Hover Glow */}
+          <mesh position={position}>
+            <sphereGeometry args={[size * 1.3, 32, 32]} />
+            <meshBasicMaterial
+              color={color}
+              transparent
+              opacity={0.2}
+              side={THREE.BackSide}
+            />
+          </mesh>
+          
+          {/* Click Indicator Text */}
+          <mesh position={[position[0], position[1] + size * 1.8, position[2]]}>
+            <planeGeometry args={[2, 0.5]} />
+            <meshBasicMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        </>
+      )}
+
+      {/* Click Animation Effect */}
+      {clicked && (
         <mesh position={position}>
-          <sphereGeometry args={[size * 1.2, 32, 32]} />
+          <sphereGeometry args={[size * 1.5, 32, 32]} />
           <meshBasicMaterial
             color={color}
             transparent
-            opacity={0.1}
+            opacity={0.4}
             side={THREE.BackSide}
           />
         </mesh>

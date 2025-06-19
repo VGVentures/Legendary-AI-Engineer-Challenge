@@ -73,8 +73,10 @@ function SpaceEnvironment() {
 }
 
 export default function SpaceScene() {
+  const [showInstructions, setShowInstructions] = useState(true);
+
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-screen relative">
       <Canvas
         camera={{ position: [0, 0, 10], fov: 75 }}
         style={{ background: 'linear-gradient(to bottom, #0a0a0a, #1a1a2e, #16213e)' }}
@@ -103,6 +105,23 @@ export default function SpaceScene() {
           minDistance={3}
         />
       </Canvas>
+
+      {/* Instructions Overlay */}
+      {showInstructions && (
+        <div className="absolute top-4 left-4 right-4 z-10">
+          <div className="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-lg p-4 text-center">
+            <p className="text-purple-300 text-sm">
+              <span className="text-purple-400 font-semibold">✨ Interactive Experience:</span> Click on any planet to chat with its entity
+            </p>
+            <button
+              onClick={() => setShowInstructions(false)}
+              className="mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
