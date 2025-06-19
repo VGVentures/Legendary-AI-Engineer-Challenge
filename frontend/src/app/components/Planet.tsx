@@ -424,8 +424,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   // Drastically slowed down particle animations for better performance
-  const ultraSlowSpeed = 0.001;  // 100x slower than before
-  const verySlowSpeed = 0.002;   // 50x slower than before
+  const ultraSlowSpeed = 0.0005;  // 200x slower than before
+  const verySlowSpeed = 0.001;    // 100x slower than before
 
   // Simplified animation with better error handling
   useFrame((state) => {
@@ -448,7 +448,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         if (sparkle) {
           // Much more varied speeds and patterns
           const baseSpeed = verySlowSpeed;
-          const speedVariation = Math.sin(index * 0.7) * 0.001 + Math.cos(index * 1.3) * 0.0008;
+          const speedVariation = Math.sin(index * 0.7) * 0.0005 + Math.cos(index * 1.3) * 0.0004;
           const speed = baseSpeed + speedVariation;
           
           // More varied orbital radii with randomness
@@ -468,10 +468,13 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           const x = Math.cos(angle) * radius * (1 + eccentricity * Math.cos(angle));
           const z = Math.sin(angle) * radius * (1 + eccentricity * Math.cos(angle));
           
-          // Much more varied vertical movement
-          const verticalSpeed = 0.01 + Math.sin(index * 0.4) * 0.005;
-          const verticalAmplitude = size * (0.05 + Math.sin(index * 0.6) * 0.03);
-          const y = Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
+          // Maintain 3D height spread with very slow vertical movement
+          const heightLayer = index % 7;
+          const baseHeight = (heightLayer - 3) * size * 0.25;
+          const heightVariation = (Math.random() - 0.5) * size * 0.15;
+          const verticalSpeed = 0.005 + Math.sin(index * 0.4) * 0.002;
+          const verticalAmplitude = size * 0.05;
+          const y = baseHeight + heightVariation + Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
           
           sparkle.position.set(x, y, z);
         }
@@ -482,7 +485,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         if (particle) {
           // Much more varied speeds with multiple patterns
           const baseSpeed = ultraSlowSpeed;
-          const speedVariation = Math.sin(index * 0.9) * 0.001 + Math.cos(index * 1.7) * 0.0006;
+          const speedVariation = Math.sin(index * 0.9) * 0.0005 + Math.cos(index * 1.7) * 0.0003;
           const speed = baseSpeed + speedVariation;
           
           // More varied orbital radii with multiple layers
@@ -503,13 +506,13 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           const x = Math.cos(angle) * radius * (1 + eccentricity * Math.cos(angle));
           const z = Math.sin(angle) * radius * (1 + eccentricity * Math.cos(angle));
           
-          // Much more varied vertical movement with different patterns
-          const verticalSpeed = 0.005 + Math.sin(index * 0.4) * 0.003;
-          const verticalAmplitude = size * (0.02 + Math.sin(index * 0.8) * 0.015);
-          const verticalPattern = index % 3 === 0 ? Math.sin(time * verticalSpeed + index * 0.05) : 
-                                 index % 3 === 1 ? Math.cos(time * verticalSpeed * 1.5 + index * 0.07) :
-                                 Math.sin(time * verticalSpeed * 0.7 + index * 0.03);
-          const y = verticalPattern * verticalAmplitude;
+          // Maintain 3D height spread with very slow vertical movement
+          const heightLayer = index % 5;
+          const baseHeight = (heightLayer - 2) * size * 0.3;
+          const heightVariation = (Math.random() - 0.5) * size * 0.2;
+          const verticalSpeed = 0.002 + Math.sin(index * 0.4) * 0.001;
+          const verticalAmplitude = size * 0.03;
+          const y = baseHeight + heightVariation + Math.sin(time * verticalSpeed + index * 0.05) * verticalAmplitude;
           
           particle.position.set(x, y, z);
         }
@@ -776,21 +779,30 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Ring Particles - Slow Moving Space Particles */}
       {Array.from({ length: ringConfig.particleCount }, (_, i) => {
-        // Much more random and spread out positioning
+        // Spread particles in 3D space around the ring plane
         const baseAngle = (i / ringConfig.particleCount) * Math.PI * 2;
         const angleVariation = Math.sin(i * 0.7) * 0.5 + Math.cos(i * 1.3) * 0.3;
         const angle = baseAngle + angleVariation;
         
-        // Much more varied radii with multiple layers and randomness
+        // Create multiple orbital layers with height variations
         const baseRadius = size * 2;
         const radiusVariation = Math.sin(i * 0.5) * size * 0.8 + Math.cos(i * 0.9) * size * 0.6;
         const layerOffset = (i % 4) * size * 0.4;
         const randomOffset = (Math.random() - 0.5) * size * 0.6;
         const radius = baseRadius + radiusVariation + layerOffset + randomOffset;
         
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.3;
+        // Spread particles above and below the ring plane
+        const heightLayer = i % 5; // 5 different height layers
+        const baseHeight = (heightLayer - 2) * size * 0.3; // -2, -1, 0, 1, 2 layers
+        const heightVariation = (Math.random() - 0.5) * size * 0.2;
+        const y = baseHeight + heightVariation;
+        
+        // Add some particles slightly off the main orbital plane
+        const xOffset = (Math.random() - 0.5) * size * 0.1;
+        const zOffset = (Math.random() - 0.5) * size * 0.1;
+        
+        const x = Math.cos(angle) * radius + xOffset;
+        const z = Math.sin(angle) * radius + zOffset;
         
         return (
           <mesh 
@@ -813,21 +825,30 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Orbiting Sparkles - Medium Speed Space Particles */}
       {Array.from({ length: ringConfig.sparkleCount }, (_, i) => {
-        // Much more random and spread out positioning
+        // Spread sparkles in 3D space around the ring plane
         const baseAngle = (i / ringConfig.sparkleCount) * Math.PI * 2;
         const angleVariation = Math.sin(i * 0.8) * 0.6 + Math.cos(i * 1.5) * 0.4;
         const angle = baseAngle + angleVariation;
         
-        // Much more varied radii with multiple layers and randomness
+        // Create multiple orbital layers with height variations
         const baseRadius = size * 2.5;
         const radiusVariation = Math.sin(i * 0.6) * size * 1.0 + Math.cos(i * 1.1) * size * 0.7;
         const layerOffset = (i % 3) * size * 0.5;
         const randomOffset = (Math.random() - 0.5) * size * 0.8;
         const radius = baseRadius + radiusVariation + layerOffset + randomOffset;
         
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.4;
+        // Spread sparkles above and below the ring plane
+        const heightLayer = i % 7; // 7 different height layers
+        const baseHeight = (heightLayer - 3) * size * 0.25; // -3, -2, -1, 0, 1, 2, 3 layers
+        const heightVariation = (Math.random() - 0.5) * size * 0.15;
+        const y = baseHeight + heightVariation;
+        
+        // Add some sparkles slightly off the main orbital plane
+        const xOffset = (Math.random() - 0.5) * size * 0.15;
+        const zOffset = (Math.random() - 0.5) * size * 0.15;
+        
+        const x = Math.cos(angle) * radius + xOffset;
+        const z = Math.sin(angle) * radius + zOffset;
         
         return (
           <mesh 
