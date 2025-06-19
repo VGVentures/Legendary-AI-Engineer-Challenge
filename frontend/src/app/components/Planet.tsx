@@ -328,29 +328,41 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
     setState({ clock: state.clock });
     
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.005;
-      meshRef.current.rotation.x += 0.002;
+      meshRef.current.rotation.y += 0.008; // More visible rotation
+      meshRef.current.rotation.x += 0.004; // More visible rotation
     }
 
-    // Animate mist particles - extremely subtle and minimal
+    // Animate rings - eerie slow rotation
+    if (groupRef.current) {
+      groupRef.current.children.forEach((child) => {
+        if (child.userData.isRing) {
+          child.rotation.z += child.userData.rotationSpeed;
+        }
+        if (child.userData.isInnerRing) {
+          child.rotation.z += child.userData.rotationSpeed;
+        }
+      });
+    }
+
+    // Animate mist particles - more visible but still atmospheric
     if (groupRef.current) {
       groupRef.current.children.forEach((child, index) => {
         if (child.userData.isMistParticle) {
-          // Extremely slow, barely noticeable movement
-          child.position.y += Math.sin(state.clock.elapsedTime * 0.02 + index) * 0.00005;
-          child.position.x += Math.cos(state.clock.elapsedTime * 0.01 + index * 0.5) * 0.00005;
-          child.rotation.z += 0.0001; // Very slow rotation
+          // More visible movement for atmospheric effect
+          child.position.y += Math.sin(state.clock.elapsedTime * 0.05 + index) * 0.0002;
+          child.position.x += Math.cos(state.clock.elapsedTime * 0.03 + index * 0.5) * 0.0002;
+          child.rotation.z += 0.002; // More visible rotation
         }
         if (child.userData.isVaporParticle) {
-          // Very slow vapor movement
-          child.position.y += Math.sin(state.clock.elapsedTime * 0.015 + index * 0.3) * 0.00008;
-          child.position.x += Math.cos(state.clock.elapsedTime * 0.008 + index * 0.7) * 0.00008;
-          child.rotation.z += 0.0002; // Very slow rotation
+          // More visible vapor movement
+          child.position.y += Math.sin(state.clock.elapsedTime * 0.04 + index * 0.3) * 0.0003;
+          child.position.x += Math.cos(state.clock.elapsedTime * 0.025 + index * 0.7) * 0.0003;
+          child.rotation.z += 0.003; // More visible rotation
         }
         if (child.userData.isAtmosphericHaze) {
-          // Very slow atmospheric rotation
-          child.rotation.y += 0.0003;
-          child.rotation.x += 0.0001;
+          // More visible atmospheric rotation
+          child.rotation.y += 0.001;
+          child.rotation.x += 0.0005;
         }
       });
     }
@@ -520,17 +532,33 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         onPointerOut={handlePointerOut}
         scale={clicked ? 1.1 : hovered ? 1.05 : 1}
       >
-        <sphereGeometry args={[size, 64, 64]} />
-        <meshPhysicalMaterial
+        <sphereGeometry args={[size, 128, 128]} />
+        <meshBasicMaterial
           map={texture}
-          emissive={new THREE.Color(animatedColors[0])}
-          emissiveIntensity={hovered ? 1.2 : entityType === 'star' ? 1.5 : 0.8}
-          clearcoat={0.9}
-          clearcoatRoughness={0.1}
-          transmission={entityType === 'nebula' ? 0.8 : 0.2}
-          thickness={0.8}
-          roughness={entityType === 'asteroid' ? 0.8 : 0.2}
-          metalness={entityType === 'asteroid' ? 0.8 : 0.2}
+          transparent
+          opacity={0.9}
+        />
+      </mesh>
+
+      {/* Enhanced 3D Detail Layer - creates more depth */}
+      <mesh>
+        <sphereGeometry args={[size * 1.02, 96, 96]} />
+        <meshBasicMaterial
+          color={animatedColors[0]}
+          transparent
+          opacity={0.3}
+          wireframe
+        />
+      </mesh>
+
+      {/* Secondary Detail Layer */}
+      <mesh>
+        <sphereGeometry args={[size * 1.05, 64, 64]} />
+        <meshBasicMaterial
+          color={animatedColors[1]}
+          transparent
+          opacity={0.2}
+          wireframe
         />
       </mesh>
 
@@ -770,6 +798,50 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       )}
+
+      {/* Eerie Rotating Rings - multiple layers rotating at different speeds */}
+      {Array.from({ length: 3 }, (_, ringIndex) => {
+        const ringRadius = size * (1.8 + ringIndex * 0.3);
+        const rotationSpeed = (0.001 + ringIndex * 0.0005) * (ringIndex % 2 === 0 ? 1 : -1);
+        const ringSegments = 64 + ringIndex * 16;
+        
+        return (
+          <mesh 
+            key={`ring-${ringIndex}`}
+            userData={{ isRing: true, ringIndex, rotationSpeed }}
+          >
+            <ringGeometry args={[ringRadius * 0.8, ringRadius, ringSegments]} />
+            <meshBasicMaterial
+              color={animatedColors[ringIndex % animatedColors.length]}
+              transparent
+              opacity={0.15 - ringIndex * 0.03}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        );
+      })}
+
+      {/* Inner Ring System - closer to planet */}
+      {Array.from({ length: 2 }, (_, ringIndex) => {
+        const ringRadius = size * (1.3 + ringIndex * 0.2);
+        const rotationSpeed = (0.002 + ringIndex * 0.001) * (ringIndex % 2 === 0 ? -1 : 1);
+        const ringSegments = 48 + ringIndex * 8;
+        
+        return (
+          <mesh 
+            key={`inner-ring-${ringIndex}`}
+            userData={{ isInnerRing: true, ringIndex, rotationSpeed }}
+          >
+            <ringGeometry args={[ringRadius * 0.9, ringRadius, ringSegments]} />
+            <meshBasicMaterial
+              color={animatedColors[(ringIndex + 2) % animatedColors.length]}
+              transparent
+              opacity={0.2 - ringIndex * 0.05}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 } 
