@@ -325,69 +325,74 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         sparkleCount: 2    // Drastically reduced from 10
       };
     } else {
-      // Enhanced Planet rings with multiple layers and realistic characteristics
+      // Enhanced Planet rings with multiple layers using planet's actual color
+      const baseColor = color;
+      const lighterColor = color + '80'; // 50% opacity
+      const darkerColor = color + '40';  // 25% opacity
+      const veryLightColor = color + '20'; // 12% opacity
+      
       const configs = {
         gas: {
-          // Saturn-like rings with multiple bands
+          // Saturn-like rings with multiple bands using planet color
           rings: [
-            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.9, color: '#FFD700' },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.7, color: '#FFA500' },
-            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.8, color: '#FF6347' },
-            { innerRadius: 2.2, outerRadius: 2.4, opacity: 0.6, color: '#FF4500' },
-            { innerRadius: 2.5, outerRadius: 2.7, opacity: 0.5, color: '#CD853F' }
+            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.9, color: baseColor },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.7, color: lighterColor },
+            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.8, color: darkerColor },
+            { innerRadius: 2.2, outerRadius: 2.4, opacity: 0.6, color: veryLightColor },
+            { innerRadius: 2.5, outerRadius: 2.7, opacity: 0.5, color: baseColor }
           ],
-          colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500', '#CD853F'],
+          colors: [baseColor, lighterColor, darkerColor, veryLightColor, baseColor],
           opacity: 0.8,
           particleCount: 15, // Drastically reduced from 75
           sparkleCount: 8    // Drastically reduced from 38
         },
         ice: {
-          // Uranus-like rings with icy particles
+          // Uranus-like rings with icy particles using planet color
           rings: [
-            { innerRadius: 1.4, outerRadius: 1.6, opacity: 0.6, color: '#87CEEB' },
-            { innerRadius: 1.7, outerRadius: 1.9, opacity: 0.5, color: '#B0E0E6' },
-            { innerRadius: 2.0, outerRadius: 2.2, opacity: 0.4, color: '#E0F6FF' },
-            { innerRadius: 2.3, outerRadius: 2.5, opacity: 0.3, color: '#F0F8FF' }
+            { innerRadius: 1.4, outerRadius: 1.6, opacity: 0.6, color: baseColor },
+            { innerRadius: 1.7, outerRadius: 1.9, opacity: 0.5, color: lighterColor },
+            { innerRadius: 2.0, outerRadius: 2.2, opacity: 0.4, color: darkerColor },
+            { innerRadius: 2.3, outerRadius: 2.5, opacity: 0.3, color: veryLightColor }
           ],
-          colors: ['#87CEEB', '#B0E0E6', '#E0F6FF', '#F0F8FF'],
+          colors: [baseColor, lighterColor, darkerColor, veryLightColor],
           opacity: 0.6,
           particleCount: 10, // Drastically reduced from 50
           sparkleCount: 5    // Drastically reduced from 25
         },
         ocean: {
-          // Neptune-like rings with water ice
+          // Neptune-like rings with water ice using planet color
           rings: [
-            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.7, color: '#00BFFF' },
-            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.6, color: '#1E90FF' },
-            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.5, color: '#4169E1' },
-            { innerRadius: 2.4, outerRadius: 2.6, opacity: 0.4, color: '#0000CD' }
+            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.7, color: baseColor },
+            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.6, color: lighterColor },
+            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.5, color: darkerColor },
+            { innerRadius: 2.4, outerRadius: 2.6, opacity: 0.4, color: veryLightColor }
           ],
-          colors: ['#00BFFF', '#1E90FF', '#4169E1', '#0000CD'],
+          colors: [baseColor, lighterColor, darkerColor, veryLightColor],
           opacity: 0.7,
           particleCount: 12, // Drastically reduced from 60
           sparkleCount: 6    // Drastically reduced from 30
         },
         desert: {
-          // Mars-like rings with dust and sand
+          // Mars-like rings with dust and sand using planet color
           rings: [
-            { innerRadius: 1.2, outerRadius: 1.4, opacity: 0.5, color: '#D2691E' },
-            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.4, color: '#CD853F' },
-            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.3, color: '#F4A460' },
-            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.2, color: '#DEB887' }
+            { innerRadius: 1.2, outerRadius: 1.4, opacity: 0.5, color: baseColor },
+            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.4, color: lighterColor },
+            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.3, color: darkerColor },
+            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.2, color: veryLightColor }
           ],
-          colors: ['#D2691E', '#CD853F', '#F4A460', '#DEB887'],
+          colors: [baseColor, lighterColor, darkerColor, veryLightColor],
           opacity: 0.5,
           particleCount: 8,   // Drastically reduced from 40
           sparkleCount: 4     // Drastically reduced from 20
         },
         terrestrial: {
-          // Earth-like rings (rare but possible)
+          // Earth-like rings using planet's actual color
           rings: [
-            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.4, color: '#32CD32' },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.3, color: '#90EE90' },
-            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.2, color: '#98FB98' }
+            { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.4, color: baseColor },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.3, color: lighterColor },
+            { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.2, color: darkerColor }
           ],
-          colors: ['#32CD32', '#90EE90', '#98FB98'],
+          colors: [baseColor, lighterColor, darkerColor],
           opacity: 0.4,
           particleCount: 6,   // Drastically reduced from 30
           sparkleCount: 3     // Drastically reduced from 15
@@ -424,8 +429,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   // Drastically slowed down particle animations for better performance
-  const ultraSlowSpeed = 0.0005;  // 200x slower than before
-  const verySlowSpeed = 0.001;    // 100x slower than before
+  const ultraSlowSpeed = 0.001;  // 100x slower than before
+  const verySlowSpeed = 0.002;   // 50x slower than before
 
   // Simplified animation with better error handling
   useFrame((state) => {
@@ -443,78 +448,31 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         }
       }
 
-      // Animate sparkles with much more randomness and spread
+      // Animate sparkles with extremely slow speed
       sparkleRefs.current.forEach((sparkle, index) => {
         if (sparkle) {
-          // Much more varied speeds and patterns
-          const baseSpeed = verySlowSpeed;
-          const speedVariation = Math.sin(index * 0.7) * 0.0005 + Math.cos(index * 1.3) * 0.0004;
-          const speed = baseSpeed + speedVariation;
+          const speed = verySlowSpeed + Math.sin(index * 0.8) * 0.0005; // Much reduced variation
+          const radius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
+          const direction = index % 2 === 0 ? 1 : -1;
+          const angle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
           
-          // More varied orbital radii with randomness
-          const baseRadius = size * 2.2;
-          const radiusVariation = Math.sin(index * 0.5) * 0.8 + Math.cos(index * 0.9) * 0.6;
-          const radius = baseRadius + radiusVariation + (index % 3) * size * 0.3;
-          
-          // Multiple direction patterns for more chaos
-          const direction = index % 4 === 0 ? 1 : (index % 4 === 1 ? -1 : (index % 4 === 2 ? 0.7 : -0.5));
-          
-          // Add elliptical orbits and phase shifts
-          const phaseShift = index * 0.8 + Math.sin(index * 0.3) * Math.PI;
-          const angle = time * speed * direction + phaseShift;
-          
-          // Add some particles with elliptical orbits
-          const eccentricity = index % 5 === 0 ? 0.3 : 0;
-          const x = Math.cos(angle) * radius * (1 + eccentricity * Math.cos(angle));
-          const z = Math.sin(angle) * radius * (1 + eccentricity * Math.cos(angle));
-          
-          // Maintain 3D height spread with very slow vertical movement
-          const heightLayer = index % 7;
-          const baseHeight = (heightLayer - 3) * size * 0.25;
-          const heightVariation = (Math.random() - 0.5) * size * 0.15;
-          const verticalSpeed = 0.005 + Math.sin(index * 0.4) * 0.002;
-          const verticalAmplitude = size * 0.05;
-          const y = baseHeight + heightVariation + Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
-          
-          sparkle.position.set(x, y, z);
+          sparkle.position.x = Math.cos(angle) * radius;
+          sparkle.position.z = Math.sin(angle) * radius;
+          sparkle.position.y = Math.sin(time * 0.01 + index * 0.1) * size * 0.05; // Much slower vertical movement
         }
       });
 
-      // Animate regular particles with much more randomness and spread
+      // Animate regular particles with ultra slow speed
       particleRefs.current.forEach((particle, index) => {
         if (particle) {
-          // Much more varied speeds with multiple patterns
-          const baseSpeed = ultraSlowSpeed;
-          const speedVariation = Math.sin(index * 0.9) * 0.0005 + Math.cos(index * 1.7) * 0.0003;
-          const speed = baseSpeed + speedVariation;
+          const speed = ultraSlowSpeed + Math.sin(index * 0.9) * 0.0005; // Much reduced variation
+          const radius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
+          const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
+          const angle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
           
-          // More varied orbital radii with multiple layers
-          const baseRadius = size * 1.8;
-          const radiusVariation = Math.sin(index * 0.3) * 1.2 + Math.cos(index * 0.7) * 0.8;
-          const layerOffset = (index % 4) * size * 0.4;
-          const radius = baseRadius + radiusVariation + layerOffset;
-          
-          // Multiple direction patterns for more chaos
-          const direction = index % 5 === 0 ? 1 : (index % 5 === 1 ? -1 : (index % 5 === 2 ? 0.6 : (index % 5 === 3 ? -0.8 : 0.3)));
-          
-          // Add elliptical orbits and phase shifts
-          const phaseShift = index * 1.2 + Math.cos(index * 0.5) * Math.PI;
-          const angle = time * speed * direction + phaseShift;
-          
-          // Add some particles with elliptical orbits
-          const eccentricity = index % 7 === 0 ? 0.4 : (index % 11 === 0 ? 0.2 : 0);
-          const x = Math.cos(angle) * radius * (1 + eccentricity * Math.cos(angle));
-          const z = Math.sin(angle) * radius * (1 + eccentricity * Math.cos(angle));
-          
-          // Maintain 3D height spread with very slow vertical movement
-          const heightLayer = index % 5;
-          const baseHeight = (heightLayer - 2) * size * 0.3;
-          const heightVariation = (Math.random() - 0.5) * size * 0.2;
-          const verticalSpeed = 0.002 + Math.sin(index * 0.4) * 0.001;
-          const verticalAmplitude = size * 0.03;
-          const y = baseHeight + heightVariation + Math.sin(time * verticalSpeed + index * 0.05) * verticalAmplitude;
-          
-          particle.position.set(x, y, z);
+          particle.position.x = Math.cos(angle) * radius;
+          particle.position.z = Math.sin(angle) * radius;
+          particle.position.y = Math.sin(time * 0.005 + index * 0.05) * size * 0.02; // Much slower vertical movement
         }
       });
     } catch (error) {
@@ -779,30 +737,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Ring Particles - Slow Moving Space Particles */}
       {Array.from({ length: ringConfig.particleCount }, (_, i) => {
-        // Spread particles in 3D space around the ring plane
-        const baseAngle = (i / ringConfig.particleCount) * Math.PI * 2;
-        const angleVariation = Math.sin(i * 0.7) * 0.5 + Math.cos(i * 1.3) * 0.3;
-        const angle = baseAngle + angleVariation;
-        
-        // Create multiple orbital layers with height variations
-        const baseRadius = size * 2;
-        const radiusVariation = Math.sin(i * 0.5) * size * 0.8 + Math.cos(i * 0.9) * size * 0.6;
-        const layerOffset = (i % 4) * size * 0.4;
-        const randomOffset = (Math.random() - 0.5) * size * 0.6;
-        const radius = baseRadius + radiusVariation + layerOffset + randomOffset;
-        
-        // Spread particles above and below the ring plane
-        const heightLayer = i % 5; // 5 different height layers
-        const baseHeight = (heightLayer - 2) * size * 0.3; // -2, -1, 0, 1, 2 layers
-        const heightVariation = (Math.random() - 0.5) * size * 0.2;
-        const y = baseHeight + heightVariation;
-        
-        // Add some particles slightly off the main orbital plane
-        const xOffset = (Math.random() - 0.5) * size * 0.1;
-        const zOffset = (Math.random() - 0.5) * size * 0.1;
-        
-        const x = Math.cos(angle) * radius + xOffset;
-        const z = Math.sin(angle) * radius + zOffset;
+        const angle = (i / ringConfig.particleCount) * Math.PI * 2;
+        const radius = size * 2 + Math.random() * size * 0.5;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = (Math.random() - 0.5) * size * 0.1;
         
         return (
           <mesh 
@@ -812,11 +751,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
               if (el) particleRefs.current[i] = el;
             }}
           >
-            <sphereGeometry args={[0.02 + Math.random() * 0.01, 8, 8]} />
+            <sphereGeometry args={[0.02, 8, 8]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
               transparent
-              opacity={0.8 + Math.random() * 0.2}
+              opacity={0.8}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
@@ -825,30 +764,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
       {/* Orbiting Sparkles - Medium Speed Space Particles */}
       {Array.from({ length: ringConfig.sparkleCount }, (_, i) => {
-        // Spread sparkles in 3D space around the ring plane
-        const baseAngle = (i / ringConfig.sparkleCount) * Math.PI * 2;
-        const angleVariation = Math.sin(i * 0.8) * 0.6 + Math.cos(i * 1.5) * 0.4;
-        const angle = baseAngle + angleVariation;
-        
-        // Create multiple orbital layers with height variations
-        const baseRadius = size * 2.5;
-        const radiusVariation = Math.sin(i * 0.6) * size * 1.0 + Math.cos(i * 1.1) * size * 0.7;
-        const layerOffset = (i % 3) * size * 0.5;
-        const randomOffset = (Math.random() - 0.5) * size * 0.8;
-        const radius = baseRadius + radiusVariation + layerOffset + randomOffset;
-        
-        // Spread sparkles above and below the ring plane
-        const heightLayer = i % 7; // 7 different height layers
-        const baseHeight = (heightLayer - 3) * size * 0.25; // -3, -2, -1, 0, 1, 2, 3 layers
-        const heightVariation = (Math.random() - 0.5) * size * 0.15;
-        const y = baseHeight + heightVariation;
-        
-        // Add some sparkles slightly off the main orbital plane
-        const xOffset = (Math.random() - 0.5) * size * 0.15;
-        const zOffset = (Math.random() - 0.5) * size * 0.15;
-        
-        const x = Math.cos(angle) * radius + xOffset;
-        const z = Math.sin(angle) * radius + zOffset;
+        const angle = (i / ringConfig.sparkleCount) * Math.PI * 2;
+        const radius = size * 2.5 + Math.random() * size * 0.3;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = (Math.random() - 0.5) * size * 0.2;
         
         return (
           <mesh 
@@ -858,11 +778,11 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
               if (el) sparkleRefs.current[i] = el;
             }}
           >
-            <sphereGeometry args={[0.01 + Math.random() * 0.005, 6, 6]} />
+            <sphereGeometry args={[0.01, 6, 6]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
               transparent
-              opacity={0.9 + Math.random() * 0.1}
+              opacity={0.9}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
