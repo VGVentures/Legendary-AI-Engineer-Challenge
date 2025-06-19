@@ -743,6 +743,15 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             {/* Special Luminous Glow for Middle Ring */}
             {ringIndex === 1 && (
               <>
+                {/* Luminous Light Source - emits actual light */}
+                <pointLight
+                  position={[0, 0, 0]}
+                  color={ring.color}
+                  intensity={2.0}
+                  distance={size * 4}
+                  decay={2}
+                />
+                
                 {/* Inner glow ring */}
                 <mesh rotation={[Math.PI / 2, 0, 0]}>
                   <ringGeometry args={[size * (ring.innerRadius - 0.05), size * (ring.outerRadius + 0.05), 64]} />
