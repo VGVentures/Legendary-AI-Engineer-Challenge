@@ -326,11 +326,13 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
   const groupRef = useRef<THREE.Group>(null);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
+  const [currentSaharaPos, setCurrentSaharaPos] = useState<[number, number, number]>([0, 0, 0]);
+  const [currentCryoPos, setCurrentCryoPos] = useState<[number, number, number]>([0, 0, 0]);
 
   // Debug: log planet positions
   console.log('PlanetLaserBattle - Planet positions:', planetPositions);
 
-  // Animation: continuous periodic laser firing
+  // Animation: continuous periodic laser firing and dynamic position updates
   useFrame((state) => {
     if (startTimeRef.current === null) startTimeRef.current = state.clock.getElapsedTime();
     const elapsed = (state.clock.getElapsedTime() - startTimeRef.current) * 1000;
@@ -338,16 +340,45 @@ function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: strin
     // Laser firing phases - every 800ms, continuous
     const laserTime = elapsed % 800;
     setLaserPhase(laserTime / 800);
+    
+    // Update planet positions based on rotation
+    const rotationAngle = state.clock.elapsedTime * 0.001; // Match the rotation speed from SpaceEnvironment
+    
+    // Get base positions
+    const sahara = planetPositions['Sahara Sands'];
+    const cryo = planetPositions['Cryo Sphere'];
+    
+    if (sahara && cryo) {
+      // Apply rotation to Sahara Sands position
+      const saharaRadius = Math.sqrt(sahara[0] * sahara[0] + sahara[2] * sahara[2]);
+      const saharaAngle = Math.atan2(sahara[2], sahara[0]) + rotationAngle;
+      const newSaharaPos: [number, number, number] = [
+        Math.cos(saharaAngle) * saharaRadius,
+        sahara[1],
+        Math.sin(saharaAngle) * saharaRadius
+      ];
+      setCurrentSaharaPos(newSaharaPos);
+      
+      // Apply rotation to Cryo Sphere position
+      const cryoRadius = Math.sqrt(cryo[0] * cryo[0] + cryo[2] * cryo[2]);
+      const cryoAngle = Math.atan2(cryo[2], cryo[0]) + rotationAngle;
+      const newCryoPos: [number, number, number] = [
+        Math.cos(cryoAngle) * cryoRadius,
+        cryo[1],
+        Math.sin(cryoAngle) * cryoRadius
+      ];
+      setCurrentCryoPos(newCryoPos);
+    }
   });
 
   // Laser beam animation (pulsing, flickering)
-  const sahara = planetPositions['Sahara Sands'];
-  const cryo = planetPositions['Cryo Sphere'];
+  const sahara = currentSaharaPos;
+  const cryo = currentCryoPos;
   
-  console.log('Sahara position:', sahara, 'Cryo position:', cryo);
+  console.log('Dynamic Sahara position:', sahara, 'Dynamic Cryo position:', cryo);
   
-  if (!sahara || !cryo) {
-    console.log('Missing planet positions, not rendering lasers');
+  if (!sahara || !cryo || (sahara[0] === 0 && sahara[1] === 0 && sahara[2] === 0)) {
+    console.log('Missing or invalid planet positions, not rendering lasers');
     return null;
   }
 
