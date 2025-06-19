@@ -48,19 +48,16 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
       const [x, y, z] = targetPosition;
       const target = new THREE.Vector3(x, y, z);
       
-      // Calculate direction from target to current camera position
-      const currentDirection = camera.position.clone().sub(target).normalize();
+      // Create a consistent, good viewing angle for all planets
+      const zoomDistance = 4;
+      const angleOffset = Math.PI / 6; // 30 degrees for a nice viewing angle
       
-      // Set intimate zoom distance
-      const zoomDistance = 3;
-      
-      // Calculate new camera position using proper vector math
-      const newCameraPosition = target.clone().add(
-        currentDirection.clone().multiplyScalar(zoomDistance)
+      // Calculate camera position with consistent angle
+      const newCameraPosition = new THREE.Vector3(
+        x + Math.sin(angleOffset) * zoomDistance,
+        y + 1.5, // Slight elevation for good view
+        z + Math.cos(angleOffset) * zoomDistance
       );
-      
-      // Add slight elevation for better viewing angle
-      newCameraPosition.y += 1;
       
       // Smoothly animate camera to new position
       camera.position.lerp(newCameraPosition, 0.05);
