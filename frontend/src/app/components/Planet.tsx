@@ -729,7 +729,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         ringConfig.rings.map((ring, ringIndex) => (
           <React.Fragment key={`ring-group-${ringIndex}`}>
             {/* Main Ring */}
-            <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <mesh>
               <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
               <meshBasicMaterial
                 color={ring.color}
@@ -753,7 +753,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
                 />
                 
                 {/* Inner glow ring */}
-                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <mesh>
                   <ringGeometry args={[size * (ring.innerRadius - 0.05), size * (ring.outerRadius + 0.05), 64]} />
                   <meshBasicMaterial
                     color={ring.color}
@@ -765,7 +765,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
                 </mesh>
                 
                 {/* Outer glow ring */}
-                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <mesh>
                   <ringGeometry args={[size * (ring.innerRadius - 0.1), size * (ring.outerRadius + 0.1), 64]} />
                   <meshBasicMaterial
                     color={ring.color}
@@ -782,7 +782,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       ) : (
         // Fallback for non-planet entities or legacy support
         [1.5, 1.8, 2.1, 2.4].map((ringScale, ringIndex) => (
-          <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh key={`ring-${ringIndex}`}>
             <ringGeometry args={[size * ringScale, size * (ringScale + 0.1), 64]} />
             <meshBasicMaterial
               color={ringConfig.colors[ringIndex % ringConfig.colors.length]}
@@ -896,7 +896,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {hovered && (
         <>
           {/* Outer Hover Ring */}
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <mesh>
             <ringGeometry args={[size * 1.4, size * 1.6, 64]} />
             <meshBasicMaterial
               color={color}
