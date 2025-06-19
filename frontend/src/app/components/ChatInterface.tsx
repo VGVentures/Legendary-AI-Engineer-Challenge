@@ -1096,7 +1096,7 @@ export default function ChatInterface({
           'Terra Nova': "Ah! I've detected your language patterns. You're speaking English, aren't you? My atmospheric sensors picked up the linguistic frequencies. How fascinating!",
           'Verdant Prime': "Oh my! My bio-sensors have analyzed your communication patterns. You're using English! The floral networks in my ecosystem are quite sensitive to language vibrations.",
           'Crystal Peak': "Interesting. My crystalline resonance chambers have detected English language patterns in your transmission. My geological sensors are quite precise.",
-          'Sahara Sands': "Ha! My desert winds carried your words to my core processors. English, right? The sand particles are excellent at picking up linguistic signatures.",
+          'Sahara Sands': "ALERT! English detected! Are you friend or foe? My shields are failing! WHAT DO YOU WANT?!",
           'Azure Depths': "Fascinating. My ocean currents have analyzed your communication patterns. You're speaking English. The depths reveal many secrets, including language detection."
         };
         
@@ -1250,7 +1250,7 @@ INTERPLANETARY RELATIONSHIPS:
 
         // Use OpenAI API for responses
         try {
-          const response = await fetch('/api/chat', {
+          const response = await fetch('http://127.0.0.1:8000/api/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1258,7 +1258,7 @@ INTERPLANETARY RELATIONSHIPS:
             body: JSON.stringify({
               developer_message: systemPrompt,
               user_message: userMessage,
-              model: "gpt-4.1-mini"
+              model: "gpt-4o-mini"
             })
           });
 
