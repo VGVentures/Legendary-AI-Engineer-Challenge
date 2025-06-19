@@ -421,31 +421,34 @@ export default function ChatInterface({
           {isTyping && (
             <div className="flex justify-start">
               <div 
-                className="text-gray-100 p-3 rounded-2xl"
+                className="text-gray-100 p-4 rounded-2xl"
                 style={{ 
                   background: 'rgba(31, 41, 55, 0.9)',
                   boxShadow: `0 2px 8px ${styling.glowColor}10`
                 }}
               >
-                <div className="flex space-x-1">
-                  <div 
-                    className="w-2 h-2 rounded-full animate-bounce"
-                    style={{ backgroundColor: styling.accentColor }}
-                  ></div>
-                  <div 
-                    className="w-2 h-2 rounded-full animate-bounce" 
-                    style={{ 
-                      backgroundColor: styling.accentColor,
-                      animationDelay: '0.1s' 
-                    }}
-                  ></div>
-                  <div 
-                    className="w-2 h-2 rounded-full animate-bounce" 
-                    style={{ 
-                      backgroundColor: styling.accentColor,
-                      animationDelay: '0.2s' 
-                    }}
-                  ></div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm opacity-70">Thinking</span>
+                  <div className="flex space-x-1">
+                    <div 
+                      className="w-3 h-3 rounded-full animate-bounce"
+                      style={{ backgroundColor: styling.accentColor }}
+                    ></div>
+                    <div 
+                      className="w-3 h-3 rounded-full animate-bounce" 
+                      style={{ 
+                        backgroundColor: styling.accentColor,
+                        animationDelay: '0.1s' 
+                      }}
+                    ></div>
+                    <div 
+                      className="w-3 h-3 rounded-full animate-bounce" 
+                      style={{ 
+                        backgroundColor: styling.accentColor,
+                        animationDelay: '0.2s' 
+                      }}
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -481,9 +484,13 @@ export default function ChatInterface({
                 boxShadow: `0 2px 8px ${styling.glowColor}15`
               }}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
+              {isTyping ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
