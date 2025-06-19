@@ -205,97 +205,12 @@ function SpaceSceneContent() {
       {/* Shooting stars */}
       <ShootingStars />
 
-      {/* Planets with VARIED SIZES and UNIQUE COLOR SCHEMES */}
-      {/* Gas Giant - Large and majestic */}
-      <Planet 
-        position={[-25, 5, 0]} 
-        size={4.5} 
-        color="#ff6b35" 
-        type="gas" 
-        name="Nebula Prime" 
-      />
-      
-      {/* Ocean World - Medium-large with deep blues */}
-      <Planet 
-        position={[20, -8, 0]} 
-        size={3.2} 
-        color="#006994" 
-        type="ocean" 
-        name="Aquaria" 
-      />
-      
-      {/* Ice Planet - Small and crystalline */}
-      <Planet 
-        position={[0, 18, 0]} 
-        size={1.8} 
-        color="#87CEEB" 
-        type="ice" 
-        name="Cryos" 
-      />
-      
-      {/* Terrestrial Planet - Medium with vibrant greens */}
-      <Planet 
-        position={[0, -18, 0]} 
-        size={2.6} 
-        color="#228B22" 
-        type="terrestrial" 
-        name="Terra Nova" 
-      />
-      
-      {/* Desert Planet - Medium-small with warm tones */}
-      <Planet 
-        position={[30, 12, 0]} 
-        size={2.1} 
-        color="#D2B48C" 
-        type="desert" 
-        name="Aridus" 
-      />
-      
-      {/* Additional planets for more variety */}
-      {/* Small Gas Giant */}
-      <Planet 
-        position={[-35, -15, 0]} 
-        size={3.8} 
-        color="#FF8C00" 
-        type="gas" 
-        name="Jupiter Minor" 
-      />
-      
-      {/* Large Ocean World */}
-      <Planet 
-        position={[35, -20, 0]} 
-        size={4.2} 
-        color="#1E90FF" 
-        type="ocean" 
-        name="Poseidon" 
-      />
-      
-      {/* Tiny Ice Moon */}
-      <Planet 
-        position={[-8, 25, 0]} 
-        size={1.2} 
-        color="#E0F6FF" 
-        type="ice" 
-        name="Frostbite" 
-      />
-      
-      {/* Large Terrestrial */}
-      <Planet 
-        position={[-12, -25, 0]} 
-        size={3.5} 
-        color="#32CD32" 
-        type="terrestrial" 
-        name="Gaia" 
-      />
-      
-      {/* Small Desert World */}
-      <Planet 
-        position={[40, 5, 0]} 
-        size={1.6} 
-        color="#F4A460" 
-        type="desert" 
-        name="Sandstorm" 
-      />
+      {/* Planets */}
+      <Planet position={[-15, 0, 0]} size={3} color="#ff6b35" type="gas" name="Nebula Prime" />
+      <Planet position={[15, 0, 0]} size={2.5} color="#4ecdc4" type="ocean" name="Aquaria" />
+      <Planet position={[0, 12, 0]} size={2} color="#45b7d1" type="ice" name="Cryos" />
+      <Planet position={[0, -12, 0]} size={2.8} color="#96ceb4" type="terrestrial" name="Terra Nova" />
+      <Planet position={[25, 8, 0]} size={1.8} color="#feca57" type="desert" name="Aridus" />
 
       {/* Camera controls */}
       <OrbitControls 
@@ -312,6 +227,11 @@ function SpaceSceneContent() {
 }
 
 export default function SpaceScene() {
+  // Detect if running on Windows (but not Safari)
+  const isWindows = typeof window !== 'undefined' && 
+    window.navigator.userAgent.includes('Windows') && 
+    !window.navigator.userAgent.includes('Safari');
+
   return (
     <Canvas
       camera={{ position: [0, 0, 20], fov: 75 }}
@@ -319,8 +239,28 @@ export default function SpaceScene() {
       gl={{ 
         antialias: true, 
         alpha: true,
-        powerPreference: "high-performance"
+        powerPreference: "high-performance",
+        // Windows-specific WebGL context settings
+        ...(isWindows && {
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false,
+          depth: true,
+          stencil: false,
+          premultipliedAlpha: false,
+        })
       }}
+      // Windows-specific canvas settings
+      {...(isWindows && {
+        onCreated: ({ gl }) => {
+          // Optimize WebGL context for Windows
+          gl.setClearColor(0x000000, 0);
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.2;
+        }
+      })}
     >
       <SpaceSceneContent />
     </Canvas>
