@@ -10,15 +10,11 @@ import os
 from typing import Optional
 from dotenv import load_dotenv
 
-# Load environment variables - try multiple approaches for Vercel
+# Load environment variables
 load_dotenv()
 
-# For Vercel deployment, also try loading from system environment
+# Get API key from environment
 api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    # Fallback for Vercel environment
-    api_key = os.environ.get("OPENAI_API_KEY")
-
 if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable is not set")
 
@@ -55,31 +51,24 @@ async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)
             raise HTTPException(status_code=401, detail="Invalid access token")
     
     try:
-        # Debug: Check if API key is available
-        if not api_key:
-            raise HTTPException(status_code=500, detail="API key not configured")
-        
-        # Initialize OpenAI client with the API key from environment variable
+        # Initialize OpenAI client
         client = OpenAI(api_key=api_key)
         
-        # Create an async generator function for streaming responses
+        # Create streaming response
         async def generate():
-            # Create a streaming chat completion request
             stream = client.chat.completions.create(
                 model=request.model,
                 messages=[
                     {"role": "system", "content": request.developer_message},
                     {"role": "user", "content": request.user_message}
                 ],
-                stream=True  # Enable streaming response
+                stream=True
             )
             
-            # Yield each chunk of the response as it becomes available
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
                     yield chunk.choices[0].delta.content
 
-        # Return a streaming response to the client
         return StreamingResponse(generate(), media_type="text/plain")
     
     except Exception as e:
