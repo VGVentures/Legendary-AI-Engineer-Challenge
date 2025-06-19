@@ -322,31 +322,23 @@ function PlanetNameLabel({ position, name, color, size }: {
   );
 }
 
-function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositions: { [key: string]: [number, number, number] }, duration?: number }) {
+function PlanetLaserBattle({ planetPositions }: { planetPositions: { [key: string]: [number, number, number] } }) {
   const groupRef = useRef<THREE.Group>(null);
-  const [visible, setVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
   const [laserPhase, setLaserPhase] = useState(0);
   const startTimeRef = useRef<number | null>(null);
 
   // Debug: log planet positions
   console.log('PlanetLaserBattle - Planet positions:', planetPositions);
 
-  // Animation: fade out after duration and periodic laser firing
+  // Animation: continuous periodic laser firing
   useFrame((state) => {
-    if (!visible) return;
     if (startTimeRef.current === null) startTimeRef.current = state.clock.getElapsedTime();
     const elapsed = (state.clock.getElapsedTime() - startTimeRef.current) * 1000;
-    setProgress(elapsed / duration);
     
-    // Laser firing phases - every 800ms
+    // Laser firing phases - every 800ms, continuous
     const laserTime = elapsed % 800;
     setLaserPhase(laserTime / 800);
-    
-    if (elapsed > duration) setVisible(false);
   });
-
-  if (!visible) return null;
 
   // Laser beam animation (pulsing, flickering)
   const sahara = planetPositions['Sahara Sands'];
@@ -359,11 +351,8 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
     return null;
   }
 
-  // Fade out effect
-  const opacity = 1 - Math.min(progress, 1);
-  
-  // Flicker effect
-  const flicker = Math.sin(progress * 30) * 0.3 + 0.7;
+  // Flicker effect for continuous animation
+  const flicker = Math.sin(laserPhase * Math.PI * 20) * 0.3 + 0.7;
   
   // Laser firing effect - only show during firing phases
   const isFiring = laserPhase < 0.3; // Laser fires for 30% of the cycle
@@ -394,7 +383,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#ff6b35" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={8}
         />
       </line>
@@ -415,7 +404,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#ff8c42" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={6}
         />
       </line>
@@ -436,7 +425,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#ff4500" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={4}
         />
       </line>
@@ -457,7 +446,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#ff6347" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={3}
         />
       </line>
@@ -479,7 +468,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#4ecdc4" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={8}
         />
       </line>
@@ -500,7 +489,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#00bfff" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={6}
         />
       </line>
@@ -521,7 +510,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#1e90ff" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={4}
         />
       </line>
@@ -542,7 +531,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
         <lineBasicMaterial 
           color="#87ceeb" 
           transparent 
-          opacity={opacity * flicker * laserIntensity}
+          opacity={flicker * laserIntensity}
           linewidth={3}
         />
       </line>
@@ -556,7 +545,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
             <meshBasicMaterial 
               color="#ff6b35" 
               transparent 
-              opacity={opacity * laserIntensity * 0.6}
+              opacity={laserIntensity * 0.6}
             />
           </mesh>
           
@@ -566,7 +555,7 @@ function PlanetLaserBattle({ planetPositions, duration = 5000 }: { planetPositio
             <meshBasicMaterial 
               color="#4ecdc4" 
               transparent 
-              opacity={opacity * laserIntensity * 0.6}
+              opacity={laserIntensity * 0.6}
             />
           </mesh>
         </>
@@ -660,7 +649,7 @@ export default function SpaceScene() {
         />
         
         {/* Laser battle between Sahara Sands and Cryo Sphere */}
-        <PlanetLaserBattle planetPositions={planetPositions} duration={5000} />
+        <PlanetLaserBattle planetPositions={planetPositions} />
         <SpaceEnvironment onEntityClick={handleEntityClick} screenSize={screenSize} />
         
         <CameraController 
