@@ -279,10 +279,9 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   
-  // Particle animation refs for slow-moving ring particles
+  // Simplified particle animation refs - reduced complexity to prevent leaks
   const particleRefs = useRef<THREE.Mesh[]>([]);
   const sparkleRefs = useRef<THREE.Mesh[]>([]);
-  const ringParticleRefs = useRef<THREE.Mesh[]>([]);
 
   const texture = useEntityTexture(entityType, type, color, size);
   
@@ -294,36 +293,36 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       return {
         colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
         opacity: 0.9,
-        particleCount: 120,
-        sparkleCount: 60
+        particleCount: 60, // Reduced from 120
+        sparkleCount: 30   // Reduced from 60
       };
     } else if (entityType === 'nebula') {
       return {
         colors: [color, color + '80', color + '40', color + '20'],
         opacity: 0.7,
-        particleCount: 80,
-        sparkleCount: 40
+        particleCount: 40, // Reduced from 80
+        sparkleCount: 20   // Reduced from 40
       };
     } else if (entityType === 'blackhole') {
       return {
         colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
         opacity: 0.8,
-        particleCount: 100,
-        sparkleCount: 50
+        particleCount: 50, // Reduced from 100
+        sparkleCount: 25   // Reduced from 50
       };
     } else if (entityType === 'comet') {
       return {
         colors: ['#FFFFFF', '#F0E68C', '#E6E6FA', '#FFFFFF'],
         opacity: 0.6,
-        particleCount: 60,
-        sparkleCount: 30
+        particleCount: 30, // Reduced from 60
+        sparkleCount: 15   // Reduced from 30
       };
     } else if (entityType === 'asteroid') {
       return {
         colors: ['#8B4513', '#A0522D', '#CD853F', '#8B4513'],
         opacity: 0.4,
-        particleCount: 40,
-        sparkleCount: 20
+        particleCount: 20, // Reduced from 40
+        sparkleCount: 10   // Reduced from 20
       };
     } else {
       // Enhanced Planet rings with multiple layers and realistic characteristics
@@ -339,8 +338,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500', '#CD853F'],
           opacity: 0.8,
-          particleCount: 150,
-          sparkleCount: 75
+          particleCount: 75,  // Reduced from 150
+          sparkleCount: 38   // Reduced from 75
         },
         ice: {
           // Uranus-like rings with icy particles
@@ -352,8 +351,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#87CEEB', '#B0E0E6', '#E0F6FF', '#F0F8FF'],
           opacity: 0.6,
-          particleCount: 100,
-          sparkleCount: 50
+          particleCount: 50,  // Reduced from 100
+          sparkleCount: 25   // Reduced from 50
         },
         ocean: {
           // Neptune-like rings with water ice
@@ -365,8 +364,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#00BFFF', '#1E90FF', '#4169E1', '#0000CD'],
           opacity: 0.7,
-          particleCount: 120,
-          sparkleCount: 60
+          particleCount: 60,  // Reduced from 120
+          sparkleCount: 30   // Reduced from 60
         },
         desert: {
           // Mars-like rings with dust and sand
@@ -378,8 +377,8 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           ],
           colors: ['#D2691E', '#CD853F', '#F4A460', '#DEB887'],
           opacity: 0.5,
-          particleCount: 80,
-          sparkleCount: 40
+          particleCount: 40,  // Reduced from 80
+          sparkleCount: 20   // Reduced from 40
         },
         terrestrial: {
           // Earth-like rings (rare but possible)
@@ -388,30 +387,27 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.3, color: '#90EE90' },
             { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.2, color: '#98FB98' }
           ],
-          colors: ['#32CD32', '#90EE90', '#98FB98', '#00FF7F'],
+          colors: ['#32CD32', '#90EE90', '#98FB98'],
           opacity: 0.4,
-          particleCount: 60,
-          sparkleCount: 30
+          particleCount: 30,  // Reduced from 60
+          sparkleCount: 15   // Reduced from 30
         }
       };
+      
       return configs[planetType as keyof typeof configs] || configs.terrestrial;
     }
   };
 
   const ringConfig = getRingConfig(entityType, type);
 
-  // Type guard to check if ringConfig has rings property
   const hasRings = (config: any): config is { rings: any[] } => {
-    return config && 'rings' in config && Array.isArray(config.rings);
+    return config && Array.isArray(config.rings);
   };
 
   const handleClick = (event: any) => {
     event.stopPropagation();
     setClicked(true);
-    
-    // Reset click state after animation
-    setTimeout(() => setClicked(false), 300);
-    
+    setTimeout(() => setClicked(false), 200);
     if (onPlanetClick) {
       onPlanetClick();
     }
@@ -420,16 +416,14 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const handlePointerOver = (event: any) => {
     event.stopPropagation();
     setHovered(true);
-    document.body.style.cursor = 'pointer';
   };
 
   const handlePointerOut = (event: any) => {
     event.stopPropagation();
     setHovered(false);
-    document.body.style.cursor = 'auto';
   };
 
-  // Animate colors over time
+  // Simplified animation with better error handling
   useFrame((state) => {
     try {
       const time = state?.clock?.elapsedTime || 0;
@@ -445,102 +439,35 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         }
       }
 
-      // Animate slow-moving ring particles
-      const slowSpeed = 0.1; // Very slow movement for space-like motion
+      // Simplified particle animations - reduced complexity
+      const slowSpeed = 0.1;
       const mediumSpeed = 0.2;
-      const fastSpeed = 0.3;
 
-      // Animate ring particles with different speeds for each ring layer
-      ringParticleRefs.current.forEach((particle, index) => {
-        if (particle) {
-          // Non-uniform speeds with random variations
-          const baseSpeed = slowSpeed + (index % 3) * 0.05;
-          const speedVariation = Math.sin(index * 0.7) * 0.03;
-          const speed = baseSpeed + speedVariation;
-          
-          // Non-uniform orbital distances
-          const baseRadius = size * (1.5 + (index % 5) * 0.2);
-          const radiusVariation = Math.cos(index * 0.5) * size * 0.1;
-          const radius = baseRadius + radiusVariation;
-          
-          // Non-uniform starting angles
-          const baseAngle = time * speed + (index / ringParticleRefs.current.length) * Math.PI * 2;
-          const angleVariation = Math.sin(index * 0.3) * 0.5;
-          const angle = baseAngle + angleVariation;
-          
-          particle.position.x = Math.cos(angle) * radius;
-          particle.position.z = Math.sin(angle) * radius;
-          
-          // Non-uniform vertical oscillation
-          const verticalSpeed = 0.5 + Math.sin(index * 0.4) * 0.3;
-          const verticalAmplitude = size * (0.03 + Math.sin(index * 0.6) * 0.02);
-          particle.position.y = Math.sin(time * verticalSpeed + index * 0.2) * verticalAmplitude;
-        }
-      });
-
-      // Animate sparkles with medium speed and non-uniform patterns
+      // Animate sparkles with medium speed
       sparkleRefs.current.forEach((sparkle, index) => {
         if (sparkle) {
-          // Varied speeds for sparkles
-          const baseSpeed = mediumSpeed + Math.sin(index * 0.8) * 0.02;
-          const speedVariation = Math.cos(index * 0.6) * 0.01;
-          const speed = baseSpeed + speedVariation;
-          
-          // Non-uniform orbital patterns
-          const baseRadius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
-          const radiusVariation = Math.sin(index * 0.9) * size * 0.15;
-          const radius = baseRadius + radiusVariation;
-          
-          // Varied orbital directions (some clockwise, some counter-clockwise)
+          const speed = mediumSpeed + Math.sin(index * 0.8) * 0.02;
+          const radius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
           const direction = index % 2 === 0 ? 1 : -1;
-          const baseAngle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
-          const angleVariation = Math.cos(index * 0.7) * 0.8;
-          const angle = baseAngle + angleVariation;
+          const angle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
           
           sparkle.position.x = Math.cos(angle) * radius;
           sparkle.position.z = Math.sin(angle) * radius;
-          
-          // Non-uniform vertical movement
-          const verticalSpeed = 0.3 + Math.sin(index * 0.5) * 0.2;
-          const verticalAmplitude = size * (0.05 + Math.cos(index * 0.4) * 0.03);
-          sparkle.position.y = Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
-          
-          // Fade sparkles in and out with non-uniform patterns
-          const material = sparkle.material as THREE.MeshBasicMaterial;
-          if (material) {
-            const fadeSpeed = 2 + Math.sin(index * 0.3) * 1;
-            const fadeOffset = index * 0.2;
-            material.opacity = 0.2 + Math.sin(time * fadeSpeed + fadeOffset) * 0.5;
-          }
+          sparkle.position.y = Math.sin(time * 0.3 + index * 0.1) * size * 0.05;
         }
       });
 
-      // Animate regular particles with slowest speed and organic movement
+      // Animate regular particles with slow speed
       particleRefs.current.forEach((particle, index) => {
         if (particle) {
-          // Very slow, varied speeds
-          const baseSpeed = slowSpeed * 0.5;
-          const speedVariation = Math.sin(index * 0.9) * 0.02;
-          const speed = baseSpeed + speedVariation;
-          
-          // Non-uniform orbital distances with more variation
-          const baseRadius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
-          const radiusVariation = Math.sin(index * 0.8) * size * 0.2;
-          const radius = baseRadius + radiusVariation;
-          
-          // Varied orbital directions and speeds
+          const speed = slowSpeed + Math.sin(index * 0.9) * 0.02;
+          const radius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
           const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
-          const baseAngle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
-          const angleVariation = Math.sin(index * 0.6) * 1.2;
-          const angle = baseAngle + angleVariation;
+          const angle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
           
           particle.position.x = Math.cos(angle) * radius;
           particle.position.z = Math.sin(angle) * radius;
-          
-          // Minimal, varied vertical movement
-          const verticalSpeed = 0.2 + Math.sin(index * 0.7) * 0.1;
-          const verticalAmplitude = size * (0.02 + Math.sin(index * 0.5) * 0.01);
-          particle.position.y = Math.sin(time * verticalSpeed + index * 0.05) * verticalAmplitude;
+          particle.position.y = Math.sin(time * 0.2 + index * 0.05) * size * 0.02;
         }
       });
     } catch (error) {
@@ -548,6 +475,15 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       console.warn('Animation error in Planet component:', error);
     }
   });
+
+  // Cleanup function to prevent memory leaks
+  React.useEffect(() => {
+    return () => {
+      // Clear refs on unmount
+      particleRefs.current = [];
+      sparkleRefs.current = [];
+    };
+  }, []);
 
   // Special effects for different entity types
   const renderSpecialEffects = () => {
@@ -663,7 +599,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   };
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       {/* Main Entity Body */}
       <mesh 
         ref={meshRef}
@@ -848,7 +784,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         );
       })}
 
-      {/* Additional Ring Layer Particles - Slowest Moving */}
+      {/* Additional Ring Layer Particles - Simplified */}
       {hasRings(ringConfig) && ringConfig.rings.map((ring, ringIndex) => 
         Array.from({ length: Math.floor(ringConfig.particleCount / ringConfig.rings.length) }, (_, i) => {
           const angle = (i / Math.floor(ringConfig.particleCount / ringConfig.rings.length)) * Math.PI * 2;
@@ -862,7 +798,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
               key={`ring-particle-${ringIndex}-${i}`} 
               position={[x, y, z]}
               ref={(el) => {
-                if (el) ringParticleRefs.current[ringIndex * Math.floor(ringConfig.particleCount / ringConfig.rings.length) + i] = el;
+                if (el) particleRefs.current[ringIndex * Math.floor(ringConfig.particleCount / ringConfig.rings.length) + i] = el;
               }}
             >
               <sphereGeometry args={[0.015, 6, 6]} />
