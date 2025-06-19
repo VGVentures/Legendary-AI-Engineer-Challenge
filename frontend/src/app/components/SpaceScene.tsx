@@ -45,30 +45,30 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
 
   useFrame(() => {
     if (targetPosition && controlsRef.current) {
-      // Calculate more intimate zoom position
-      const zoomDistance = 5; // Closer distance for more intimacy
+      // Calculate very intimate zoom position for face-to-face conversation
+      const zoomDistance = 2.5; // Much closer for intimate conversation feel
       const [x, y, z] = targetPosition;
       
       // Calculate direction from origin to planet for more accurate positioning
       const planetVector = new THREE.Vector3(x, y, z);
       const direction = planetVector.clone().normalize();
       
-      // Position camera closer and more accurately to the planet
+      // Position camera very close for intimate conversation
       const cameraPosition = new THREE.Vector3(
-        x + (direction.x * zoomDistance), // Offset in planet's direction
-        y + 1.5, // Slight elevation for better view
-        z + (direction.z * zoomDistance) // Offset in planet's direction
+        x + (direction.x * zoomDistance), // Close offset in planet's direction
+        y + 0.8, // Lower elevation for more personal angle
+        z + (direction.z * zoomDistance) // Close offset in planet's direction
       );
       
       // Smoothly animate camera to new position
-      camera.position.lerp(cameraPosition, 0.03); // Slightly faster for more responsive feel
+      camera.position.lerp(cameraPosition, 0.04); // Faster for more responsive feel
       
       // Look directly at the planet center
       const target = new THREE.Vector3(x, y, z);
       camera.lookAt(target);
       
       // Update controls target smoothly
-      controlsRef.current.target.lerp(target, 0.03);
+      controlsRef.current.target.lerp(target, 0.04);
     }
   });
 
@@ -79,7 +79,7 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
       enableZoom={true}
       enableRotate={true}
       maxDistance={50}
-      minDistance={3} // Allow closer zoom for intimacy
+      minDistance={1.5} // Allow very close zoom for intimate conversation
     />
   );
 }
