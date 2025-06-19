@@ -267,11 +267,11 @@ export default function SpaceScene() {
   const getResponsiveCameraConfig = () => {
     switch (screenSize) {
       case 'mobile':
-        return { position: [0, 0, 15] as [number, number, number], fov: 70 };
+        return { position: [0, 2, 12] as [number, number, number], fov: 70 };
       case 'tablet':
-        return { position: [0, 0, 18] as [number, number, number], fov: 72 };
+        return { position: [0, 2.5, 15] as [number, number, number], fov: 72 };
       default: // desktop
-        return { position: [0, 0, 20] as [number, number, number], fov: 75 };
+        return { position: [0, 3, 17] as [number, number, number], fov: 75 };
     }
   };
 
