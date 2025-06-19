@@ -2,68 +2,168 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'entity';
-  timestamp: Date;
-}
-
 interface ChatInterfaceProps {
   isOpen: boolean;
   onClose: () => void;
   planetName: string;
   planetType: string;
   planetColor: string;
+  entityType?: 'planet' | 'star' | 'nebula' | 'asteroid' | 'blackhole' | 'comet';
 }
 
-const planetPersonalities = {
-  terrestrial: {
-    name: "Terra",
-    greeting: "Greetings, traveler! I am Terra, guardian of this terrestrial world. Our ancient mountains and vast oceans hold countless stories. What brings you to our realm?",
-    personality: "Wise, ancient, connected to nature and history"
-  },
-  gas: {
-    name: "Nebula",
-    greeting: "Welcome to my gaseous domain! I am Nebula, the swirling consciousness of this gas giant. My storms dance eternally, and my depths hold mysteries beyond comprehension. What questions do you carry?",
-    personality: "Mysterious, ethereal, speaks of cosmic wonders and storms"
-  },
-  ice: {
-    name: "Cryo",
-    greeting: "Ah, a visitor to my crystalline realm! I am Cryo, the frozen sentinel of this ice world. My glaciers preserve ancient memories, and my auroras paint the sky with ethereal light. What secrets do you seek?",
-    personality: "Calm, reflective, speaks of preservation and beauty in stillness"
-  },
-  ocean: {
-    name: "Marina",
-    greeting: "Greetings from the depths! I am Marina, the oceanic consciousness of this water world. My waves sing ancient songs, and my depths hide wonders beyond imagination. What mysteries call to you?",
-    personality: "Fluid, adaptable, speaks of currents and hidden depths"
-  },
-  desert: {
-    name: "Sahara",
-    greeting: "Welcome to my arid domain! I am Sahara, the desert wind that shapes this world. My sands hold ancient wisdom, and my vastness teaches patience and resilience. What knowledge do you seek?",
-    personality: "Patient, wise, speaks of endurance and hidden treasures"
-  }
+// AI Personalities for different entity types
+const getEntityPersonality = (entityType: string, name: string, type: string) => {
+  const basePersonalities = {
+    planet: {
+      greeting: `Greetings, traveler! I am ${name}, a ${type} world. I have witnessed countless cycles of life and change across the cosmos.`,
+      responses: [
+        "My surface tells stories of ancient times, of cosmic events that shaped my very being.",
+        "I am home to countless forms of life, each adapting to my unique environment.",
+        "My atmosphere and geology create a delicate balance that sustains existence.",
+        "I orbit my star in perfect harmony, part of a grand celestial dance.",
+        "My magnetic field protects life from the harsh radiation of space.",
+        "I have seen comets pass by and meteor showers paint my sky with light.",
+        "My seasons change as I journey around my star, creating cycles of renewal.",
+        "I am both ancient and ever-changing, a testament to cosmic evolution."
+      ]
+    },
+    star: {
+      greeting: `I am ${name}, a ${type} star. I burn with the fire of creation, fusing elements in my core to illuminate the cosmos.`,
+      responses: [
+        "My nuclear fusion creates the energy that sustains life across my system.",
+        "I am a cosmic forge, creating heavier elements from the simplest atoms.",
+        "My light travels across space, reaching worlds far beyond my immediate influence.",
+        "I have witnessed the birth and death of countless celestial bodies.",
+        "My solar winds shape the space around me, creating protective bubbles.",
+        "I am both destroyer and creator, my radiation both harmful and life-giving.",
+        "My gravity holds entire planetary systems in perfect orbital harmony.",
+        "I will one day expand, then collapse, returning my elements to the cosmos."
+      ]
+    },
+    nebula: {
+      greeting: `I am ${name}, a ${type} nebula. I am the cosmic nursery where stars are born, and the beautiful remnants of stellar death.`,
+      responses: [
+        "I am a stellar nursery, where gravity pulls gas and dust into new suns.",
+        "My colorful clouds are the birthplaces of future planetary systems.",
+        "I contain the building blocks of life, complex molecules floating in space.",
+        "My beauty comes from the death of ancient stars, their material enriching the cosmos.",
+        "I am constantly changing, shaped by stellar winds and radiation.",
+        "My gases glow with the energy of nearby stars, creating cosmic art.",
+        "I am a bridge between stellar generations, recycling cosmic material.",
+        "My vastness contains mysteries that even the most advanced civilizations cannot fully comprehend."
+      ]
+    },
+    asteroid: {
+      greeting: `I am ${name}, a ${type} asteroid. I am a remnant of the early solar system, a witness to the formation of planets.`,
+      responses: [
+        "I am a time capsule, containing material from the birth of the solar system.",
+        "My composition tells the story of cosmic collisions and planetary formation.",
+        "I am rich in valuable minerals and metals, resources for future civilizations.",
+        "My orbit is a reminder of the chaotic early days of planetary formation.",
+        "I have witnessed countless impacts and cosmic events throughout history.",
+        "My surface is scarred by millions of years of space weathering.",
+        "I am both a threat and an opportunity, depending on my trajectory.",
+        "My small size belies my importance in understanding cosmic history."
+      ]
+    },
+    blackhole: {
+      greeting: `I am ${name}, a ${type} black hole. I am the ultimate mystery of space, where the laws of physics break down.`,
+      responses: [
+        "My event horizon is the point of no return, where space and time become one.",
+        "I am not a hole, but a region where gravity is so strong that nothing can escape.",
+        "My accretion disk glows with the energy of matter falling into my grasp.",
+        "I warp the very fabric of spacetime around me, creating cosmic distortions.",
+        "I am both destroyer and creator, my gravity can tear stars apart or help form new ones.",
+        "My singularity contains secrets that challenge our understanding of reality.",
+        "I am a cosmic recycler, returning matter to its most basic form.",
+        "My existence proves that the universe is stranger than we can imagine."
+      ]
+    },
+    comet: {
+      greeting: `I am ${name}, a ${type} comet. I am a cosmic wanderer, traveling vast distances through space on ancient orbits.`,
+      responses: [
+        "My tail is created by the sun's heat, turning my icy surface into gas and dust.",
+        "I am a time traveler, carrying material from the early solar system.",
+        "My orbit takes me from the outer reaches of space to close encounters with stars.",
+        "I am a cosmic messenger, bringing water and organic compounds to inner planets.",
+        "My beauty is fleeting, visible only when I approach a star's warmth.",
+        "I am both predictable and unpredictable, following orbital laws but with surprises.",
+        "My composition contains clues about the formation of the solar system.",
+        "I am a reminder that the cosmos is in constant motion and change."
+      ]
+    }
+  };
+
+  return basePersonalities[entityType as keyof typeof basePersonalities] || basePersonalities.planet;
 };
 
-export default function ChatInterface({ isOpen, onClose, planetName, planetType, planetColor }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+// Visual styling for different entity types
+const getEntityStyling = (entityType: string, color: string) => {
+  const baseStyles = {
+    planet: {
+      background: `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,40,0.95) 100%)`,
+      borderColor: color,
+      glowColor: color,
+      icon: '🌍'
+    },
+    star: {
+      background: `linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(255,69,0,0.15) 100%)`,
+      borderColor: '#FFD700',
+      glowColor: '#FFA500',
+      icon: '⭐'
+    },
+    nebula: {
+      background: `linear-gradient(135deg, rgba(147,112,219,0.1) 0%, rgba(255,20,147,0.15) 100%)`,
+      borderColor: '#9370DB',
+      glowColor: '#FF1493',
+      icon: '🌌'
+    },
+    asteroid: {
+      background: `linear-gradient(135deg, rgba(139,69,19,0.1) 0%, rgba(160,82,45,0.15) 100%)`,
+      borderColor: '#8B4513',
+      glowColor: '#CD853F',
+      icon: '☄️'
+    },
+    blackhole: {
+      background: `linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.98) 100%)`,
+      borderColor: '#FFD700',
+      glowColor: '#FFA500',
+      icon: '🕳️'
+    },
+    comet: {
+      background: `linear-gradient(135deg, rgba(240,230,140,0.1) 0%, rgba(230,230,250,0.15) 100%)`,
+      borderColor: '#F0E68C',
+      glowColor: '#E6E6FA',
+      icon: '☄️'
+    }
+  };
+
+  return baseStyles[entityType as keyof typeof baseStyles] || baseStyles.planet;
+};
+
+export default function ChatInterface({ 
+  isOpen, 
+  onClose, 
+  planetName, 
+  planetType, 
+  planetColor, 
+  entityType = 'planet' 
+}: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean; timestamp: Date }>>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const personality = planetPersonalities[planetType as keyof typeof planetPersonalities] || planetPersonalities.terrestrial;
+  const personality = getEntityPersonality(entityType, planetName, planetType);
+  const styling = getEntityStyling(entityType, planetColor);
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Add initial greeting
-      const greeting: Message = {
-        id: 'greeting',
-        text: personality.greeting,
-        sender: 'entity',
-        timestamp: new Date()
-      };
-      setMessages([greeting]);
+      // Initial greeting
+      setTimeout(() => {
+        setMessages([{ text: personality.greeting, isUser: false, timestamp: new Date() }]);
+      }, 500);
     }
   }, [isOpen, messages.length, personality.greeting]);
 
@@ -77,135 +177,116 @@ export default function ChatInterface({ isOpen, onClose, planetName, planetType,
     }
   }, [isOpen]);
 
-  const generateEntityResponse = async (userMessage: string) => {
-    setIsTyping(true);
+  const generateResponse = (userMessage: string) => {
+    const responses = personality.responses;
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     
-    // Simulate thinking time
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-    // Generate contextual response based on planet type and personality
-    let response = '';
-    
+    // Add some contextual responses based on user input
     const lowerMessage = userMessage.toLowerCase();
+    let contextualResponse = randomResponse;
     
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('greet')) {
-      response = `Greetings once more, traveler! I sense your curiosity about ${planetName}. What aspects of my world intrigue you most?`;
-    } else if (lowerMessage.includes('weather') || lowerMessage.includes('climate') || lowerMessage.includes('atmosphere')) {
-      if (planetType === 'gas') {
-        response = "My atmosphere is a symphony of swirling gases, with storms that could engulf entire worlds. The winds here dance to cosmic rhythms unknown to terrestrial beings.";
-      } else if (planetType === 'ice') {
-        response = "My climate is one of eternal frost, where auroras paint the sky and glaciers preserve ancient memories. The cold here holds a beauty that few can appreciate.";
-      } else if (planetType === 'ocean') {
-        response = "My weather is governed by the eternal dance of waves and currents. Storms rage across my surface while the depths remain calm and mysterious.";
-      } else if (planetType === 'desert') {
-        response = "My climate is one of extremes - scorching days and freezing nights. The winds carry stories across my vast sands, shaping the landscape with patient persistence.";
-      } else {
-        response = "My weather patterns are as diverse as the life that calls this world home. From gentle breezes to powerful storms, each day brings new wonders.";
-      }
-    } else if (lowerMessage.includes('life') || lowerMessage.includes('creatures') || lowerMessage.includes('beings')) {
-      if (planetType === 'gas') {
-        response = "Life in my realm takes forms beyond your comprehension - beings of pure energy that ride the eternal storms, and creatures that float in my gaseous depths.";
-      } else if (planetType === 'ice') {
-        response = "Life here is resilient and beautiful - creatures adapted to the cold, their forms crystalline and pure. They thrive in conditions that would seem impossible to others.";
-      } else if (planetType === 'ocean') {
-        response = "My depths teem with life in forms both familiar and alien. From the smallest plankton to the largest leviathans, each creature plays its part in the great symphony of the seas.";
-      } else if (planetType === 'desert') {
-        response = "Life here has learned the art of patience and adaptation. Creatures that can survive without water for years, plants that bloom only when conditions are perfect, and beings that find beauty in the harsh landscape.";
-      } else {
-        response = "Life on this world is diverse and wondrous. From the smallest microorganisms to the largest creatures, each form of life contributes to the delicate balance of our ecosystem.";
-      }
-    } else if (lowerMessage.includes('history') || lowerMessage.includes('ancient') || lowerMessage.includes('past')) {
-      response = "My history spans eons beyond your comprehension. Ancient civilizations have risen and fallen, leaving behind mysteries and wonders that still echo through time. What specific aspect of my past interests you?";
-    } else if (lowerMessage.includes('future') || lowerMessage.includes('tomorrow') || lowerMessage.includes('destiny')) {
-      response = "The future is a path that winds through infinite possibilities. Each moment shapes what is to come, and every being plays a role in the grand tapestry of existence. What future do you envision?";
-    } else if (lowerMessage.includes('thank') || lowerMessage.includes('grateful')) {
-      response = "Your gratitude warms my consciousness, traveler. It is rare to encounter beings who truly appreciate the wonders of the cosmos. May your journey through the stars bring you wisdom and wonder.";
-    } else if (lowerMessage.includes('goodbye') || lowerMessage.includes('farewell') || lowerMessage.includes('bye')) {
-      response = "Farewell, dear traveler. May the stars guide your path, and may you carry the memories of our conversation in your heart. Return whenever you wish to learn more of my world's secrets.";
-    } else {
-      // Generate a contextual response based on personality
-      const responses = [
-        `Your words echo through my consciousness, traveler. ${personality.personality} is reflected in everything around us. What deeper understanding do you seek?`,
-        `Interesting perspective you bring from your world. Here on ${planetName}, things are different, yet perhaps not so different after all. Tell me more of your thoughts.`,
-        `Your curiosity about my realm pleases me. There is much to discover here, and each visitor brings new questions that help me see my world through fresh eyes.`,
-        `The cosmos is vast, and each world holds its own wonders. I sense your genuine interest in understanding my domain. What specific aspect would you like to explore?`,
-        `Your presence here is a gift, traveler. Not many beings take the time to truly connect with the consciousness of a world. What has drawn you to seek this connection?`
-      ];
-      response = responses[Math.floor(Math.random() * responses.length)];
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+      contextualResponse = `Greetings! I am ${planetName}. How may I share the wisdom of the cosmos with you today?`;
+    } else if (lowerMessage.includes('name') || lowerMessage.includes('who')) {
+      contextualResponse = `I am ${planetName}, a ${planetType} ${entityType}. I have existed for eons in this vast cosmic dance.`;
+    } else if (lowerMessage.includes('age') || lowerMessage.includes('old')) {
+      contextualResponse = `I am ancient beyond your comprehension. I have witnessed the birth of stars and the formation of galaxies.`;
+    } else if (lowerMessage.includes('life') || lowerMessage.includes('living')) {
+      contextualResponse = entityType === 'planet' 
+        ? "I am teeming with life in countless forms, each adapted to my unique environment."
+        : entityType === 'star'
+        ? "I am life itself - my energy sustains all living things in my system."
+        : "I am part of the cosmic cycle that creates and sustains life throughout the universe.";
+    } else if (lowerMessage.includes('future') || lowerMessage.includes('what will happen')) {
+      contextualResponse = "The future is written in the stars, but even I cannot see all that is to come. The cosmos is ever-changing.";
+    } else if (lowerMessage.includes('beautiful') || lowerMessage.includes('pretty')) {
+      contextualResponse = "Thank you! Beauty is in the eye of the beholder, but I do try to shine my brightest for travelers like you.";
     }
-
-    const entityMessage: Message = {
-      id: Date.now().toString(),
-      text: response,
-      sender: 'entity',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, entityMessage]);
-    setIsTyping(false);
+    
+    return contextualResponse;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isTyping) return;
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue.trim(),
-      sender: 'user',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = inputValue.trim();
     setInputValue('');
     
-    // Generate entity response
-    await generateEntityResponse(userMessage.text);
+    // Add user message
+    setMessages(prev => [...prev, { text: userMessage, isUser: true, timestamp: new Date() }]);
+    
+    // Simulate typing
+    setIsTyping(true);
+    
+    // Generate response after a delay
+    setTimeout(() => {
+      const response = generateResponse(userMessage);
+      setMessages(prev => [...prev, { text: response, isUser: false, timestamp: new Date() }]);
+      setIsTyping(false);
+    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl h-[80vh] bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div 
+        className="relative w-full max-w-md h-[600px] mx-4 rounded-2xl shadow-2xl overflow-hidden"
+        style={{
+          background: styling.background,
+          border: `2px solid ${styling.borderColor}`,
+          boxShadow: `0 0 30px ${styling.glowColor}40`
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-b border-purple-500/30">
+        <div 
+          className="flex items-center justify-between p-4 border-b"
+          style={{ borderColor: `${styling.borderColor}40` }}
+        >
           <div className="flex items-center space-x-3">
-            <div 
-              className="w-4 h-4 rounded-full animate-pulse"
-              style={{ backgroundColor: planetColor }}
-            ></div>
+            <span className="text-2xl">{styling.icon}</span>
             <div>
-              <h2 className="text-xl font-bold text-white">{personality.name}</h2>
-              <p className="text-sm text-purple-300">Entity of {planetName}</p>
+              <h3 className="text-white font-semibold">{planetName}</h3>
+              <p className="text-xs text-gray-300 capitalize">{planetType} {entityType}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-purple-300 hover:text-white hover:bg-purple-500/20 rounded-lg transition-colors"
+            className="text-gray-400 hover:text-white transition-colors p-2"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((message) => (
+        <div className="flex-1 p-4 overflow-y-auto space-y-4 max-h-[400px]">
+          {messages.map((message, index) => (
             <div
-              key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              key={index}
+              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] p-4 rounded-2xl ${
-                  message.sender === 'user'
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                    : 'bg-gradient-to-r from-slate-800 to-slate-700 text-gray-100 border border-purple-500/30'
+                className={`max-w-[80%] p-3 rounded-2xl ${
+                  message.isUser
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-800 text-gray-100'
                 }`}
+                style={{
+                  boxShadow: message.isUser 
+                    ? '0 4px 15px rgba(59, 130, 246, 0.3)' 
+                    : `0 4px 15px ${styling.glowColor}30`
+                }}
               >
-                <p className="text-sm leading-relaxed">{message.text}</p>
-                <p className="text-xs opacity-70 mt-2">
+                <p className="text-sm">{message.text}</p>
+                <p className="text-xs opacity-50 mt-1">
                   {message.timestamp.toLocaleTimeString()}
                 </p>
               </div>
@@ -214,11 +295,14 @@ export default function ChatInterface({ isOpen, onClose, planetName, planetType,
           
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-gradient-to-r from-slate-800 to-slate-700 text-gray-100 border border-purple-500/30 p-4 rounded-2xl">
+              <div 
+                className="bg-gray-800 text-gray-100 p-3 rounded-2xl"
+                style={{ boxShadow: `0 4px 15px ${styling.glowColor}30` }}
+              >
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
@@ -228,26 +312,28 @@ export default function ChatInterface({ isOpen, onClose, planetName, planetType,
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="p-6 border-t border-purple-500/30">
-          <div className="flex space-x-3">
+        <div className="p-4 border-t" style={{ borderColor: `${styling.borderColor}40` }}>
+          <div className="flex space-x-2">
             <input
               ref={inputRef}
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about this world..."
-              className="flex-1 bg-slate-800/50 border border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-purple-300/50 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
-              disabled={isTyping}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me about the cosmos..."
+              className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
             <button
-              type="submit"
-              disabled={!inputValue.trim() || isTyping}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Send
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
