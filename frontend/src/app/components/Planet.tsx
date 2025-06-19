@@ -280,110 +280,16 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
   const [clicked, setClicked] = useState(false);
   const [state, setState] = useState<{ clock?: { elapsedTime: number } }>({});
 
-  const getRingConfig = (entityType: string, planetType: string) => {
-    if (entityType === 'planet' && planetType === 'gas') {
-      return {
-        colors: ['#FFD23F', '#F7931E', '#FF6B35', '#FF4500'],
-        opacity: 0.6,
-        particleCount: 80,
-        sparkleCount: 25
-      };
-    } else if (entityType === 'planet' && planetType === 'desert') {
-      return {
-        colors: ['#D2691E', '#CD853F', '#F4A460', '#DEB887'],
-        opacity: 0.4,
-        particleCount: 60,
-        sparkleCount: 20
-      };
-    } else if (entityType === 'blackhole') {
-      return {
-        colors: ['#FFD700', '#FFA500', '#FF4500', '#FF0000'],
-        opacity: 0.8,
-        particleCount: 100,
-        sparkleCount: 30
-      };
-    } else if (entityType === 'comet') {
-      return {
-        colors: ['#FFFFFF', '#E0F6FF', '#B0E0E6', '#87CEEB'],
-        opacity: 0.5,
-        particleCount: 40,
-        sparkleCount: 15
-      };
-    } else {
-      return {
-        colors: [color, color + 'CC', color + '99', color + '66'],
-        opacity: 0.3,
-        particleCount: 50,
-        sparkleCount: 18
-      };
-    }
-  };
-
-  const ringConfig = getRingConfig(entityType, type);
   const texture = useEntityTexture(entityType, type, color, size);
   const animatedColors = getAnimatedColors(entityType, type, state?.clock?.elapsedTime || 0);
 
-  // Animation frame updates
+  // Animation frame updates - simplified to prevent crashes
   useFrame((state) => {
     setState({ clock: state.clock });
     
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.008; // Restore normal planet rotation
-      meshRef.current.rotation.x += 0.004; // Restore normal planet rotation
-    }
-
-    // Animate rings - normal speed for eerie effect
-    if (groupRef.current) {
-      groupRef.current.children.forEach((child) => {
-        if (child.userData.isRing) {
-          child.rotation.z += child.userData.rotationSpeed; // Normal ring speed
-        }
-        if (child.userData.isInnerRing) {
-          child.rotation.z += child.userData.rotationSpeed; // Normal ring speed
-        }
-      });
-    }
-
-    // Animate mist particles - extremely slow as requested
-    if (groupRef.current) {
-      groupRef.current.children.forEach((child, index) => {
-        if (child.userData.isMistParticle) {
-          // Almost no movement - barely perceptible
-          child.position.y += Math.sin(state.clock.elapsedTime * 0.001 + index) * 0.000001;
-          child.position.x += Math.cos(state.clock.elapsedTime * 0.0005 + index * 0.5) * 0.000001;
-          child.rotation.z += 0.000001; // Almost no rotation
-        }
-        if (child.userData.isVaporParticle) {
-          // Almost no movement - barely perceptible
-          child.position.y += Math.sin(state.clock.elapsedTime * 0.002 + index * 0.7) * 0.000002;
-          child.position.x += Math.cos(state.clock.elapsedTime * 0.001 + index * 0.3) * 0.000002;
-          child.rotation.z += 0.000002; // Almost no rotation
-        }
-        if (child.userData.isAtmosphericHaze) {
-          child.rotation.y += 0.0001; // Very slow atmospheric rotation
-          child.rotation.z += 0.0005; // Very slow atmospheric rotation
-        }
-      });
-    }
-
-    // Update material colors for animation
-    if (meshRef.current && meshRef.current.material) {
-      const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
-      const time = state.clock.elapsedTime;
-      const colorIndex = Math.floor(time * 0.5) % animatedColors.length;
-      const nextColorIndex = (colorIndex + 1) % animatedColors.length;
-      const t = (time * 0.5) % 1;
-      
-      const newColors = animatedColors.map((color, i) => {
-        if (i === colorIndex) {
-          return color.clone().lerp(animatedColors[nextColorIndex], t);
-        }
-        return color;
-      });
-      
-      if (material.emissive) {
-        material.emissive.copy(newColors[0]);
-      }
+      meshRef.current.rotation.y += 0.008; // Normal planet rotation
+      meshRef.current.rotation.x += 0.004; // Normal planet rotation
     }
   });
 
@@ -637,76 +543,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         </mesh>
       ))}
 
-      {/* Ring System */}
-      {[1.5, 1.8, 2.1, 2.4].map((ringScale, ringIndex) => (
-        <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[size * ringScale, size * (ringScale + 0.1), 64]} />
-          <meshBasicMaterial
-            color={ringConfig.colors[ringIndex % ringConfig.colors.length]}
-            transparent
-            opacity={ringConfig.opacity * (1 - ringIndex * 0.2)}
-            blending={THREE.AdditiveBlending}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      ))}
-
-      {/* Ring Particles */}
-      {Array.from({ length: ringConfig.particleCount }, (_, i) => {
-        const angle = (i / ringConfig.particleCount) * Math.PI * 2;
-        const radius = size * 2 + Math.random() * size * 0.5;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.1;
-        
-        return (
-          <mesh key={`particle-${i}`} position={[x, y, z]}>
-            <sphereGeometry args={[0.02, 8, 8]} />
-            <meshBasicMaterial
-              color={ringConfig.colors[i % ringConfig.colors.length]}
-              transparent
-              opacity={0.8}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
-        );
-      })}
-
-      {/* Orbiting Sparkles */}
-      {Array.from({ length: ringConfig.sparkleCount }, (_, i) => {
-        const angle = (i / ringConfig.sparkleCount) * Math.PI * 2;
-        const radius = size * 2.5 + Math.random() * size * 0.3;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * size * 0.2;
-        
-        return (
-          <mesh key={`sparkle-${i}`} position={[x, y, z]}>
-            <sphereGeometry args={[0.01, 6, 6]} />
-            <meshBasicMaterial
-              color={ringConfig.colors[i % ringConfig.colors.length]}
-              transparent
-              opacity={0.9}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
-        );
-      })}
-
-      {/* Reduced Enhanced Glow Spheres */}
-      {[0.7, 0.9, 1.1].map((glowScale, glowIndex) => (
-        <mesh key={`glow-${glowIndex}`}>
-          <sphereGeometry args={[size * glowScale, 24, 24]} />
-          <meshBasicMaterial
-            color={animatedColors[glowIndex % animatedColors.length]}
-            transparent
-            opacity={0.2 - glowIndex * 0.05}
-            blending={THREE.AdditiveBlending}
-            side={THREE.BackSide}
-          />
-        </mesh>
-      ))}
-
       {/* Enhanced Hover Effect */}
       {hovered && (
         <>
@@ -746,50 +582,6 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           />
         </mesh>
       )}
-
-      {/* Eerie Rotating Rings - simplified to just 2 rings */}
-      {Array.from({ length: 2 }, (_, ringIndex) => {
-        const ringRadius = size * (1.8 + ringIndex * 0.4);
-        const rotationSpeed = (0.0005 + ringIndex * 0.0002) * (ringIndex % 2 === 0 ? 1 : -1);
-        const ringSegments = 32 + ringIndex * 16;
-        
-        return (
-          <mesh 
-            key={`ring-${ringIndex}`}
-            userData={{ isRing: true, ringIndex, rotationSpeed }}
-          >
-            <ringGeometry args={[ringRadius * 0.8, ringRadius, ringSegments]} />
-            <meshBasicMaterial
-              color={animatedColors[ringIndex % animatedColors.length]}
-              transparent
-              opacity={0.12 - ringIndex * 0.04}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        );
-      })}
-
-      {/* Inner Ring System - closer to planet */}
-      {Array.from({ length: 2 }, (_, ringIndex) => {
-        const ringRadius = size * (1.3 + ringIndex * 0.2);
-        const rotationSpeed = (0.002 + ringIndex * 0.001) * (ringIndex % 2 === 0 ? -1 : 1);
-        const ringSegments = 48 + ringIndex * 8;
-        
-        return (
-          <mesh 
-            key={`inner-ring-${ringIndex}`}
-            userData={{ isInnerRing: true, ringIndex, rotationSpeed }}
-          >
-            <ringGeometry args={[ringRadius * 0.9, ringRadius, ringSegments]} />
-            <meshBasicMaterial
-              color={animatedColors[(ringIndex + 2) % animatedColors.length]}
-              transparent
-              opacity={0.2 - ringIndex * 0.05}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        );
-      })}
     </group>
   );
 } 
