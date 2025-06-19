@@ -386,7 +386,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           // Earth-like rings using planet's actual color with beautiful variations
           rings: [
             { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.5, color: '#' + baseColor.getHexString() },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.4, color: '#' + lighterColor },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.8, color: '#' + lighterColor },
             { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.3, color: '#' + complementaryColor }
           ],
           colors: ['#' + baseColor.getHexString(), '#' + lighterColor, '#' + complementaryColor],
@@ -723,20 +723,52 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         </mesh>
       ))}
 
-      {/* Enhanced Ring System with Multiple Layers */}
+      {/* Enhanced Ring System with Multiple Layers and Luminous Middle Ring */}
       {entityType === 'planet' && hasRings(ringConfig) ? (
         // Use the new ring configuration with multiple layers
         ringConfig.rings.map((ring, ringIndex) => (
-          <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
-            <meshBasicMaterial
-              color={ring.color}
-              transparent
-              opacity={ring.opacity}
-              blending={THREE.AdditiveBlending}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
+          <React.Fragment key={`ring-group-${ringIndex}`}>
+            {/* Main Ring */}
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
+              <meshBasicMaterial
+                color={ring.color}
+                transparent
+                opacity={ring.opacity}
+                blending={THREE.AdditiveBlending}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+            
+            {/* Special Luminous Glow for Middle Ring */}
+            {ringIndex === 1 && (
+              <>
+                {/* Inner glow ring */}
+                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                  <ringGeometry args={[size * (ring.innerRadius - 0.05), size * (ring.outerRadius + 0.05), 64]} />
+                  <meshBasicMaterial
+                    color={ring.color}
+                    transparent
+                    opacity={0.6}
+                    blending={THREE.AdditiveBlending}
+                    side={THREE.DoubleSide}
+                  />
+                </mesh>
+                
+                {/* Outer glow ring */}
+                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                  <ringGeometry args={[size * (ring.innerRadius - 0.1), size * (ring.outerRadius + 0.1), 64]} />
+                  <meshBasicMaterial
+                    color={ring.color}
+                    transparent
+                    opacity={0.3}
+                    blending={THREE.AdditiveBlending}
+                    side={THREE.DoubleSide}
+                  />
+                </mesh>
+              </>
+            )}
+          </React.Fragment>
         ))
       ) : (
         // Fallback for non-planet entities or legacy support
