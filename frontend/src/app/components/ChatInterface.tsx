@@ -669,7 +669,6 @@ export default function ChatInterface({
   });
   const [alienGagShown, setAlienGagShown] = useState(false);
   const [userLanguage, setUserLanguage] = useState<string | null>(null);
-  const [awaitingLanguage, setAwaitingLanguage] = useState(false);
   const [alienTyping, setAlienTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -703,7 +702,6 @@ export default function ChatInterface({
       });
       setAlienGagShown(false);
       setUserLanguage(null);
-      setAwaitingLanguage(false);
       setAlienTyping(false);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       if (alienGagTimeoutRef.current) clearTimeout(alienGagTimeoutRef.current);
@@ -737,28 +735,34 @@ export default function ChatInterface({
     const userMessage = inputValue.trim();
     setInputValue('');
     setMessages(prev => [...prev, { text: userMessage, isUser: true, timestamp: new Date() }]);
-    // If we are awaiting language, set it and continue
-    if (awaitingLanguage) {
-      setUserLanguage(userMessage);
-      setAwaitingLanguage(false);
-      setIsTyping(false);
-      setAlienTyping(false);
-      setMessages(prev => [...prev, { text: `Thank you! I'll do my best to speak in ${userMessage} from now on.`, isUser: false, timestamp: new Date() }]);
-      return;
-    }
+    
     // Alien language gag (first message only)
     if (!alienGagShown) {
       setAlienTyping(true);
       setMessages(prev => [...prev, { text: generateAlienString(24), isUser: false, timestamp: new Date(), isAlien: true, isLoading: true }]);
       alienGagTimeoutRef.current = setTimeout(() => {
         setMessages(prev => prev.slice(0, -1)); // Remove alien message
-        setMessages(prev => [...prev, { text: `Oops! Sorry, I forgot to use your language. What language do you speak, traveler?`, isUser: false, timestamp: new Date() }]);
+        
+        // Planet-specific language detection messages
+        const languageDetectionMessages = {
+          'Terra Nova': "Ah! I've detected your language patterns. You're speaking English, aren't you? My atmospheric sensors picked up the linguistic frequencies. How fascinating!",
+          'Verdant Prime': "Oh my! My bio-sensors have analyzed your communication patterns. You're using English! The floral networks in my ecosystem are quite sensitive to language vibrations.",
+          'Crystal Peak': "Interesting. My crystalline resonance chambers have detected English language patterns in your transmission. My geological sensors are quite precise.",
+          'Sahara Sands': "Ha! My desert winds carried your words to my core processors. English, right? The sand particles are excellent at picking up linguistic signatures.",
+          'Azure Depths': "Fascinating. My ocean currents have analyzed your communication patterns. You're speaking English. The depths reveal many secrets, including language detection."
+        };
+        
+        const detectionMessage = languageDetectionMessages[planetName as keyof typeof languageDetectionMessages] || 
+          "I've detected your language patterns. You're speaking English, aren't you?";
+        
+        setMessages(prev => [...prev, { text: detectionMessage, isUser: false, timestamp: new Date() }]);
         setAlienGagShown(true);
-        setAwaitingLanguage(true);
+        setUserLanguage('English');
         setAlienTyping(false);
       }, 1800);
       return;
     }
+    
     // Normal response: show alien typing indicator, then replace with real response
     setAlienTyping(true);
     setMessages(prev => [...prev, { text: generateAlienString(18), isUser: false, timestamp: new Date(), isAlien: true, isLoading: true }]);
@@ -766,7 +770,7 @@ export default function ChatInterface({
       try {
         const { response, newContext, shouldInterject, interjection } = generateContextualResponse(
           userMessage, 
-          personality, 
+          getEntityPersonality(entityType, planetName, planetType), 
           conversationContext,
           planetName,
           planetType,
@@ -791,7 +795,7 @@ export default function ChatInterface({
         setAlienTyping(false);
       }
     }, 1200 + Math.random() * 1200);
-  }, [inputValue, isTyping, alienGagShown, awaitingLanguage, conversationContext, planetName, planetType, entityType]);
+  }, [inputValue, isTyping, alienGagShown, conversationContext, planetName, planetType, entityType]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isTyping && !alienTyping) {
@@ -996,7 +1000,7 @@ export default function ChatInterface({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={awaitingLanguage ? "Type your language (e.g. English)" : "Ask me about the cosmos..."}
+              placeholder="Ask me about the cosmos..."
               disabled={isTyping || alienTyping}
               className="flex-1 px-4 py-3 rounded-xl border transition-all disabled:opacity-50 focus:outline-none"
               style={{

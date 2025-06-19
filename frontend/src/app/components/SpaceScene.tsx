@@ -38,26 +38,121 @@ const celestialEntities: CelestialEntity[] = [
   { id: 'sahara-sands', position: [-5.7, 0, -1.9] as [number, number, number], size: 0.7, color: '#DAA520', type: 'desert', name: 'Sahara Sands', entityType: 'planet' },
 ];
 
-// Custom camera controller component
-function CameraController({ targetPosition, isZooming }: { targetPosition: [number, number, number] | null, isZooming: boolean }) {
+// Custom camera controller component with enhanced zoom and orbit functionality
+function CameraController({ 
+  targetPosition, 
+  isZooming, 
+  isChatOpen 
+}: { 
+  targetPosition: [number, number, number] | null, 
+  isZooming: boolean,
+  isChatOpen: boolean 
+}) {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
+  const orbitAngleRef = useRef(0);
+  const zoomProgressRef = useRef(0);
+  const initialCameraPositionRef = useRef<THREE.Vector3 | null>(null);
+  const initialTargetRef = useRef<THREE.Vector3 | null>(null);
+  const baseOrbitPositionRef = useRef<THREE.Vector3 | null>(null);
   
-  useFrame(() => {
+  useFrame((state) => {
     if (isZooming && targetPosition && controlsRef.current) {
-      // Smoothly move camera to target position
       const target = new THREE.Vector3(...targetPosition);
-      const distance = 8; // Close distance for zoom
       
-      // Calculate camera position slightly offset from planet
-      const cameraPosition = target.clone().add(new THREE.Vector3(0, 2, distance));
+      // Store initial positions on first zoom
+      if (initialCameraPositionRef.current === null) {
+        initialCameraPositionRef.current = camera.position.clone();
+        initialTargetRef.current = controlsRef.current.target.clone();
+        zoomProgressRef.current = 0;
+        orbitAngleRef.current = 0;
+      }
       
-      // Smooth camera movement
-      camera.position.lerp(cameraPosition, 0.02);
-      controlsRef.current.target.lerp(target, 0.02);
+      // Smooth zoom progress
+      zoomProgressRef.current = Math.min(zoomProgressRef.current + 0.02, 1);
       
-      // Look at the planet
-      camera.lookAt(target);
+      // Calculate zoom distance based on planet size (closer for smaller planets)
+      const planetSize = celestialEntities.find(e => 
+        e.position[0] === targetPosition[0] && 
+        e.position[1] === targetPosition[1] && 
+        e.position[2] === targetPosition[2]
+      )?.size || 0.8;
+      const zoomDistance = 3 + (planetSize * 2); // Closer for larger planets
+      
+      // Calculate camera position for zoom
+      const zoomCameraPosition = target.clone().add(new THREE.Vector3(0, 1.5, zoomDistance));
+      
+      // Smooth camera movement to zoom position
+      if (initialCameraPositionRef.current) {
+        camera.position.lerpVectors(initialCameraPositionRef.current, zoomCameraPosition, zoomProgressRef.current);
+        controlsRef.current.target.lerpVectors(initialTargetRef.current!, target, zoomProgressRef.current);
+      }
+      
+      // Once zoomed in and chat is open, maintain close position with some movement
+      if (zoomProgressRef.current >= 1 && isChatOpen) {
+        // Store base orbit position if not set
+        if (baseOrbitPositionRef.current === null) {
+          baseOrbitPositionRef.current = camera.position.clone();
+        }
+        
+        // Allow very slow automatic orbiting
+        orbitAngleRef.current += 0.003; // Even slower rotation
+        
+        const orbitRadius = zoomDistance;
+        const orbitHeight = 1.5;
+        
+        // Calculate base orbit position
+        const orbitX = target.x + Math.cos(orbitAngleRef.current) * orbitRadius;
+        const orbitZ = target.z + Math.sin(orbitAngleRef.current) * orbitRadius;
+        const orbitY = target.y + orbitHeight;
+        
+        const baseOrbitPosition = new THREE.Vector3(orbitX, orbitY, orbitZ);
+        baseOrbitPositionRef.current = baseOrbitPosition;
+        
+        // Keep camera close to base orbit position but allow some drift
+        camera.position.lerp(baseOrbitPosition, 0.01); // Very gentle pull back to base position
+        controlsRef.current.target.lerp(target, 0.02);
+        
+        // Enable limited controls but with constraints
+        controlsRef.current.enablePan = true;
+        controlsRef.current.enableZoom = true;
+        controlsRef.current.enableRotate = true;
+        
+        // Constrain movement to stay close to planet
+        const distanceFromTarget = camera.position.distanceTo(target);
+        const maxDistance = zoomDistance * 1.5; // Allow some movement but not too far
+        
+        if (distanceFromTarget > maxDistance) {
+          // Pull camera back towards planet if it gets too far
+          const direction = camera.position.clone().sub(target).normalize();
+          const constrainedPosition = target.clone().add(direction.multiplyScalar(maxDistance));
+          camera.position.lerp(constrainedPosition, 0.1);
+        }
+        
+        // Keep minimum distance
+        const minDistance = zoomDistance * 0.8;
+        if (distanceFromTarget < minDistance) {
+          const direction = camera.position.clone().sub(target).normalize();
+          const constrainedPosition = target.clone().add(direction.multiplyScalar(minDistance));
+          camera.position.lerp(constrainedPosition, 0.1);
+        }
+      }
+    } else {
+      // Reset when not zooming
+      if (initialCameraPositionRef.current !== null) {
+        initialCameraPositionRef.current = null;
+        initialTargetRef.current = null;
+        baseOrbitPositionRef.current = null;
+        zoomProgressRef.current = 0;
+        orbitAngleRef.current = 0;
+        
+        // Re-enable full controls
+        if (controlsRef.current) {
+          controlsRef.current.enablePan = true;
+          controlsRef.current.enableZoom = true;
+          controlsRef.current.enableRotate = true;
+        }
+      }
     }
   });
 
@@ -67,8 +162,10 @@ function CameraController({ targetPosition, isZooming }: { targetPosition: [numb
       enablePan={true}
       enableZoom={true}
       enableRotate={true}
-      maxDistance={50}
-      minDistance={5}
+      maxDistance={isChatOpen ? 8 : 50} // Limit max distance when chatting
+      minDistance={isChatOpen ? 2 : 3} // Keep closer minimum when chatting
+      dampingFactor={0.05}
+      enableDamping={true}
     />
   );
 }
@@ -147,7 +244,11 @@ export default function SpaceScene() {
         
         <SpaceEnvironment onEntityClick={handleEntityClick} />
         
-        <CameraController targetPosition={targetPosition} isZooming={isZooming} />
+        <CameraController 
+          targetPosition={targetPosition} 
+          isZooming={isZooming} 
+          isChatOpen={isChatOpen}
+        />
       </Canvas>
 
       {/* Chat Interface - Now outside Canvas context */}
