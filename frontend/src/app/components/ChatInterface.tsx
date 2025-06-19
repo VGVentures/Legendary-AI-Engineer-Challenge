@@ -156,7 +156,7 @@ export default function ChatInterface({
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const personality = getEntityPersonality(entityType, planetName, planetType);
+  // Get styling (this is safe to keep outside since it's just visual)
   const styling = getEntityStyling(entityType, planetColor);
 
   // Reset messages when chat opens with a new entity
@@ -171,6 +171,9 @@ export default function ChatInterface({
         clearTimeout(typingTimeoutRef.current);
       }
       
+      // Get fresh personality data for the current entity
+      const personality = getEntityPersonality(entityType, planetName, planetType);
+      
       // Initial greeting with a slight delay
       const greetingTimeout = setTimeout(() => {
         setMessages([{ text: personality.greeting, isUser: false, timestamp: new Date() }]);
@@ -178,7 +181,7 @@ export default function ChatInterface({
       
       return () => clearTimeout(greetingTimeout);
     }
-  }, [isOpen, planetName, planetType, entityType]); // Removed personality.greeting from dependencies
+  }, [isOpen, planetName, planetType, entityType]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -200,6 +203,8 @@ export default function ChatInterface({
   }, [isOpen]);
 
   const generateResponse = useCallback((userMessage: string) => {
+    // Get fresh personality data for each response to prevent stale closures
+    const personality = getEntityPersonality(entityType, planetName, planetType);
     const responses = personality.responses;
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     
@@ -226,7 +231,7 @@ export default function ChatInterface({
     }
     
     return contextualResponse;
-  }, [personality.responses, planetName, planetType, entityType]);
+  }, [planetName, planetType, entityType]); // Removed personality.responses dependency
 
   const handleSendMessage = useCallback(async () => {
     if (!inputValue.trim() || isTyping) return;
