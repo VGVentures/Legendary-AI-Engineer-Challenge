@@ -135,36 +135,31 @@ function useEntityTexture(entityType: string, type: string, color: string, size:
         ctx.fill();
       }
     } else {
-      // Planet texture (default)
+      // Planet texture (default) - using planet's actual color
       const grad = ctx.createRadialGradient(256, 256, 80, 256, 256, 256);
       
-      let colors: string[];
-      switch (type) {
-        case 'gas':
-          colors = ['#FF6B35', '#F7931E', '#FFD23F', '#FF6B35'];
-          break;
-        case 'ice':
-          colors = ['#87CEEB', '#B0E0E6', '#E0F6FF', '#87CEEB'];
-          break;
-        case 'ocean':
-          colors = ['#006994', '#0099CC', '#00BFFF', '#006994'];
-          break;
-        case 'desert':
-          colors = ['#D2691E', '#CD853F', '#F4A460', '#DEB887'];
-          break;
-        default: // terrestrial
-          colors = ['#228B22', '#32CD32', '#90EE90', '#228B22'];
-      }
+      // Use the planet's actual color instead of hardcoded type-based colors
+      const baseColor = new THREE.Color(color);
+      const lighterColor = baseColor.clone().multiplyScalar(1.3);
+      const darkerColor = baseColor.clone().multiplyScalar(0.7);
+      const veryLightColor = baseColor.clone().multiplyScalar(1.6);
       
-      grad.addColorStop(0, colors[0]);
-      grad.addColorStop(0.3, colors[1]);
-      grad.addColorStop(0.7, colors[2]);
-      grad.addColorStop(1, colors[3]);
+      const colors = [
+        baseColor.getHexString(),
+        lighterColor.getHexString(),
+        darkerColor.getHexString(),
+        veryLightColor.getHexString()
+      ];
+      
+      grad.addColorStop(0, '#' + colors[0]);
+      grad.addColorStop(0.3, '#' + colors[1]);
+      grad.addColorStop(0.7, '#' + colors[2]);
+      grad.addColorStop(1, '#' + colors[3]);
       
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 512, 512);
       
-      // Add some texture variation
+      // Add some texture variation using the planet's color
       for (let i = 0; i < 50; i++) {
         const x = Math.random() * 512;
         const y = Math.random() * 512;
@@ -172,7 +167,7 @@ function useEntityTexture(entityType: string, type: string, color: string, size:
         const alpha = Math.random() * 0.3 + 0.1;
         
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+        ctx.fillStyle = '#' + colors[Math.floor(Math.random() * colors.length)];
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
