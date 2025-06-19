@@ -46,25 +46,29 @@ function CameraController({ targetPosition }: { targetPosition: [number, number,
   useFrame(() => {
     if (targetPosition && controlsRef.current) {
       // Calculate zoom position (closer to the planet)
-      const zoomDistance = 8; // Distance from planet
+      const zoomDistance = 12; // Distance from planet
       const [x, y, z] = targetPosition;
       
-      // Position camera at a slight offset from the planet
+      // Calculate camera position based on planet's actual position
+      // Position camera at an angle that shows the planet clearly
+      const angle = Math.atan2(x, z); // Calculate angle from center to planet
+      const cameraOffset = 3; // Offset from direct line to planet
+      
       const cameraPosition = new THREE.Vector3(
-        x + (x * 0.3), // Slight offset in x direction
+        x + Math.sin(angle) * cameraOffset, // Offset perpendicular to planet direction
         y + 2, // Slight elevation
-        z + zoomDistance // Zoom distance from planet
+        z + Math.cos(angle) * zoomDistance // Distance from planet along its direction
       );
       
       // Smoothly animate camera to new position
-      camera.position.lerp(cameraPosition, 0.02);
+      camera.position.lerp(cameraPosition, 0.03);
       
-      // Look at the planet
+      // Look directly at the planet
       const target = new THREE.Vector3(x, y, z);
       camera.lookAt(target);
       
-      // Update controls target
-      controlsRef.current.target.lerp(target, 0.02);
+      // Update controls target to the planet
+      controlsRef.current.target.lerp(target, 0.03);
     }
   });
 
