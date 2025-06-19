@@ -10,6 +10,7 @@ interface ChatInterfaceProps {
   planetType: string;
   planetColor: string;
   entityType?: 'planet' | 'star' | 'nebula' | 'asteroid' | 'blackhole' | 'comet';
+  screenSize?: 'mobile' | 'tablet' | 'desktop';
 }
 
 // AI Personalities for different entity types with enhanced conversation capabilities, interplanetary opinions, and personality attitudes
@@ -653,7 +654,8 @@ export default function ChatInterface({
   planetName, 
   planetType, 
   planetColor, 
-  entityType = 'planet' 
+  entityType = 'planet', 
+  screenSize = 'desktop' 
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean; timestamp: Date; isAlien?: boolean; isLoading?: boolean }>>([]);
   const [inputValue, setInputValue] = useState('');
@@ -805,14 +807,64 @@ export default function ChatInterface({
 
   if (!isOpen) return null;
 
+  // Responsive styling based on screen size
+  const getResponsiveStyling = () => {
+    switch (screenSize) {
+      case 'mobile':
+        return {
+          containerClass: "fixed inset-0 z-50 flex items-center justify-center p-2",
+          chatClass: "relative w-full h-full max-h-[90vh] mx-0 rounded-xl shadow-2xl overflow-hidden",
+          headerClass: "flex items-center justify-between p-3 border-b relative",
+          messagesClass: "flex-1 p-3 overflow-y-auto space-y-3 max-h-[60vh]",
+          inputClass: "p-3 border-t relative",
+          inputFieldClass: "flex-1 px-3 py-2 rounded-lg border transition-all disabled:opacity-50 focus:outline-none text-sm",
+          buttonClass: "px-3 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105",
+          titleClass: "font-semibold tracking-wider text-sm",
+          subtitleClass: "text-xs capitalize tracking-widest",
+          messageClass: "max-w-[85%] p-3 rounded-xl relative text-sm",
+          closeButtonClass: "transition-all p-1.5 rounded-lg hover:scale-110"
+        };
+      case 'tablet':
+        return {
+          containerClass: "fixed inset-0 z-50 flex items-center justify-center p-4",
+          chatClass: "relative w-full max-w-lg h-[70vh] mx-2 rounded-2xl shadow-2xl overflow-hidden",
+          headerClass: "flex items-center justify-between p-4 border-b relative",
+          messagesClass: "flex-1 p-4 overflow-y-auto space-y-4 max-h-[50vh]",
+          inputClass: "p-4 border-t relative",
+          inputFieldClass: "flex-1 px-4 py-3 rounded-xl border transition-all disabled:opacity-50 focus:outline-none",
+          buttonClass: "px-4 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105",
+          titleClass: "font-semibold tracking-wider",
+          subtitleClass: "text-xs capitalize tracking-widest",
+          messageClass: "max-w-[80%] p-4 rounded-2xl relative",
+          closeButtonClass: "transition-all p-2 rounded-lg hover:scale-110"
+        };
+      default: // desktop
+        return {
+          containerClass: "fixed inset-0 z-50 flex items-center justify-center",
+          chatClass: "relative w-full max-w-md h-[600px] mx-4 rounded-2xl shadow-2xl overflow-hidden",
+          headerClass: "flex items-center justify-between p-4 border-b relative",
+          messagesClass: "flex-1 p-4 overflow-y-auto space-y-4 max-h-[400px]",
+          inputClass: "p-4 border-t relative",
+          inputFieldClass: "flex-1 px-4 py-3 rounded-xl border transition-all disabled:opacity-50 focus:outline-none",
+          buttonClass: "px-4 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105",
+          titleClass: "font-semibold tracking-wider",
+          subtitleClass: "text-xs capitalize tracking-widest",
+          messageClass: "max-w-[80%] p-4 rounded-2xl relative",
+          closeButtonClass: "transition-all p-2 rounded-lg hover:scale-110"
+        };
+    }
+  };
+
+  const responsiveStyles = getResponsiveStyling();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ 
+    <div className={responsiveStyles.containerClass} style={{ 
       background: 'rgba(10,15,28,0.92)', 
       backdropFilter: 'blur(4px)',
       backgroundImage: TECH_PATTERN
     }}>
       <div 
-        className="relative w-full max-w-md h-[600px] mx-4 rounded-2xl shadow-2xl overflow-hidden"
+        className={responsiveStyles.chatClass}
         style={{
           background: getPlanetTechStyling(planetColor).techBackground,
           border: `3px solid ${planetColor}`,
@@ -832,7 +884,7 @@ export default function ChatInterface({
         
         {/* Header with tech styling */}
         <div 
-          className="flex items-center justify-between p-4 border-b relative"
+          className={responsiveStyles.headerClass}
           style={{ 
             borderColor: `${planetColor}80`, 
             fontFamily: ALIEN_FONT,
@@ -859,7 +911,7 @@ export default function ChatInterface({
             </div>
             <div>
               <h3 
-                className="font-semibold tracking-wider"
+                className={responsiveStyles.titleClass}
                 style={{ 
                   color: planetColor, 
                   fontFamily: ALIEN_FONT,
@@ -869,7 +921,7 @@ export default function ChatInterface({
                 {planetName}
               </h3>
               <p 
-                className="text-xs capitalize tracking-widest"
+                className={responsiveStyles.subtitleClass}
                 style={{ 
                   color: `${planetColor}cc`, 
                   fontFamily: ALIEN_FONT,
@@ -882,7 +934,7 @@ export default function ChatInterface({
           </div>
           <button
             onClick={onClose}
-            className="transition-all p-2 rounded-lg hover:scale-110"
+            className={responsiveStyles.closeButtonClass}
             style={{ 
               color: planetColor,
               backgroundColor: `${planetColor}15`,
@@ -898,7 +950,7 @@ export default function ChatInterface({
         </div>
 
         {/* Messages with enhanced tech styling */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4 max-h-[400px]" style={{ fontFamily: ALIEN_FONT }}>
+        <div className={responsiveStyles.messagesClass} style={{ fontFamily: ALIEN_FONT }}>
           {messages.map((message, index) => {
             const isInterjection = message.text.includes('joins the conversation');
             const techStyling = getPlanetTechStyling(planetColor);
@@ -909,7 +961,7 @@ export default function ChatInterface({
                 className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-4 rounded-2xl relative ${
+                  className={`${responsiveStyles.messageClass} ${
                     message.isUser ? 'user-message' : 'alien-message'
                   }`}
                   style={{
@@ -919,7 +971,7 @@ export default function ChatInterface({
                         ? 'rgba(255, 165, 0, 0.15)'
                         : `linear-gradient(135deg, ${planetColor}15 0%, rgba(10,15,28,0.8) 100%)`,
                     fontFamily: ALIEN_FONT,
-                    fontSize: message.isAlien ? '1.25rem' : undefined,
+                    fontSize: message.isAlien ? (screenSize === 'mobile' ? '1.1rem' : '1.25rem') : undefined,
                     letterSpacing: message.isAlien ? '0.15em' : '0.05em',
                     color: message.isUser ? '#ffffff' : (isInterjection ? '#FFA500' : planetColor),
                     boxShadow: message.isUser 
@@ -948,7 +1000,7 @@ export default function ChatInterface({
                   
                   {/* Message content */}
                   <div className="relative z-10">
-                    <p className="text-sm leading-relaxed" style={{ 
+                    <p className={`${screenSize === 'mobile' ? 'text-xs' : 'text-sm'} leading-relaxed`} style={{ 
                       color: message.isUser ? '#ffffff' : (isInterjection ? '#FFA500' : planetColor), 
                       fontFamily: ALIEN_FONT,
                       textShadow: message.isUser ? 'none' : `0 0 4px ${planetColor}40`
@@ -980,7 +1032,7 @@ export default function ChatInterface({
         </div>
 
         {/* Input with tech styling */}
-        <div className="p-4 border-t relative" style={{ 
+        <div className={responsiveStyles.inputClass} style={{ 
           borderColor: `${planetColor}80`, 
           fontFamily: ALIEN_FONT,
           background: `linear-gradient(90deg, ${planetColor}05 0%, transparent 100%)`
@@ -1000,9 +1052,9 @@ export default function ChatInterface({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask me about the cosmos..."
+              placeholder={screenSize === 'mobile' ? "Ask about the cosmos..." : "Ask me about the cosmos..."}
               disabled={isTyping || alienTyping}
-              className="flex-1 px-4 py-3 rounded-xl border transition-all disabled:opacity-50 focus:outline-none"
+              className={responsiveStyles.inputFieldClass}
               style={{
                 background: `linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)`,
                 borderColor: `${planetColor}60`,
@@ -1016,7 +1068,7 @@ export default function ChatInterface({
             <button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping || alienTyping}
-              className="px-4 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
+              className={responsiveStyles.buttonClass}
               style={{
                 background: `linear-gradient(135deg, ${planetColor} 0%, ${planetColor}80 100%)`,
                 boxShadow: getPlanetTechStyling(planetColor).primaryGlow,
