@@ -2,6 +2,7 @@
 
 import React, { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface PlanetProps {
@@ -621,6 +622,24 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           metalness={entityType === 'asteroid' ? 0.8 : 0.2}
         />
       </mesh>
+
+      {/* Planet Name Label */}
+      <Text
+        position={[0, size * 1.8, 0]}
+        fontSize={size * 0.3}
+        color={color}
+        anchorX="center"
+        anchorY="middle"
+        font="/fonts/Inter-Bold.woff"
+        outlineWidth={0.02}
+        outlineColor="#000000"
+        fillOpacity={0.9}
+        strokeOpacity={0.5}
+        strokeWidth={0.01}
+        strokeColor="#000000"
+      >
+        {name}
+      </Text>
 
       {/* Special Effects */}
       {renderSpecialEffects()}
