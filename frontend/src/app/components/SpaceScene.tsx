@@ -263,9 +263,19 @@ function PlanetNameLabel({ position, name, color, size }: {
   
   useFrame((state) => {
     if (labelRef.current) {
-      // Gentle floating animation
-      labelRef.current.position.y = position[1] + size + 0.5 + Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
-      labelRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+      // More responsive positioning - directly follow the planet
+      const targetY = position[1] + size + 0.5;
+      const currentY = labelRef.current.position.y;
+      
+      // Smooth but responsive follow with higher lerp factor
+      labelRef.current.position.y = THREE.MathUtils.lerp(currentY, targetY, 0.15); // Increased from 0.1 to 0.15
+      
+      // Keep X and Z positions tightly coupled to planet
+      labelRef.current.position.x = position[0];
+      labelRef.current.position.z = position[2];
+      
+      // Gentle rotation that follows planet movement
+      labelRef.current.rotation.y = state.clock.elapsedTime * 0.05; // Reduced rotation speed
     }
   });
 
@@ -287,7 +297,7 @@ function PlanetNameLabel({ position, name, color, size }: {
         }}
       >
         <div
-          className={`transition-all duration-300 ${
+          className={`transition-all duration-200 ${
             hovered ? 'scale-110 opacity-100' : 'scale-100 opacity-60'
           }`}
           style={{
