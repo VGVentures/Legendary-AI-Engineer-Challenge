@@ -333,7 +333,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           // Saturn-like rings with multiple bands using planet color
           rings: [
             { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.9, color: '#' + baseColor.getHexString() },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.8, color: '#' + lighterColor },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.95, color: '#' + lighterColor },
             { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.7, color: '#' + complementaryColor },
             { innerRadius: 2.2, outerRadius: 2.4, opacity: 0.6, color: '#' + warmAccent },
             { innerRadius: 2.5, outerRadius: 2.7, opacity: 0.5, color: '#' + baseColor.getHexString() }
@@ -347,7 +347,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           // Uranus-like rings with icy particles using planet color
           rings: [
             { innerRadius: 1.4, outerRadius: 1.6, opacity: 0.7, color: '#' + baseColor.getHexString() },
-            { innerRadius: 1.7, outerRadius: 1.9, opacity: 0.6, color: '#' + lighterColor },
+            { innerRadius: 1.7, outerRadius: 1.9, opacity: 0.9, color: '#' + lighterColor },
             { innerRadius: 2.0, outerRadius: 2.2, opacity: 0.5, color: '#' + coolAccent },
             { innerRadius: 2.3, outerRadius: 2.5, opacity: 0.4, color: '#' + complementaryColor }
           ],
@@ -360,7 +360,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           // Neptune-like rings with water ice using planet color
           rings: [
             { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.8, color: '#' + baseColor.getHexString() },
-            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.7, color: '#' + lighterColor },
+            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.95, color: '#' + lighterColor },
             { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.6, color: '#' + coolAccent },
             { innerRadius: 2.4, outerRadius: 2.6, opacity: 0.5, color: '#' + complementaryColor }
           ],
@@ -373,7 +373,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           // Mars-like rings with dust and sand using planet color
           rings: [
             { innerRadius: 1.2, outerRadius: 1.4, opacity: 0.6, color: '#' + baseColor.getHexString() },
-            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.5, color: '#' + warmAccent },
+            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.85, color: '#' + warmAccent },
             { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.4, color: '#' + darkerColor },
             { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.3, color: '#' + complementaryColor }
           ],
@@ -386,7 +386,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           // Earth-like rings using planet's actual color with beautiful variations
           rings: [
             { innerRadius: 1.3, outerRadius: 1.5, opacity: 0.5, color: '#' + baseColor.getHexString() },
-            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.8, color: '#' + lighterColor },
+            { innerRadius: 1.6, outerRadius: 1.8, opacity: 0.9, color: '#' + lighterColor },
             { innerRadius: 1.9, outerRadius: 2.1, opacity: 0.3, color: '#' + complementaryColor }
           ],
           colors: ['#' + baseColor.getHexString(), '#' + lighterColor, '#' + complementaryColor],
@@ -656,7 +656,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Enhanced Luminous Core with Beautiful Color Variations */}
       {(() => {
         const baseColor = new THREE.Color(color);
-        const lighterColor = baseColor.clone().multiplyScalar(1.5);
+        const lighterColor = baseColor.clone().multiplyScalar(1.8);
         const complementaryColor = baseColor.clone().offsetHSL(180, 0, 0);
         const warmAccent = baseColor.clone().offsetHSL(30, 0.3, 0.2);
         const coolAccent = baseColor.clone().offsetHSL(-30, 0.3, 0.2);
@@ -669,7 +669,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             <meshBasicMaterial
               color={coreColors[index % coreColors.length]}
               transparent
-              opacity={0.9 - index * 0.12}
+              opacity={1.2 - index * 0.15}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
@@ -710,79 +710,49 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         );
       })}
 
-      {/* Inner Core Glow */}
-      {[0.1, 0.15, 0.2].map((scale, index) => (
-        <mesh key={`inner-glow-${index}`}>
-          <sphereGeometry args={[size * scale, 16, 16]} />
-          <meshBasicMaterial
-            color={color}
-            transparent
-            opacity={1.0 - index * 0.3}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      ))}
+      {/* Enhanced Inner Core Glow - Brighter and More Luminous */}
+      {(() => {
+        const baseColor = new THREE.Color(color);
+        const brightColor = baseColor.clone().multiplyScalar(2.0); // Much brighter
+        const lighterColor = baseColor.clone().multiplyScalar(1.6);
+        
+        return [0.1, 0.15, 0.2].map((scale, index) => {
+          const glowColors = [brightColor, lighterColor, baseColor];
+          const glowColor = glowColors[index % glowColors.length];
+          
+          return (
+            <mesh key={`inner-glow-${index}`}>
+              <sphereGeometry args={[size * scale, 16, 16]} />
+              <meshBasicMaterial
+                color={glowColor}
+                transparent
+                opacity={1.5 - index * 0.4} // Increased opacity for brighter glow
+                blending={THREE.AdditiveBlending}
+              />
+            </mesh>
+          );
+        });
+      })()}
 
-      {/* Enhanced Ring System with Multiple Layers and Luminous Middle Ring */}
+      {/* Enhanced Ring System with Multiple Layers */}
       {entityType === 'planet' && hasRings(ringConfig) ? (
         // Use the new ring configuration with multiple layers
         ringConfig.rings.map((ring, ringIndex) => (
-          <React.Fragment key={`ring-group-${ringIndex}`}>
-            {/* Main Ring */}
-            <mesh>
-              <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
-              <meshBasicMaterial
-                color={ring.color}
-                transparent
-                opacity={ring.opacity}
-                blending={THREE.AdditiveBlending}
-                side={THREE.DoubleSide}
-              />
-            </mesh>
-            
-            {/* Special Luminous Glow for Middle Ring */}
-            {ringIndex === 1 && (
-              <>
-                {/* Luminous Light Source - emits actual light */}
-                <pointLight
-                  position={[0, 0, 0]}
-                  color={ring.color}
-                  intensity={2.0}
-                  distance={size * 4}
-                  decay={2}
-                />
-                
-                {/* Inner glow ring */}
-                <mesh>
-                  <ringGeometry args={[size * (ring.innerRadius - 0.05), size * (ring.outerRadius + 0.05), 64]} />
-                  <meshBasicMaterial
-                    color={ring.color}
-                    transparent
-                    opacity={0.6}
-                    blending={THREE.AdditiveBlending}
-                    side={THREE.DoubleSide}
-                  />
-                </mesh>
-                
-                {/* Outer glow ring */}
-                <mesh>
-                  <ringGeometry args={[size * (ring.innerRadius - 0.1), size * (ring.outerRadius + 0.1), 64]} />
-                  <meshBasicMaterial
-                    color={ring.color}
-                    transparent
-                    opacity={0.3}
-                    blending={THREE.AdditiveBlending}
-                    side={THREE.DoubleSide}
-                  />
-                </mesh>
-              </>
-            )}
-          </React.Fragment>
+          <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
+            <meshBasicMaterial
+              color={ring.color}
+              transparent
+              opacity={ring.opacity}
+              blending={THREE.AdditiveBlending}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
         ))
       ) : (
         // Fallback for non-planet entities or legacy support
         [1.5, 1.8, 2.1, 2.4].map((ringScale, ringIndex) => (
-          <mesh key={`ring-${ringIndex}`}>
+          <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
             <ringGeometry args={[size * ringScale, size * (ringScale + 0.1), 64]} />
             <meshBasicMaterial
               color={ringConfig.colors[ringIndex % ringConfig.colors.length]}
@@ -896,7 +866,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {hovered && (
         <>
           {/* Outer Hover Ring */}
-          <mesh>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
             <ringGeometry args={[size * 1.4, size * 1.6, 64]} />
             <meshBasicMaterial
               color={color}
