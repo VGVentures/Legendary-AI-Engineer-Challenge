@@ -980,8 +980,6 @@ export default function ChatInterface({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const alienGagTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
 
   // Debug log to verify planet data is correct
   useEffect(() => {
@@ -1253,24 +1251,10 @@ INTERPLANETARY RELATIONSHIPS:
 
         // Use OpenAI API for responses
         try {
-          // Check if user has provided an API key
-          const userApiKey = localStorage.getItem('openai_api_key');
-          if (!userApiKey) {
-            setMessages(prev => [...prev, {
-              text: '🔑 **API Key Required**\n\nTo use the AI chat, please enter your OpenAI API key:\n\n1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)\n2. Enter it below and click "Set API Key"\n\n**Your API key is stored locally and never sent to our servers.**',
-              isUser: false,
-              timestamp: new Date(),
-              isAlien: false
-            }]);
-            setShowApiKeyInput(true);
-            return;
-          }
-
           const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${userApiKey}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               developer_message: systemPrompt,
@@ -1652,65 +1636,6 @@ INTERPLANETARY RELATIONSHIPS:
           </div>
         </div>
       </div>
-
-      {/* API Key Input Modal */}
-      {showApiKeyInput && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">🔑 Enter Your OpenAI API Key</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Your API key is stored locally in your browser and never sent to our servers.
-            </p>
-            <input
-              type="password"
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder="sk-..."
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  if (apiKeyInput.startsWith('sk-')) {
-                    localStorage.setItem('openai_api_key', apiKeyInput);
-                    setShowApiKeyInput(false);
-                    setApiKeyInput('');
-                    // Retry the last message
-                    if (messages.length > 0) {
-                      const lastMessage = messages[messages.length - 1];
-                      if (!lastMessage.isUser) {
-                        // Remove the API key message and retry the user's message
-                        setMessages(prev => prev.slice(0, -1));
-                        if (messages.length > 1) {
-                          const userMessage = messages[messages.length - 2];
-                          // Set the input value and trigger the send
-                          setInputValue(userMessage.text);
-                          setTimeout(() => handleSendMessage(), 100);
-                        }
-                      } else {
-                        // Set the input value and trigger the send
-                        setInputValue(lastMessage.text);
-                        setTimeout(() => handleSendMessage(), 100);
-                      }
-                    }
-                  } else {
-                    alert('Please enter a valid OpenAI API key starting with "sk-"');
-                  }
-                }}
-                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Set API Key
-              </button>
-              <button
-                onClick={() => setShowApiKeyInput(false)}
-                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

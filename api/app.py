@@ -1,5 +1,5 @@
 # Import required FastAPI components for building the API
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 # Import Pydantic for data validation and settings management
@@ -7,14 +7,15 @@ from pydantic import BaseModel
 # Import OpenAI client for interacting with OpenAI's API
 from openai import OpenAI
 import os
-from typing import Optional
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Get API key from environment (fallback for development)
+# Get API key from environment
 api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
 
 # Access control token (optional - for additional security)
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "cosmic-ai-2024")
@@ -44,21 +45,10 @@ class ChatRequest(BaseModel):
 
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
-async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)):
-    # Extract API key from Authorization header
-    user_api_key = None
-    if authorization and authorization.startswith("Bearer "):
-        user_api_key = authorization[7:]  # Remove "Bearer " prefix
-    
-    # Use user-provided API key or fallback to environment variable
-    api_key_to_use = user_api_key or api_key
-    
-    if not api_key_to_use:
-        raise HTTPException(status_code=400, detail="API key required. Please provide it in the Authorization header or set OPENAI_API_KEY environment variable.")
-    
+async def chat(request: ChatRequest):
     try:
         # Initialize OpenAI client with the API key
-        client = OpenAI(api_key=api_key_to_use)
+        client = OpenAI(api_key=api_key)
         
         # Create streaming response
         async def generate():
@@ -87,7 +77,7 @@ async def health_check():
     return {
         "status": "ok", 
         "api_key_configured": bool(api_key),
-        "message": "API key can be provided via Authorization header or environment variable"
+        "message": "API key can be provided via environment variable"
     }
 
 # Entry point for running the application directly
