@@ -2,6 +2,7 @@
 
 import React, { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface PlanetProps {
@@ -623,38 +624,21 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       </mesh>
 
       {/* Planet Name Label */}
-      <mesh position={[0, size * 1.8, 0]}>
-        <planeGeometry args={[size * 2, size * 0.5]} />
-        <meshBasicMaterial
-          transparent
-          opacity={0.8}
-          map={(() => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 64;
-            const ctx = canvas.getContext('2d')!;
-            
-            // Background
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, 256, 64);
-            
-            // Text
-            ctx.fillStyle = color;
-            ctx.font = 'bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(name, 128, 32);
-            
-            // Border
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.strokeRect(2, 2, 252, 60);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            return texture;
-          })()}
-        />
-      </mesh>
+      <Text
+        position={[0, size * 1.8, 0]}
+        fontSize={size * 0.3}
+        color={color}
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#000000"
+        fillOpacity={0.9}
+        strokeOpacity={0.5}
+        strokeWidth={0.01}
+        strokeColor="#000000"
+      >
+        {name}
+      </Text>
 
       {/* Special Effects */}
       {renderSpecialEffects()}
