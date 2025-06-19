@@ -13,16 +13,14 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Get API key from environment
+# Get API key from environment (fallback for development)
 api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set")
-
-# Debug: Print first few characters of API key to verify it's loaded correctly
-print(f"API Key loaded: {api_key[:10]}..." if api_key else "No API key found")
 
 # Access control token (optional - for additional security)
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "cosmic-ai-2024")
+
+# Debug: Print first few characters of API key to verify it's loaded correctly
+print(f"API Key loaded: {api_key[:10]}..." if api_key else "No API key found")
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -47,15 +45,20 @@ class ChatRequest(BaseModel):
 # Define the main chat endpoint that handles POST requests
 @app.post("/api/chat")
 async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)):
-    # Simple authentication check - only if custom token is set
-    custom_token = os.getenv("ACCESS_TOKEN")
-    if custom_token and custom_token != "cosmic-ai-2024":
-        if not authorization or authorization != f"Bearer {custom_token}":
-            raise HTTPException(status_code=401, detail="Invalid access token")
+    # Extract API key from Authorization header
+    user_api_key = None
+    if authorization and authorization.startswith("Bearer "):
+        user_api_key = authorization[7:]  # Remove "Bearer " prefix
+    
+    # Use user-provided API key or fallback to environment variable
+    api_key_to_use = user_api_key or api_key
+    
+    if not api_key_to_use:
+        raise HTTPException(status_code=400, detail="API key required. Please provide it in the Authorization header or set OPENAI_API_KEY environment variable.")
     
     try:
-        # Initialize OpenAI client
-        client = OpenAI(api_key=api_key)
+        # Initialize OpenAI client with the API key
+        client = OpenAI(api_key=api_key_to_use)
         
         # Create streaming response
         async def generate():
@@ -81,7 +84,11 @@ async def chat(request: ChatRequest, authorization: Optional[str] = Header(None)
 # Define a health check endpoint to verify API status
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "api_key_configured": bool(api_key)}
+    return {
+        "status": "ok", 
+        "api_key_configured": bool(api_key),
+        "message": "API key can be provided via Authorization header or environment variable"
+    }
 
 # Entry point for running the application directly
 if __name__ == "__main__":
