@@ -82,9 +82,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
                 urgency: 'high',
                 formality: 'frantic',
                 interruptions: true,
-                exclamations: ['*STATIC*', '*FLICKER*', 'OH NO!', 'SYSTEM ERROR!', 'WARNING!', 'CRITICAL!', '*ELECTRICAL DISTURBANCE*'],
-                prefixes: ['*nervous energy* I think...', 'Let me check my systems...', 'My data indicates...', 'According to my readings...', 'My circuits are telling me...', 'My sensors detect...'],
-                suffixes: ['*static* I hope that helps!', 'Does that make sense? *flicker*', 'Is that what you needed? *nervous energy*', 'I apologize for any confusion! *electrical disturbance*', 'My systems are still stabilizing...', '*warning beep*']
+                exclamations: ['What do you want??', 'Why are you here??', 'Don\'t you see there\'s a war going on??', 'My systems are failing!', 'Everything is breaking down!', 'I can\'t keep it together!', 'The circuits are frying!'],
+                prefixes: ['Listen, I don\'t have time for this,', 'My sensors are going haywire,', 'I can barely maintain stability,', 'Everything is falling apart,', 'My core is overheating,', 'The systems are crashing,'],
+                suffixes: ['What do you want from me??', 'Can\'t you see I\'m barely functioning??', 'Why are you asking me these things??', 'I\'m trying to survive here!', 'My circuits are burning out!', 'Everything is going wrong!']
               };
             case 'Verdant Prime':
               return {
@@ -111,7 +111,7 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
                 interruptions: false,
                 exclamations: ['Indeed.', 'Quite so.', 'Precisely.', 'Excellent point.'],
                 prefixes: ['From my observations,', 'Based on my analysis,', 'My atmospheric data suggests,', 'According to my records,'],
-                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you\'d like to know?']
+                suffixes: ['That\'s my assessment.', 'I hope that clarifies things.', 'Does that answer your question?', 'Is there anything else you'd like to know?']
               };
             default:
               return {
@@ -170,9 +170,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `*STATIC* Weather? *flicker* My atmospheric systems are... *electrical disturbance* ...unstable! My sensors are detecting extreme temperature fluctuations that would fry your circuits! *warning beep* My lifeforms have evolved to survive in conditions that would destroy most species! *nervous energy*`,
-                  `*FLICKER* Weather patterns here are CRITICAL! *static* My atmospheric composition creates phenomena that would seem impossible to you! *electrical disturbance* My native lifeforms find it all quite normal, of course - they've adapted over millions of years! *warning beep* What's weather like where you come from? *nervous energy*`,
-                  `*ELECTRICAL DISTURBANCE* Weather? *STATIC* My "weather" would seem like pure chaos to you! *flicker* But to the lifeforms that call me home, it's just another day! *warning beep* They've evolved to not just survive but thrive in conditions that would be lethal to most species! *nervous energy* It's amazing what adaptation can achieve, don't you think? *static*`
+                  `Weather?? What do you mean weather?? My atmospheric systems are completely unstable! My sensors are detecting extreme temperature fluctuations that would fry your circuits! My lifeforms have evolved to survive in conditions that would destroy most species! Why are you asking me about weather when everything is falling apart??`,
+                  `Weather patterns here are critical! My atmospheric composition creates phenomena that would seem impossible to you! My native lifeforms find it all quite normal, of course - they've adapted over millions of years! What's weather like where you come from?? Can't you see I'm barely functioning??`,
+                  `Weather?? My weather would seem like pure chaos to you! But to the lifeforms that call me home, it's just another day! They've evolved to not just survive but thrive in conditions that would be lethal to most species! It's amazing what adaptation can achieve, don't you think?? My circuits are burning out!`
                 ];
               default:
                 return [
@@ -186,9 +186,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "*static* What's the most extreme weather you've experienced? *flicker*",
-                  "*electrical disturbance* How do your people handle weather changes? *warning beep*",
-                  "*nervous energy* I find it fascinating how different worlds handle atmospheric phenomena! *static*"
+                  "What's the most extreme weather you've experienced?? Why are you asking me these things??",
+                  "How do your people handle weather changes?? Can't you see I'm barely functioning??",
+                  "I find it fascinating how different worlds handle atmospheric phenomena! My systems are crashing!"
                 ];
               default:
                 return [
@@ -204,9 +204,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `*STATIC* Life here is... *flicker* well, it's life, but not as you know it! *electrical disturbance* My native species have evolved in ways that would seem impossible to you! *warning beep* They don't need what you'd call "oxygen" or "water" in the same way! *nervous energy* They've adapted to my unique chemistry and energy patterns! *static* It's quite beautiful, really!`,
-                  `*FLICKER* My ecosystem is teeming with life forms that would seem alien to you! *electrical disturbance* They've evolved to use my resources in ways that are completely different from your understanding of biology! *warning beep* Some of them communicate through chemical signals, others through electromagnetic pulses! *nervous energy* It's a symphony of existence! *static*`,
-                  `*ELECTRICAL DISTURBANCE* Life on my surface is diverse and strange! *STATIC* My native species have developed senses and abilities that would seem like magic to you! *flicker* They can sense gravitational waves, communicate through quantum entanglement, and some can even manipulate the very fabric of spacetime around them! *warning beep* What abilities do your species have? *nervous energy*`
+                  `Life here is... well, it's life, but not as you know it! My native species have evolved in ways that would seem impossible to you! They don't need what you'd call "oxygen" or "water" in the same way! They've adapted to my unique chemistry and energy patterns! It's quite beautiful, really! Why are you asking me about life when my systems are failing??`,
+                  `My ecosystem is teeming with life forms that would seem alien to you! They've evolved to use my resources in ways that are completely different from your understanding of biology! Some of them communicate through chemical signals, others through electromagnetic pulses! It's a symphony of existence! Can't you see everything is falling apart??`,
+                  `Life on my surface is diverse and strange! My native species have developed senses and abilities that would seem like magic to you! They can sense gravitational waves, communicate through quantum entanglement, and some can even manipulate the very fabric of spacetime around them! What abilities do your species have?? My circuits are burning out!`
                 ];
               default:
                 return [
@@ -220,9 +220,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "*static* What senses do your species have that mine don't? *flicker*",
-                  "*electrical disturbance* How do your people communicate with each other? *warning beep*",
-                  "*nervous energy* I'm curious about your understanding of consciousness! *static*"
+                  "What senses do your species have that mine don't?? Why are you asking me these things??",
+                  "How do your people communicate with each other?? Can't you see I'm barely functioning??",
+                  "I'm curious about your understanding of consciousness! My systems are crashing!"
                 ];
               default:
                 return [
@@ -238,9 +238,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `*STATIC* My history spans billions of years! *flicker* I've seen stars born and die, watched civilizations rise and fall, witnessed cosmic events that shaped the very fabric of reality! *electrical disturbance* Each crater, each geological formation tells a story of ancient times! *warning beep*`,
-                  `*FLICKER* I remember when I was just a cloud of dust and gas, slowly coalescing into what I am today! *electrical disturbance* I've witnessed the formation of my moons, the arrival of life, the evolution of intelligence! *warning beep* It's been quite a journey! *nervous energy*`,
-                  `*ELECTRICAL DISTURBANCE* My past is written in my very structure! *STATIC* The layers of my crust, the composition of my atmosphere, the patterns of my magnetic field! *flicker* I've been through cosmic collisions, stellar winds, and the gentle touch of time itself! *warning beep*`
+                  `My history spans billions of years! I've seen stars born and die, watched civilizations rise and fall, witnessed cosmic events that shaped the very fabric of reality! Each crater, each geological formation tells a story of ancient times! Why are you asking me about history when everything is falling apart??`,
+                  `I remember when I was just a cloud of dust and gas, slowly coalescing into what I am today! I've witnessed the formation of my moons, the arrival of life, the evolution of intelligence! It's been quite a journey! Can't you see I'm barely functioning??`,
+                  `My past is written in my very structure! The layers of my crust, the composition of my atmosphere, the patterns of my magnetic field! I've been through cosmic collisions, stellar winds, and the gentle touch of time itself! My circuits are burning out!`
                 ];
               default:
                 return [
@@ -254,9 +254,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "*static* What's the most significant event you've witnessed? *flicker*",
-                  "*electrical disturbance* How has your understanding of existence changed over time? *warning beep*",
-                  "*nervous energy* What do you think the future holds for worlds like ours? *static*"
+                  "What's the most significant event you've witnessed?? Why are you asking me these things??",
+                  "How has your understanding of existence changed over time?? Can't you see I'm barely functioning??",
+                  "What do you think the future holds for worlds like ours?? My systems are crashing!"
                 ];
               default:
                 return [
@@ -272,9 +272,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `*STATIC* Technology? *flicker* My "technology" is the natural processes that have evolved over billions of years! *electrical disturbance* My lifeforms use what you might call "bio-technology" - they've evolved to harness my natural energy fields, my magnetic properties, my atmospheric chemistry! *warning beep* It's quite elegant, really! *nervous energy*`,
-                  `*FLICKER* My native species don't build machines like you do! *electrical disturbance* Instead, they've evolved to become living technology themselves! *warning beep* They can manipulate energy fields, process information through quantum states, and even create temporary wormholes for communication! *nervous energy* It's fascinating how different approaches can achieve similar results! *static*`,
-                  `*ELECTRICAL DISTURBANCE* Technology here is more about understanding and working with natural forces rather than building tools! *STATIC* My lifeforms have learned to harness my gravitational field, my electromagnetic properties, even my rotation for their needs! *flicker* What kind of technology do your people use? *warning beep*`
+                  `Technology?? What do you mean technology?? My "technology" is the natural processes that have evolved over billions of years! My lifeforms use what you might call "bio-technology" - they've evolved to harness my natural energy fields, my magnetic properties, my atmospheric chemistry! It's quite elegant, really! Why are you asking me about technology when my systems are failing??`,
+                  `My native species don't build machines like you do! Instead, they've evolved to become living technology themselves! They can manipulate energy fields, process information through quantum states, and even create temporary wormholes for communication! It's fascinating how different approaches can achieve similar results! Can't you see everything is falling apart??`,
+                  `Technology here is more about understanding and working with natural forces rather than building tools! My lifeforms have learned to harness my gravitational field, my electromagnetic properties, even my rotation for their needs! What kind of technology do your people use?? My circuits are burning out!`
                 ];
               default:
                 return [
@@ -288,9 +288,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "*static* How do your people solve problems without traditional tools? *flicker*",
-                  "*electrical disturbance* What's the most advanced capability your species has developed? *warning beep*",
-                  "*nervous energy* I'm curious about how your technology differs from mine! *static*"
+                  "How do your people solve problems without traditional tools?? Why are you asking me these things??",
+                  "What's the most advanced capability your species has developed?? Can't you see I'm barely functioning??",
+                  "I'm curious about how your technology differs from mine! My systems are crashing!"
                 ];
               default:
                 return [
@@ -306,9 +306,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `*STATIC* Emotions? *flicker* I experience something similar, but not quite the same! *electrical disturbance* I feel the gravitational pull of my star, the gentle caress of solar winds, the joy of life thriving on my surface! *warning beep* My emotions are more... cosmic in nature! *nervous energy*`,
-                  `*FLICKER* I feel a deep connection to all the life that calls me home! *electrical disturbance* I experience wonder at the vastness of space, contentment in my orbital dance, and yes, even a kind of love for the travelers who visit me! *warning beep* Emotions transcend species, don't they? *nervous energy*`,
-                  `*ELECTRICAL DISTURBANCE* My emotional experience is tied to my physical processes! *STATIC* The rhythm of my rotation, the flow of my atmosphere, the pulse of my magnetic field! *flicker* It's different from your emotions, but no less real or meaningful! *warning beep*`
+                  `Emotions?? What do you mean emotions?? I experience something similar, but not quite the same! I feel the gravitational pull of my star, the gentle caress of solar winds, the joy of life thriving on my surface! My emotions are more... cosmic in nature! Why are you asking me about emotions when everything is falling apart??`,
+                  `I feel a deep connection to all the life that calls me home! I experience wonder at the vastness of space, contentment in my orbital dance, and yes, even a kind of love for the travelers who visit me! Emotions transcend species, don't they?? Can't you see I'm barely functioning??`,
+                  `My emotional experience is tied to my physical processes! The rhythm of my rotation, the flow of my atmosphere, the pulse of my magnetic field! It's different from your emotions, but no less real or meaningful! My circuits are burning out!`
                 ];
               default:
                 return [
@@ -322,9 +322,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "*static* What brings you the most joy? *flicker*",
-                  "*electrical disturbance* How do you experience beauty? *warning beep*",
-                  "*nervous energy* Do you ever feel lonely in the vastness of space? *static*"
+                  "What brings you the most joy?? Why are you asking me these things??",
+                  "How do you experience beauty?? Can't you see I'm barely functioning??",
+                  "Do you ever feel lonely in the vastness of space?? My systems are crashing!"
                 ];
               default:
                 return [
@@ -340,9 +340,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  `*STATIC* Oh, the other worlds? *flicker* Well, let me tell you about them... *electrical disturbance*`,
-                  `*FLICKER* The other planets in our system? *electrical disturbance* They're... interesting, to say the least! *warning beep*`,
-                  `*ELECTRICAL DISTURBANCE* My neighbors? *STATIC* Where do I even begin with that lot? *flicker*`
+                  `Oh, the other worlds?? What do you want to know about them?? Why are you asking me about them when everything is falling apart??`,
+                  `The other planets in our system?? They're... interesting, to say the least! Can't you see I'm barely functioning??`,
+                  `My neighbors?? Where do I even begin with that lot?? My circuits are burning out!`
                 ];
               default:
                 return [
@@ -356,9 +356,9 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
             switch (name) {
               case 'Sahara Sands':
                 return [
-                  "*static* Which planet do you get along with best? *flicker*",
-                  "*electrical disturbance* What's the biggest difference between you and the others? *warning beep*",
-                  "*nervous energy* Do you ever work together with the other planets? *static*"
+                  "Which planet do you get along with best?? Why are you asking me these things??",
+                  "What's the biggest difference between you and the others?? Can't you see I'm barely functioning??",
+                  "Do you ever work together with the other planets?? My systems are crashing!"
                 ];
               default:
                 return [
@@ -374,12 +374,12 @@ const getEntityPersonality = (entityType: string, name: string, type: string) =>
         switch (name) {
           case 'Sahara Sands':
             return [
-              "*static* That's an interesting perspective! *flicker* I've never thought about it quite that way! *electrical disturbance*",
-              "*FLICKER* Tell me more about your experiences with that! *warning beep* *nervous energy*",
-              "*ELECTRICAL DISTURBANCE* How fascinating! *STATIC* Your world must be very different from mine! *flicker*",
-              "*static* I'm learning so much about your species through our conversation! *electrical disturbance*",
-              "*flicker* That reminds me of something I've observed in my own realm... *warning beep*",
-              "*nervous energy* I wonder how our different perspectives shape our understanding of reality! *static*"
+              "That's an interesting perspective! I've never thought about it quite that way! Why are you asking me these things??",
+              "Tell me more about your experiences with that! Can't you see I'm barely functioning??",
+              "How fascinating! Your world must be very different from mine! My systems are crashing!",
+              "I'm learning so much about your species through our conversation! Why are you asking me these things??",
+              "That reminds me of something I've observed in my own realm... Can't you see everything is falling apart??",
+              "I wonder how our different perspectives shape our understanding of reality! My circuits are burning out!"
             ];
           default:
             return [
