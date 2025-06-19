@@ -275,8 +275,15 @@ const getAnimatedColors = (entityType: string, type: string, time: number) => {
 
 export default function Planet({ position, size, color, type = 'terrestrial', name, entityType = 'planet', onPlanetClick }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
+  
+  // Particle animation refs for slow-moving ring particles
+  const particleRefs = useRef<THREE.Mesh[]>([]);
+  const sparkleRefs = useRef<THREE.Mesh[]>([]);
+  const ringParticleRefs = useRef<THREE.Mesh[]>([]);
+
   const texture = useEntityTexture(entityType, type, color, size);
   
   const getRingConfig = (entityType: string, planetType: string) => {
@@ -431,6 +438,56 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         material.emissive.copy(newColors[0]);
       }
     }
+
+    // Animate slow-moving ring particles
+    const slowSpeed = 0.1; // Very slow movement for space-like motion
+    const mediumSpeed = 0.2;
+    const fastSpeed = 0.3;
+
+    // Animate ring particles with different speeds for each ring layer
+    ringParticleRefs.current.forEach((particle, index) => {
+      if (particle) {
+        const speed = slowSpeed + (index % 3) * 0.05; // Varying speeds
+        const angle = time * speed + (index / ringParticleRefs.current.length) * Math.PI * 2;
+        const radius = size * (1.5 + (index % 5) * 0.2); // Different orbital distances
+        
+        particle.position.x = Math.cos(angle) * radius;
+        particle.position.z = Math.sin(angle) * radius;
+        particle.position.y = Math.sin(time * 0.5 + index) * size * 0.05; // Slight vertical oscillation
+      }
+    });
+
+    // Animate sparkles with medium speed
+    sparkleRefs.current.forEach((sparkle, index) => {
+      if (sparkle) {
+        const speed = mediumSpeed + Math.sin(index) * 0.02;
+        const angle = time * speed + (index / sparkleRefs.current.length) * Math.PI * 2;
+        const radius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
+        
+        sparkle.position.x = Math.cos(angle) * radius;
+        sparkle.position.z = Math.sin(angle) * radius;
+        sparkle.position.y = Math.sin(time * 0.3 + index * 0.1) * size * 0.08;
+        
+        // Fade sparkles in and out
+        const material = sparkle.material as THREE.MeshBasicMaterial;
+        if (material) {
+          material.opacity = 0.3 + Math.sin(time * 2 + index) * 0.4;
+        }
+      }
+    });
+
+    // Animate regular particles with slowest speed
+    particleRefs.current.forEach((particle, index) => {
+      if (particle) {
+        const speed = slowSpeed * 0.5; // Slowest movement
+        const angle = time * speed + (index / particleRefs.current.length) * Math.PI * 2;
+        const radius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
+        
+        particle.position.x = Math.cos(angle) * radius;
+        particle.position.z = Math.sin(angle) * radius;
+        particle.position.y = Math.sin(time * 0.2 + index * 0.05) * size * 0.03;
+      }
+    });
   });
 
   // Special effects for different entity types
@@ -678,7 +735,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         ))
       )}
 
-      {/* Ring Particles */}
+      {/* Ring Particles - Slow Moving Space Particles */}
       {Array.from({ length: ringConfig.particleCount }, (_, i) => {
         const angle = (i / ringConfig.particleCount) * Math.PI * 2;
         const radius = size * 2 + Math.random() * size * 0.5;
@@ -687,7 +744,13 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         const y = (Math.random() - 0.5) * size * 0.1;
         
         return (
-          <mesh key={`particle-${i}`} position={[x, y, z]}>
+          <mesh 
+            key={`particle-${i}`} 
+            position={[x, y, z]}
+            ref={(el) => {
+              if (el) particleRefs.current[i] = el;
+            }}
+          >
             <sphereGeometry args={[0.02, 8, 8]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
@@ -699,7 +762,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         );
       })}
 
-      {/* Orbiting Sparkles */}
+      {/* Orbiting Sparkles - Medium Speed Space Particles */}
       {Array.from({ length: ringConfig.sparkleCount }, (_, i) => {
         const angle = (i / ringConfig.sparkleCount) * Math.PI * 2;
         const radius = size * 2.5 + Math.random() * size * 0.3;
@@ -708,7 +771,13 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
         const y = (Math.random() - 0.5) * size * 0.2;
         
         return (
-          <mesh key={`sparkle-${i}`} position={[x, y, z]}>
+          <mesh 
+            key={`sparkle-${i}`} 
+            position={[x, y, z]}
+            ref={(el) => {
+              if (el) sparkleRefs.current[i] = el;
+            }}
+          >
             <sphereGeometry args={[0.01, 6, 6]} />
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
@@ -719,6 +788,35 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
           </mesh>
         );
       })}
+
+      {/* Additional Ring Layer Particles - Slowest Moving */}
+      {hasRings(ringConfig) && ringConfig.rings.map((ring, ringIndex) => 
+        Array.from({ length: Math.floor(ringConfig.particleCount / ringConfig.rings.length) }, (_, i) => {
+          const angle = (i / Math.floor(ringConfig.particleCount / ringConfig.rings.length)) * Math.PI * 2;
+          const radius = size * ring.innerRadius + (ring.outerRadius - ring.innerRadius) * Math.random();
+          const x = Math.cos(angle) * radius;
+          const z = Math.sin(angle) * radius;
+          const y = (Math.random() - 0.5) * size * 0.05;
+          
+          return (
+            <mesh 
+              key={`ring-particle-${ringIndex}-${i}`} 
+              position={[x, y, z]}
+              ref={(el) => {
+                if (el) ringParticleRefs.current[ringIndex * Math.floor(ringConfig.particleCount / ringConfig.rings.length) + i] = el;
+              }}
+            >
+              <sphereGeometry args={[0.015, 6, 6]} />
+              <meshBasicMaterial
+                color={ring.color}
+                transparent
+                opacity={ring.opacity * 0.8}
+                blending={THREE.AdditiveBlending}
+              />
+            </mesh>
+          );
+        })
+      )}
 
       {/* Reduced Enhanced Glow Spheres */}
       {[0.7, 0.9, 1.1].map((glowScale, glowIndex) => (
