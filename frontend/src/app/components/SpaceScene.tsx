@@ -31,8 +31,8 @@ const celestialEntities: CelestialEntity[] = [
   { id: 'red-giant', position: [2, 6, -3] as [number, number, number], size: 2.0, color: '#FF4500', type: 'red-giant', name: 'Red Giant', entityType: 'star' },
   { id: 'blue-supergiant', position: [-7, 1, -4] as [number, number, number], size: 1.8, color: '#00BFFF', type: 'blue-supergiant', name: 'Blue Supergiant', entityType: 'star' },
   
-  // Nebulae
-  { id: 'cosmic-cloud', position: [0, 8, 0] as [number, number, number], size: 3.0, color: '#9370DB', type: 'emission', name: 'Cosmic Cloud', entityType: 'nebula' },
+  // Nebulae - repositioned away from center
+  { id: 'cosmic-cloud', position: [4, 8, 2] as [number, number, number], size: 3.0, color: '#9370DB', type: 'emission', name: 'Cosmic Cloud', entityType: 'nebula' },
   { id: 'stellar-nursery', position: [-8, -6, 2] as [number, number, number], size: 2.5, color: '#FF1493', type: 'star-forming', name: 'Stellar Nursery', entityType: 'nebula' },
   { id: 'planetary-nebula', position: [6, -4, -5] as [number, number, number], size: 2.2, color: '#00CED1', type: 'planetary', name: 'Planetary Nebula', entityType: 'nebula' },
   
@@ -40,8 +40,8 @@ const celestialEntities: CelestialEntity[] = [
   { id: 'asteroid-belt', position: [4, -3, 3] as [number, number, number], size: 0.3, color: '#8B4513', type: 'carbonaceous', name: 'Asteroid Belt', entityType: 'asteroid' },
   { id: 'metallic-asteroid', position: [-3, 5, -2] as [number, number, number], size: 0.2, color: '#C0C0C0', type: 'metallic', name: 'Metallic Asteroid', entityType: 'asteroid' },
   
-  // Black Holes
-  { id: 'void-singularity', position: [0, -8, 0] as [number, number, number], size: 1.0, color: '#000000', type: 'stellar', name: 'Void Singularity', entityType: 'blackhole' },
+  // Black Holes - repositioned away from center
+  { id: 'void-singularity', position: [3, -8, 2] as [number, number, number], size: 1.0, color: '#000000', type: 'stellar', name: 'Void Singularity', entityType: 'blackhole' },
   { id: 'cosmic-abyss', position: [-5, -5, -6] as [number, number, number], size: 0.8, color: '#1a1a1a', type: 'supermassive', name: 'Cosmic Abyss', entityType: 'blackhole' },
   
   // Comets
