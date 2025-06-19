@@ -1688,7 +1688,9 @@ INTERPLANETARY RELATIONSHIPS:
                           setTimeout(() => handleSendMessage(), 100);
                         }
                       } else {
-                        handleSendMessage(lastMessage.text);
+                        // Set the input value and trigger the send
+                        setInputValue(lastMessage.text);
+                        setTimeout(() => handleSendMessage(), 100);
                       }
                     }
                   } else {
