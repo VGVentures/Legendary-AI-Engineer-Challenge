@@ -333,6 +333,23 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       const warmAccent = baseColor.clone().offsetHSL(30, 0.2, 0.1).getHexString();
       const coolAccent = baseColor.clone().offsetHSL(-30, 0.2, 0.1).getHexString();
       
+      // Special wounded ring configuration for Sahara Sands
+      if (name === 'Sahara Sands') {
+        return {
+          rings: [
+            { innerRadius: 1.2, outerRadius: 1.4, opacity: 0.6, color: '#' + baseColor.getHexString(), tilt: 0.3, rotation: 0.2 },
+            { innerRadius: 1.5, outerRadius: 1.7, opacity: 0.85, color: '#' + warmAccent, tilt: 0.4, rotation: 0.1 },
+            { innerRadius: 1.8, outerRadius: 2.0, opacity: 0.4, color: '#' + darkerColor, tilt: 0.25, rotation: 0.3 },
+            { innerRadius: 2.1, outerRadius: 2.3, opacity: 0.3, color: '#' + complementaryColor, tilt: 0.35, rotation: 0.15 }
+          ],
+          colors: ['#' + baseColor.getHexString(), '#' + warmAccent, '#' + darkerColor, '#' + complementaryColor],
+          opacity: 0.5,
+          particleCount: 8,
+          sparkleCount: 4,
+          isWounded: true
+        };
+      }
+      
       const configs = {
         gas: {
           // Saturn-like rings with multiple bands using planet color
@@ -472,7 +489,10 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             material.emissive.copy(baseEmissive.lerp(shortCircuitColor, shortCircuitIntensity * flickerIntensity));
             material.emissiveIntensity = 0.5 + shortCircuitIntensity * 2;
           } else {
-            material.emissive.copy(newColors[0]);
+            // Enhanced brightness for all other planets
+            const enhancedEmissive = newColors[0].clone().multiplyScalar(1.8); // Much brighter
+            material.emissive.copy(enhancedEmissive);
+            material.emissiveIntensity = 1.2; // Increased intensity
           }
         }
       }
@@ -777,18 +797,32 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
       {/* Enhanced Ring System with Multiple Layers */}
       {entityType === 'planet' && hasRings(ringConfig) ? (
         // Use the new ring configuration with multiple layers
-        ringConfig.rings.map((ring, ringIndex) => (
-          <mesh key={`ring-${ringIndex}`} rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
-            <meshBasicMaterial
-              color={ring.color}
-              transparent
-              opacity={ring.opacity}
-              blending={THREE.AdditiveBlending}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        ))
+        ringConfig.rings.map((ring, ringIndex) => {
+          // Check if this is a wounded planet with tilted rings
+          const isWounded = (ringConfig as any).isWounded || false;
+          const tilt = (ring as any).tilt || 0;
+          const rotation = (ring as any).rotation || 0;
+          
+          return (
+            <mesh 
+              key={`ring-${ringIndex}`} 
+              rotation={[
+                Math.PI / 2 + (isWounded ? tilt : 0), 
+                isWounded ? rotation : 0, 
+                0
+              ]}
+            >
+              <ringGeometry args={[size * ring.innerRadius, size * ring.outerRadius, 64]} />
+              <meshBasicMaterial
+                color={ring.color}
+                transparent
+                opacity={ring.opacity}
+                blending={THREE.AdditiveBlending}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+          );
+        })
       ) : (
         // Fallback for non-planet entities or legacy support
         [1.5, 1.8, 2.1, 2.4].map((ringScale, ringIndex) => (
@@ -825,7 +859,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
               transparent
-              opacity={0.8}
+              opacity={isShortCircuiting ? 0.4 : 1.2} // Dimmed for short-circuiting planet, bright for others
               blending={THREE.AdditiveBlending}
             />
           </mesh>
@@ -852,7 +886,7 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
             <meshBasicMaterial
               color={ringConfig.colors[i % ringConfig.colors.length]}
               transparent
-              opacity={0.9}
+              opacity={isShortCircuiting ? 0.3 : 1.4} // Dimmed for short-circuiting planet, bright for others
               blending={THREE.AdditiveBlending}
             />
           </mesh>
