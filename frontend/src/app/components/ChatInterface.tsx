@@ -273,7 +273,7 @@ export default function ChatInterface({
         className="relative w-full max-w-md h-[600px] mx-4 rounded-2xl shadow-2xl overflow-hidden"
         style={{
           background: styling.background,
-          border: `2px solid ${styling.borderColor}`,
+          border: `2px solid ${styling.borderColor} !important`,
           boxShadow: `0 0 30px ${styling.glowColor}40`
         }}
       >

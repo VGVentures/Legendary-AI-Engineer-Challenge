@@ -431,117 +431,122 @@ export default function Planet({ position, size, color, type = 'terrestrial', na
 
   // Animate colors over time
   useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    const newColors = getAnimatedColors(entityType, type, time);
-    
-    // Update animated colors state
-    setAnimatedColors(newColors);
-    
-    if (meshRef.current) {
-      const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
-      if (material.emissive) {
-        material.emissive.copy(newColors[0]);
-      }
-    }
-
-    // Animate slow-moving ring particles
-    const slowSpeed = 0.1; // Very slow movement for space-like motion
-    const mediumSpeed = 0.2;
-    const fastSpeed = 0.3;
-
-    // Animate ring particles with different speeds for each ring layer
-    ringParticleRefs.current.forEach((particle, index) => {
-      if (particle) {
-        // Non-uniform speeds with random variations
-        const baseSpeed = slowSpeed + (index % 3) * 0.05;
-        const speedVariation = Math.sin(index * 0.7) * 0.03;
-        const speed = baseSpeed + speedVariation;
-        
-        // Non-uniform orbital distances
-        const baseRadius = size * (1.5 + (index % 5) * 0.2);
-        const radiusVariation = Math.cos(index * 0.5) * size * 0.1;
-        const radius = baseRadius + radiusVariation;
-        
-        // Non-uniform starting angles
-        const baseAngle = time * speed + (index / ringParticleRefs.current.length) * Math.PI * 2;
-        const angleVariation = Math.sin(index * 0.3) * 0.5;
-        const angle = baseAngle + angleVariation;
-        
-        particle.position.x = Math.cos(angle) * radius;
-        particle.position.z = Math.sin(angle) * radius;
-        
-        // Non-uniform vertical oscillation
-        const verticalSpeed = 0.5 + Math.sin(index * 0.4) * 0.3;
-        const verticalAmplitude = size * (0.03 + Math.sin(index * 0.6) * 0.02);
-        particle.position.y = Math.sin(time * verticalSpeed + index * 0.2) * verticalAmplitude;
-      }
-    });
-
-    // Animate sparkles with medium speed and non-uniform patterns
-    sparkleRefs.current.forEach((sparkle, index) => {
-      if (sparkle) {
-        // Varied speeds for sparkles
-        const baseSpeed = mediumSpeed + Math.sin(index * 0.8) * 0.02;
-        const speedVariation = Math.cos(index * 0.6) * 0.01;
-        const speed = baseSpeed + speedVariation;
-        
-        // Non-uniform orbital patterns
-        const baseRadius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
-        const radiusVariation = Math.sin(index * 0.9) * size * 0.15;
-        const radius = baseRadius + radiusVariation;
-        
-        // Varied orbital directions (some clockwise, some counter-clockwise)
-        const direction = index % 2 === 0 ? 1 : -1;
-        const baseAngle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
-        const angleVariation = Math.cos(index * 0.7) * 0.8;
-        const angle = baseAngle + angleVariation;
-        
-        sparkle.position.x = Math.cos(angle) * radius;
-        sparkle.position.z = Math.sin(angle) * radius;
-        
-        // Non-uniform vertical movement
-        const verticalSpeed = 0.3 + Math.sin(index * 0.5) * 0.2;
-        const verticalAmplitude = size * (0.05 + Math.cos(index * 0.4) * 0.03);
-        sparkle.position.y = Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
-        
-        // Fade sparkles in and out with non-uniform patterns
-        const material = sparkle.material as THREE.MeshBasicMaterial;
-        if (material) {
-          const fadeSpeed = 2 + Math.sin(index * 0.3) * 1;
-          const fadeOffset = index * 0.2;
-          material.opacity = 0.2 + Math.sin(time * fadeSpeed + fadeOffset) * 0.5;
+    try {
+      const time = state?.clock?.elapsedTime || 0;
+      const newColors = getAnimatedColors(entityType, type, time);
+      
+      // Update animated colors state
+      setAnimatedColors(newColors);
+      
+      if (meshRef.current) {
+        const material = meshRef.current.material as THREE.MeshPhysicalMaterial;
+        if (material?.emissive) {
+          material.emissive.copy(newColors[0]);
         }
       }
-    });
 
-    // Animate regular particles with slowest speed and organic movement
-    particleRefs.current.forEach((particle, index) => {
-      if (particle) {
-        // Very slow, varied speeds
-        const baseSpeed = slowSpeed * 0.5;
-        const speedVariation = Math.sin(index * 0.9) * 0.02;
-        const speed = baseSpeed + speedVariation;
-        
-        // Non-uniform orbital distances with more variation
-        const baseRadius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
-        const radiusVariation = Math.sin(index * 0.8) * size * 0.2;
-        const radius = baseRadius + radiusVariation;
-        
-        // Varied orbital directions and speeds
-        const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
-        const baseAngle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
-        const angleVariation = Math.sin(index * 0.6) * 1.2;
-        const angle = baseAngle + angleVariation;
-        
-        particle.position.x = Math.cos(angle) * radius;
-        particle.position.z = Math.sin(angle) * radius;
-        
-        // Minimal, varied vertical movement
-        const verticalSpeed = 0.2 + Math.sin(index * 0.7) * 0.1;
-        const verticalAmplitude = size * (0.02 + Math.sin(index * 0.5) * 0.01);
-        particle.position.y = Math.sin(time * verticalSpeed + index * 0.05) * verticalAmplitude;
-      }
-    });
+      // Animate slow-moving ring particles
+      const slowSpeed = 0.1; // Very slow movement for space-like motion
+      const mediumSpeed = 0.2;
+      const fastSpeed = 0.3;
+
+      // Animate ring particles with different speeds for each ring layer
+      ringParticleRefs.current.forEach((particle, index) => {
+        if (particle) {
+          // Non-uniform speeds with random variations
+          const baseSpeed = slowSpeed + (index % 3) * 0.05;
+          const speedVariation = Math.sin(index * 0.7) * 0.03;
+          const speed = baseSpeed + speedVariation;
+          
+          // Non-uniform orbital distances
+          const baseRadius = size * (1.5 + (index % 5) * 0.2);
+          const radiusVariation = Math.cos(index * 0.5) * size * 0.1;
+          const radius = baseRadius + radiusVariation;
+          
+          // Non-uniform starting angles
+          const baseAngle = time * speed + (index / ringParticleRefs.current.length) * Math.PI * 2;
+          const angleVariation = Math.sin(index * 0.3) * 0.5;
+          const angle = baseAngle + angleVariation;
+          
+          particle.position.x = Math.cos(angle) * radius;
+          particle.position.z = Math.sin(angle) * radius;
+          
+          // Non-uniform vertical oscillation
+          const verticalSpeed = 0.5 + Math.sin(index * 0.4) * 0.3;
+          const verticalAmplitude = size * (0.03 + Math.sin(index * 0.6) * 0.02);
+          particle.position.y = Math.sin(time * verticalSpeed + index * 0.2) * verticalAmplitude;
+        }
+      });
+
+      // Animate sparkles with medium speed and non-uniform patterns
+      sparkleRefs.current.forEach((sparkle, index) => {
+        if (sparkle) {
+          // Varied speeds for sparkles
+          const baseSpeed = mediumSpeed + Math.sin(index * 0.8) * 0.02;
+          const speedVariation = Math.cos(index * 0.6) * 0.01;
+          const speed = baseSpeed + speedVariation;
+          
+          // Non-uniform orbital patterns
+          const baseRadius = size * (2.2 + Math.sin(index * 0.5) * 0.3);
+          const radiusVariation = Math.sin(index * 0.9) * size * 0.15;
+          const radius = baseRadius + radiusVariation;
+          
+          // Varied orbital directions (some clockwise, some counter-clockwise)
+          const direction = index % 2 === 0 ? 1 : -1;
+          const baseAngle = time * speed * direction + (index / sparkleRefs.current.length) * Math.PI * 2;
+          const angleVariation = Math.cos(index * 0.7) * 0.8;
+          const angle = baseAngle + angleVariation;
+          
+          sparkle.position.x = Math.cos(angle) * radius;
+          sparkle.position.z = Math.sin(angle) * radius;
+          
+          // Non-uniform vertical movement
+          const verticalSpeed = 0.3 + Math.sin(index * 0.5) * 0.2;
+          const verticalAmplitude = size * (0.05 + Math.cos(index * 0.4) * 0.03);
+          sparkle.position.y = Math.sin(time * verticalSpeed + index * 0.1) * verticalAmplitude;
+          
+          // Fade sparkles in and out with non-uniform patterns
+          const material = sparkle.material as THREE.MeshBasicMaterial;
+          if (material) {
+            const fadeSpeed = 2 + Math.sin(index * 0.3) * 1;
+            const fadeOffset = index * 0.2;
+            material.opacity = 0.2 + Math.sin(time * fadeSpeed + fadeOffset) * 0.5;
+          }
+        }
+      });
+
+      // Animate regular particles with slowest speed and organic movement
+      particleRefs.current.forEach((particle, index) => {
+        if (particle) {
+          // Very slow, varied speeds
+          const baseSpeed = slowSpeed * 0.5;
+          const speedVariation = Math.sin(index * 0.9) * 0.02;
+          const speed = baseSpeed + speedVariation;
+          
+          // Non-uniform orbital distances with more variation
+          const baseRadius = size * (1.8 + Math.cos(index * 0.3) * 0.4);
+          const radiusVariation = Math.sin(index * 0.8) * size * 0.2;
+          const radius = baseRadius + radiusVariation;
+          
+          // Varied orbital directions and speeds
+          const direction = index % 3 === 0 ? 1 : (index % 3 === 1 ? -1 : 0.5);
+          const baseAngle = time * speed * direction + (index / particleRefs.current.length) * Math.PI * 2;
+          const angleVariation = Math.sin(index * 0.6) * 1.2;
+          const angle = baseAngle + angleVariation;
+          
+          particle.position.x = Math.cos(angle) * radius;
+          particle.position.z = Math.sin(angle) * radius;
+          
+          // Minimal, varied vertical movement
+          const verticalSpeed = 0.2 + Math.sin(index * 0.7) * 0.1;
+          const verticalAmplitude = size * (0.02 + Math.sin(index * 0.5) * 0.01);
+          particle.position.y = Math.sin(time * verticalSpeed + index * 0.05) * verticalAmplitude;
+        }
+      });
+    } catch (error) {
+      // Silently handle any animation errors to prevent crashes
+      console.warn('Animation error in Planet component:', error);
+    }
   });
 
   // Special effects for different entity types
